@@ -1,9 +1,6 @@
 ##### Load packages ---------------------------------------------------------------------------------------
 
 # Import Coinbase-related packages
-import math
-import time
-import json
 import cbpro
 import coinbase
 from coinbase.wallet.client import Client
@@ -16,18 +13,15 @@ from datetime import datetime
 from numpy import argmax
 from numpy import argmin
 from pandas import *
+import math
+import time
+import json
 
 
 
 
 
 ##### Get price data --------------------------------------------------------------------------------------
-
-# Read in data from saved file on BTC prices
-# This code is just a test and will likely be deprecated
-chunksize = 10000
-dat = read_csv("D:\Documents\coinbaseUSD.csv", iterator = True, chunksize = chunksize)
-df = concat(dat, ignore_index = True)
 
 # Create function to pull price data for a given timeframe
 # Possible timeframes: 1hr, 1d (default), 1 wk, 1m, 6m, 1yr, max

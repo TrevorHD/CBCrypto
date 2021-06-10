@@ -1,6 +1,8 @@
 ##### Load packages ---------------------------------------------------------------------------------------
 
 # Import Coinbase-related packages
+import math
+import time
 import json
 import cbpro
 import coinbase
@@ -25,33 +27,94 @@ from pandas import *
 # This code is just a test and will likely be deprecated
 chunksize = 10000
 dat = read_csv("D:\Documents\coinbaseUSD.csv", iterator = True, chunksize = chunksize)
-df = concat(dat, ignore_index=True)
+df = concat(dat, ignore_index = True)
 
-# Get BTC price data from Coinbase, then sort by date
-public_client = cbpro.PublicClient()
-data = public_client.get_product_historic_rates("BTC-USD", granularity = 60,
-                                                start = "2019-01-01T13:55:00", end = "2019-01-01T18:55:00")
-dataframe = DataFrame(data, columns = ["date", "open", "high", "low", "close", "test"])
-dataframe = dataframe.sort_values(by = "date")
+# Create function to pull price data for a given timeframe
+# Possible timeframes: 1hr, 1d (default), 1 wk, 1m, 6m, 1yr, max
+def getPriceData(tFrame, currency):
 
-# Set starting timestamp at 01 Jan 2019 00:00
-datetime.utcfromtimestamp(1546350900).isoformat()
+    # Set end of timeframe
+    tEnd = round(time.time())
 
-# Get data (1-minute resolution) in 5-hour blocks using corresponding timestamps
-# This may take a while for larger ranges of data
-for i in range(1, 4140):
-    ts = 1546350900 + i*5*3600
-    isodate0 = datetime.utcfromtimestamp(ts - 5*3600).isoformat()
-    isodate1 = datetime.utcfromtimestamp(ts).isoformat()
-    newdat = public_client.get_product_historic_rates("BTC-USD", granularity = 60,
-                                                      start = isodate0, end = isodate1)
-    newdat = DataFrame(newdat, columns = ["date", "open", "high", "low", "close", "test"])
-    newdat = newdat.sort_values(by = "date")
-    dataframe = dataframe.append(newdat, ignore_index = True)
+    # Set beginning of timeframe and data granularity
+    # Max is still a work in progress
+    if tFrame == "1hr":
+        tStart = tEnd - 3600
+        gran = 60
+    elif tFrame == "1d":
+        tStart = tEnd - 86400
+        gran = 300
+    elif tFrame == "1wk":
+        tStart = tEnd - 86400*7 
+        gran = 3600
+    elif tFrame == "1m":
+        tStart = tEnd - 86400*30
+        gran = 21600
+    elif tFrame == "6m":
+        tStart = tEnd - 86400*30*6
+        gran = 21600
+    elif tFrame == "1yr":
+        tStart = tEnd - 86400*365
+        gran = 21600
+    elif tFrame == "max":
+        gran = 86400
 
-# Get mean price for each 1-minute interval
-dataframe["mean"] = dataframe[["open", "close"]].mean(axis = 1)
-vals = dataframe["mean"]
+    # Activate public client
+    p_client = cbpro.PublicClient()
+    
+    # Set number of blocks since there is a 300-point limit per block
+    nBlocks = ((tEnd - tStart)/gran + 2)/300
+    
+    # Set currency conversion string
+    ccs = currency + "-USD"
+    
+    # Define internal function to convert timestamp to ISO format
+    def tsToISO(ts):
+        return datetime.utcfromtimestamp(ts).isoformat()
+    
+    # Pull data from CoinbasePro API
+    if nBlocks <= 1:    
+        isodate0 = tsToISO(tStart)
+        isodate1 = tsToISO(tEnd)
+        data = p_client.get_product_historic_rates(ccs, granularity = gran,
+                                                   start = isodate0, end = isodate1)
+        data = DataFrame(data, columns = ["timestamp", "open", "high", "low", "close", "volume"])
+        data = data.sort_values(by = "timestamp")
+    else:
+        for i in range(1, math.ceil(nBlocks) + 1):
+            if i == 1:
+                isodate0 = tsToISO(tStart)
+                isodate1 = tsToISO(tStart + gran*300)
+                data = p_client.get_product_historic_rates(ccs, granularity = gran,
+                                                           start = isodate0, end = isodate1)
+                data = DataFrame(data, columns = ["timestamp", "open", "high", "low", "close", "volume"])
+                data = data.sort_values(by = "timestamp")
+            else:
+                if i > 1 and i < nBlocks:
+                    isodate0 = tsToISO(tStart + (i - 1)*gran*300)
+                    isodate1 = tsToISO(tStart + i*gran*300)
+                elif i > nBlocks:
+                    isodate0 = tsToISO(tStart + (i - 1)*gran*300)
+                    isodate1 = tsToISO(tEnd)
+                newdat = p_client.get_product_historic_rates(ccs, granularity = gran,
+                                                             start = isodate0, end = isodate1)
+                newdat = DataFrame(newdat, columns = ["timestamp", "open", "high", "low", "close", "volume"])
+                newdat = newdat.sort_values(by = "timestamp")
+                data = data.append(newdat, ignore_index = True)
+
+    # Get mean price (average of open and close)
+    data["mean"] = data[["open", "close"]].mean(axis = 1)   
+
+    # Convert timestamp to ISO format    
+    data["ISO"] = data["timestamp"].map(tsToISO)
+    
+    # Return data frame
+    return data
+    
+# Test the above function
+data = getPriceData("1yr", "BTC")
+data = getPriceData("1wk", "ETH")
+data = getPriceData("1d", "ADA")
 
 
 

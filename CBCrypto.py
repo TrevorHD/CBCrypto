@@ -25,13 +25,13 @@ import json
 
 # Create function to pull price data for a given timeframe
 # Possible timeframes: 1hr, 1d (default), 1 wk, 1m, 6m, 1yr, max
+# Note: Coinbase historical data may be incomplete
 def getPriceData(tFrame, currency):
 
     # Set end of timeframe
     tEnd = round(time.time())
 
     # Set beginning of timeframe and data granularity
-    # Max is still a work in progress
     if tFrame == "1hr":
         tStart = tEnd - 3600
         gran = 60
@@ -51,6 +51,7 @@ def getPriceData(tFrame, currency):
         tStart = tEnd - 86400*365
         gran = 21600
     elif tFrame == "max":
+        tStart = 1375660800
         gran = 86400
 
     # Activate public client
@@ -106,6 +107,7 @@ def getPriceData(tFrame, currency):
     return data
     
 # Test the above function
+data = getPriceData("max", "BTC")
 data = getPriceData("1yr", "BTC")
 data = getPriceData("1wk", "ETH")
 data = getPriceData("1d", "ADA")

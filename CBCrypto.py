@@ -13,6 +13,7 @@ from datetime import datetime
 from numpy import argmax
 from numpy import argmin
 from pandas import *
+import seaborn
 import math
 import time
 import json
@@ -105,12 +106,43 @@ def getPriceData(tFrame, currency):
     
     # Return data frame
     return data
+
+
+
+
+
+##### Plot price data -------------------------------------------------------------------------------------
+
+# Function to plot value against opening value for given timeframe
+def buildPlot(tFrame, currencyList):
     
+    # Compile dict of prices
+    d1 = {}
+    for i in range(0, len(currencyList)):
+        d1["key%s" %i] = getPriceData(tFrame, currencyList[i])
+
+    # Compile dict of start prices
+    d2 = {}
+    for i in range(0, len(currencyList)):
+        d2["key%s" %i] = d1["key%s" %i]["mean"][0]
+    
+    # Compile dict of price versus opening price
+    d3 = {}
+    for i in range(0, len(currencyList)):
+        d3["key%s" %i] = d1["key%s" %i]["mean"]/d2["key%s" %i]
+    
+    # Generate colour palette
+    # Will later use pre-defined colours for each currency
+    colours = seaborn.color_palette("tab10", len(currencyList))
+    
+    # Plot value relative to opening value
+    for i in range(0, len(currencyList)):
+        pyplot.plot(d1["key%s" %i]["timestamp"], d3["key%s" %i], linestyle = "-",
+                    linewidth = 0.6, label = currencyList[i], color = colours[i])
+
 # Test the above function
-data = getPriceData("max", "BTC")
-data = getPriceData("1yr", "BTC")
-data = getPriceData("1wk", "ETH")
-data = getPriceData("1d", "ADA")
+buildPlot("1d", ["BTC", "LTC", "ETH"])
+buildPlot("6m", ["ETH", "ADA"])
 
 
 

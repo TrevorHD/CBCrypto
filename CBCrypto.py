@@ -11,6 +11,8 @@ import matplotlib.dates
 from matplotlib import pyplot
 import dateutil.parser as dp
 from datetime import datetime
+from datetime import timedelta
+from numpy import arange
 from numpy import argmax
 from numpy import argmin
 from pandas import *
@@ -150,22 +152,43 @@ def buildPlot(tFrame, currencyList):
     colours = seaborn.color_palette("tab10", len(currencyList))
     
     # Set axis time format depending on timeframe
-    if tFrame in ["1hr", "1d"]:
-        xformatter = matplotlib.dates.DateFormatter("%H:%M")
-    elif tFrame in ["1wk", "1m", "6m"]:
-        xformatter = matplotlib.dates.DateFormatter("%m/%d")
+    if tFrame == "1hr":
+        formatter = matplotlib.dates.DateFormatter("%H:%M")
+        intvMj = matplotlib.dates.MinuteLocator(interval = 10)
+        intvMi = matplotlib.dates.MinuteLocator(interval = 1)
+    elif tFrame == "1d":
+        formatter = matplotlib.dates.DateFormatter("%H:%M")
+        intvMj = matplotlib.dates.HourLocator(interval = 4)
+        intvMi = matplotlib.dates.HourLocator(interval = 1)
+    elif tFrame == "1wk":
+        formatter = matplotlib.dates.DateFormatter("%m/%d")
+        intvMj = matplotlib.dates.DayLocator(interval = 1)
+        intvMi = matplotlib.dates.HourLocator(interval = 4)
+    elif tFrame == "6wk":
+        formatter = matplotlib.dates.DateFormatter("%m/%d")
+        intvMj = matplotlib.dates.DayLocator(interval = 7)
+        intvMi = matplotlib.dates.DayLocator(interval = 1)
+    elif tFrame == "6m":
+        formatter = matplotlib.dates.DateFormatter("%m/%d")
+        intvMj = matplotlib.dates.MonthLocator(interval = 1)
+        intvMi = matplotlib.dates.DayLocator(interval = 7)
     elif tFrame == "1yr":
-        xformatter = matplotlib.dates.DateFormatter("%m/%d/%y")
+        formatter = matplotlib.dates.DateFormatter("%m/%d/%y")
+        intvMj = matplotlib.dates.MonthLocator(interval = 2)
+        intvMi = matplotlib.dates.DayLocator(interval = 7)
     
     # Plot value relative to opening value
     for i in range(0, len(currencyList)):
         pyplot.plot(d1["key%s" %i]["datetime"], d3["key%s" %i], linestyle = "-",
                     linewidth = 0.6, label = currencyList[i], color = colours[i])
-    pyplot.gcf().axes[0].xaxis.set_major_formatter(xformatter)
-    pyplot.ylim([min(pmin)*0.98, max(pmax)*1.02])
+    pyplot.gcf().axes[0].xaxis.set_major_formatter(formatter)
+    pyplot.gcf().axes[0].xaxis.set_major_locator(intvMj)
+    pyplot.gcf().axes[0].xaxis.set_minor_locator(intvMi)
+    pyplot.ylim([min(pmin)*0.995, max(pmax)*1.005])
+    pyplot.xlim(min(d1["key%s" %i]["datetime"]), max(d1["key%s" %i]["datetime"]))
 
 # Test the above function
-buildPlot("1d", ["BTC"])
+buildPlot("1hr", ["BTC", "ETH", "ADA", "UNI", "LTC"])
 buildPlot("1d", ["BTC", "LTC", "ETH"])
 buildPlot("6m", ["ETH", "ADA"])
 
@@ -236,8 +259,8 @@ if price > price_max:
 # Sell if current price drops more than 5% relative to recent maximum
 if (price - price_max)/price_max < -0.05:
     sell = client.sell('2bbf394c-193b-5b2a-9155-3b4732659ede',
-                   amount="10",
-                   currency="BTC",
-                   payment_method="83562370-3e5c-51db-87da-752af5ab9559")
+                   amount = "10",
+                   currency = "BTC",
+                   payment_method = "83562370-3e5c-51db-87da-752af5ab9559")
     
     

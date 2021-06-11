@@ -7,6 +7,7 @@ from coinbase.wallet.client import Client
 from coinbase.wallet.model import APIObject
 
 # Import other packages
+import matplotlib.dates
 from matplotlib import pyplot
 import dateutil.parser as dp
 from datetime import datetime
@@ -104,6 +105,9 @@ def getPriceData(tFrame, currency):
     # Convert timestamp to ISO format    
     data["ISO"] = data["timestamp"].map(tsToISO)
     
+    # Convert ISO format to datetime
+    data["datetime"] = data["ISO"].map(dp.isoparse)
+    
     # Return data frame
     return data
 
@@ -130,17 +134,38 @@ def buildPlot(tFrame, currencyList):
     d3 = {}
     for i in range(0, len(currencyList)):
         d3["key%s" %i] = d1["key%s" %i]["mean"]/d2["key%s" %i]
+     
+    # Get minimum price versus opening price
+    pmin = []
+    for i in range(0, len(currencyList)):
+        pmin.append(min(d3["key%s" %i]))
+        
+    # Get maximum price versus opening price
+    pmax = []
+    for i in range(0, len(currencyList)):
+        pmax.append(max(d3["key%s" %i]))
     
     # Generate colour palette
     # Will later use pre-defined colours for each currency
     colours = seaborn.color_palette("tab10", len(currencyList))
     
+    # Set axis time format depending on timeframe
+    if tFrame in ["1hr", "1d"]:
+        xformatter = matplotlib.dates.DateFormatter("%H:%M")
+    elif tFrame in ["1wk", "1m", "6m"]:
+        xformatter = matplotlib.dates.DateFormatter("%m/%d")
+    elif tFrame == "1yr":
+        xformatter = matplotlib.dates.DateFormatter("%m/%d/%y")
+    
     # Plot value relative to opening value
     for i in range(0, len(currencyList)):
-        pyplot.plot(d1["key%s" %i]["timestamp"], d3["key%s" %i], linestyle = "-",
+        pyplot.plot(d1["key%s" %i]["datetime"], d3["key%s" %i], linestyle = "-",
                     linewidth = 0.6, label = currencyList[i], color = colours[i])
+    pyplot.gcf().axes[0].xaxis.set_major_formatter(xformatter)
+    pyplot.ylim([min(pmin)*0.98, max(pmax)*1.02])
 
 # Test the above function
+buildPlot("1d", ["BTC"])
 buildPlot("1d", ["BTC", "LTC", "ETH"])
 buildPlot("6m", ["ETH", "ADA"])
 

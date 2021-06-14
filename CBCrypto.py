@@ -110,6 +110,9 @@ def getPriceData(tFrame, currency):
     # Convert ISO format to datetime
     data["datetime"] = data["ISO"].map(dp.isoparse)
     
+    # Reset index to start with smallest timestamp
+    data.reset_index(inplace = True, drop = True)
+    
     # Return data frame
     return data
 
@@ -146,6 +149,16 @@ def buildPlot(tFrame, currencyList):
     pmax = []
     for i in range(0, len(currencyList)):
         pmax.append(max(d3["key%s" %i]))
+    
+    # Get earliest available datetime
+    dmin = []
+    for i in range(0, len(currencyList)):
+        dmin.append(min(d1["key%s" %i]["datetime"]))
+        
+    # Get latest available datetime
+    dmax = []
+    for i in range(0, len(currencyList)):
+        dmax.append(max(d1["key%s" %i]["datetime"]))
     
     # Generate colour palette
     # Will later use pre-defined colours for each currency
@@ -185,7 +198,7 @@ def buildPlot(tFrame, currencyList):
     pyplot.gcf().axes[0].xaxis.set_major_locator(intvMj)
     pyplot.gcf().axes[0].xaxis.set_minor_locator(intvMi)
     pyplot.ylim([min(pmin)*0.995, max(pmax)*1.005])
-    pyplot.xlim(min(d1["key%s" %i]["datetime"]), max(d1["key%s" %i]["datetime"]))
+    pyplot.xlim(min(dmin), min(dmax))
 
 # Test the above function
 buildPlot("1hr", ["BTC", "ETH", "ADA", "UNI", "LTC"])

@@ -12,7 +12,7 @@ from matplotlib import pyplot
 import dateutil.parser as dp
 from datetime import datetime
 from datetime import timedelta
-from numpy import arange
+from numpy import linspace
 from numpy import argmax
 from numpy import argmin
 from pandas import *
@@ -47,6 +47,9 @@ def getPriceData(tFrame, currency):
         gran = 3600
     elif tFrame == "1m":
         tStart = tEnd - 86400*30
+        gran = 21600
+    elif tFrame == "3m":
+        tStart = tEnd - 86400*30*3
         gran = 21600
     elif tFrame == "6m":
         tStart = tEnd - 86400*30*6
@@ -159,6 +162,13 @@ def buildPlot(tFrame, currencyList):
     dmax = []
     for i in range(0, len(currencyList)):
         dmax.append(max(d1["key%s" %i]["datetime"]))
+        
+    # Get lowest price divisible by 5
+    lPrice = math.floor(min(pmin)*100/5)*5/100
+        
+    # Get difference between min and max price versus opening price, for scaling purposes
+    mmDiff = max(pmax) - min(pmin)
+    mmDiff = math.ceil(mmDiff*100/5)*5/100
     
     # Generate colour palette
     # Will later use pre-defined colours for each currency
@@ -177,9 +187,13 @@ def buildPlot(tFrame, currencyList):
         formatter = matplotlib.dates.DateFormatter("%m/%d")
         intvMj = matplotlib.dates.DayLocator(interval = 1)
         intvMi = matplotlib.dates.HourLocator(interval = 4)
-    elif tFrame == "6wk":
+    elif tFrame == "1m":
         formatter = matplotlib.dates.DateFormatter("%m/%d")
         intvMj = matplotlib.dates.DayLocator(interval = 7)
+        intvMi = matplotlib.dates.DayLocator(interval = 1)
+    elif tFrame == "3m":
+        formatter = matplotlib.dates.DateFormatter("%m/%d")
+        intvMj = matplotlib.dates.DayLocator(interval = 14)
         intvMi = matplotlib.dates.DayLocator(interval = 1)
     elif tFrame == "6m":
         formatter = matplotlib.dates.DateFormatter("%m/%d")
@@ -197,16 +211,27 @@ def buildPlot(tFrame, currencyList):
     pyplot.gcf().axes[0].xaxis.set_major_formatter(formatter)
     pyplot.gcf().axes[0].xaxis.set_major_locator(intvMj)
     pyplot.gcf().axes[0].xaxis.set_minor_locator(intvMi)
-    pyplot.ylim([min(pmin)*0.995, max(pmax)*1.005])
-    pyplot.xlim(min(dmin), min(dmax))
+    pyplot.yticks(linspace(lPrice, lPrice + mmDiff, 6))
+    if mmDiff < 0.3:
+        pyplot.ylim([lPrice*0.99, (lPrice + mmDiff + (0.01*lPrice))])
+    elif mmDiff > 0.3 and mmDiff < 1:
+        pyplot.ylim([lPrice*0.95, (lPrice + mmDiff + (0.05*lPrice))])
+    else:
+        pyplot.ylim([lPrice*0.85, (lPrice + mmDiff + (0.15*lPrice))])
+    pyplot.xlim(min(dmin), max(dmax))
+    pyplot.axhline(y = 1, color = "black", linestyle = "--", linewidth = 0.5)
 
 # Test the above function
 buildPlot("1hr", ["BTC", "ETH", "ADA", "UNI", "LTC"])
-buildPlot("1d", ["BTC", "LTC", "ETH"])
-buildPlot("6m", ["ETH", "ADA"])
+buildPlot("1d", ["BTC", "ETH", "ADA", "UNI", "LTC"])
+buildPlot("1wk", ["BTC", "ETH", "ADA", "UNI", "LTC"])
+buildPlot("1m", ["BTC", "ETH", "ADA", "UNI", "LTC"])
+buildPlot("3m", ["BTC", "ETH", "ADA", "UNI", "LTC"])
+buildPlot("6m", ["BTC", "ETH", "ADA", "UNI", "LTC"])
+buildPlot("1yr", ["BTC", "ETH", "ADA", "UNI", "LTC"])
 
 
-
+min = min; max = min + mdiff
 
 
 ##### Examine data ----------------------------------------------------------------------------------------

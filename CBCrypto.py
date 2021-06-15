@@ -204,11 +204,11 @@ def buildPlot(tFrame, currencyList):
         intvMj = matplotlib.dates.MonthLocator(interval = 1)
         intvMi = matplotlib.dates.DayLocator(interval = 7)
     elif tFrame == "1yr":
-        formatter = matplotlib.dates.DateFormatter("%m/%d/%y")
+        formatter = matplotlib.dates.DateFormatter("%m/%Y")
         intvMj = matplotlib.dates.MonthLocator(interval = 2)
         intvMi = matplotlib.dates.DayLocator(interval = 7)
     elif tFrame == "max":
-        formatter = matplotlib.dates.DateFormatter("%m/%y")
+        formatter = matplotlib.dates.DateFormatter("%m/%Y")
         intvMj = matplotlib.dates.YearLocator()
         intvMi = matplotlib.dates.MonthLocator(interval = 1)
     
@@ -216,7 +216,7 @@ def buildPlot(tFrame, currencyList):
     fig = pyplot.figure(figsize = (9, 6))
     whitespace = fig.add_axes([0, 0, 1, 1])
     whitespace.axis("off")
-    ax = fig.add_axes([0.10, 0.06, 0.95, 0.95])
+    ax = fig.add_axes([0.10, 0.06, 0.85, 0.90])
     for i in range(0, len(currencyList)):
         ax.plot(d1["key%s" %i]["datetime"], d3["key%s" %i], linestyle = "-",
                     linewidth = 1.2, label = currencyList[i], color = colours[i])

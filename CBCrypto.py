@@ -130,45 +130,28 @@ def getPriceData(tFrame, currency):
 # Function to plot value against opening value for given timeframe
 def buildPlot(tFrame, currencyList):
     
-    # Compile dict of prices
-    d1 = {}
+    # Compile dicts of prices and price versus opening price
+    d1, d2 = {}, {}
     for i in range(0, len(currencyList)):
         d1["key%s" %i] = getPriceData(tFrame, currencyList[i])
-
-    # Compile dict of start prices
-    d2 = {}
-    for i in range(0, len(currencyList)):
-        d2["key%s" %i] = d1["key%s" %i]["mean"][0]
-    
-    # Compile dict of price versus opening price
-    d3 = {}
-    for i in range(0, len(currencyList)):
-        d3["key%s" %i] = d1["key%s" %i]["mean"]/d2["key%s" %i]
+        d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
      
-    # Get minimum price versus opening price
-    pmin = []
+    # Get min and max price versus opening price
+    pmin, pmax = [], []
     for i in range(0, len(currencyList)):
-        pmin.append(min(d3["key%s" %i]))
-        
-    # Get maximum price versus opening price
-    pmax = []
-    for i in range(0, len(currencyList)):
-        pmax.append(max(d3["key%s" %i]))
+        pmin.append(min(d2["key%s" %i]))
+        pmax.append(max(d2["key%s" %i]))
     
-    # Get earliest available datetime
-    dmin = []
+    # Get earliest and latest available datetimes
+    dmin, dmax = [], []
     for i in range(0, len(currencyList)):
         dmin.append(min(d1["key%s" %i]["datetime"]))
-        
-    # Get latest available datetime
-    dmax = []
-    for i in range(0, len(currencyList)):
         dmax.append(max(d1["key%s" %i]["datetime"]))
-        
+                
     # Get difference between min and max price versus opening price, for scaling purposes
-    mmDiff = max(pmax) - min(pmin)
-    mmDiff = math.ceil(mmDiff*100/5)*5/100
+    mmDiff = math.ceil((max(pmax) - min(pmin))*100/5)*5/100
     
+    # Set scaling based on difference between max and min price versus opening price
     if mmDiff > 0.5:
         lPrice = math.floor(min(pmin)*100/5)*5/100
     else:
@@ -221,7 +204,7 @@ def buildPlot(tFrame, currencyList):
     whitespace.axis("off")
     ax = fig.add_axes([0.10, 0.06, 0.85, 0.90])
     for i in range(0, len(currencyList)):
-        ax.plot(d1["key%s" %i]["datetime"], d3["key%s" %i], linestyle = "-",
+        ax.plot(d1["key%s" %i]["datetime"], d2["key%s" %i], linestyle = "-",
                     linewidth = 1.2, label = currencyList[i], color = colours[i])
     ax.xaxis.set_major_formatter(formatter)
     ax.xaxis.set_major_locator(intvMj)

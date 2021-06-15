@@ -8,6 +8,7 @@ from coinbase.wallet.model import APIObject
 
 # Import other packages
 import matplotlib.dates
+from matplotlib.ticker import StrMethodFormatter
 from matplotlib import pyplot
 import dateutil.parser as dp
 from datetime import datetime
@@ -16,6 +17,7 @@ from numpy import linspace
 from numpy import argmax
 from numpy import argmin
 from pandas import *
+import decimal
 import seaborn
 import math
 import time
@@ -28,7 +30,7 @@ import json
 ##### Get price data --------------------------------------------------------------------------------------
 
 # Create function to pull price data for a given timeframe
-# Possible timeframes: 1hr, 1d (default), 1 wk, 1m, 6m, 1yr, max
+# Possible timeframes: 1hr, 1d (default), 1 wk, 1m, 3m, 6m, 1yr, max
 # Note: Coinbase historical data may be incomplete
 def getPriceData(tFrame, currency):
 
@@ -205,22 +207,32 @@ def buildPlot(tFrame, currencyList):
         formatter = matplotlib.dates.DateFormatter("%m/%d/%y")
         intvMj = matplotlib.dates.MonthLocator(interval = 2)
         intvMi = matplotlib.dates.DayLocator(interval = 7)
+    elif tFrame == "max":
+        formatter = matplotlib.dates.DateFormatter("%m/%y")
+        intvMj = matplotlib.dates.YearLocator()
+        intvMi = matplotlib.dates.MonthLocator(interval = 1)
     
     # Plot value relative to opening value
+    fig = pyplot.figure(figsize = (9, 6))
+    whitespace = fig.add_axes([0, 0, 1, 1])
+    whitespace.axis("off")
+    ax = fig.add_axes([0.10, 0.06, 0.95, 0.95])
     for i in range(0, len(currencyList)):
-        pyplot.plot(d1["key%s" %i]["datetime"], d3["key%s" %i], linestyle = "-",
-                    linewidth = 0.6, label = currencyList[i], color = colours[i])
-    pyplot.gcf().axes[0].xaxis.set_major_formatter(formatter)
-    pyplot.gcf().axes[0].xaxis.set_major_locator(intvMj)
-    pyplot.gcf().axes[0].xaxis.set_minor_locator(intvMi)
+        ax.plot(d1["key%s" %i]["datetime"], d3["key%s" %i], linestyle = "-",
+                    linewidth = 1.2, label = currencyList[i], color = colours[i])
+    ax.xaxis.set_major_formatter(formatter)
+    ax.xaxis.set_major_locator(intvMj)
+    ax.xaxis.set_minor_locator(intvMi)
+    ax.yaxis.set_major_formatter(StrMethodFormatter("{x:,.2f}"))
     if mmDiff > 0.5:
-        pyplot.yticks(linspace(lPrice, lPrice + mmDiff, 6))
-        pyplot.ylim([lPrice - mmDiff*0.1, (lPrice + mmDiff + mmDiff*0.1)])
+        ax.yaxis.set_ticks(linspace(lPrice, lPrice + mmDiff, 6))
+        ax.set_ylim([lPrice - mmDiff*0.1, (lPrice + mmDiff + mmDiff*0.1)])
     else:
-        pyplot.yticks(linspace(lPrice, lPrice + mmDiff, 6))
-        pyplot.ylim([lPrice - mmDiff*0.1, (lPrice + mmDiff + mmDiff*0.1)])
-    pyplot.xlim(min(dmin), max(dmax))
-    pyplot.axhline(y = 1, color = "black", linestyle = "--", linewidth = 0.5)
+        ax.yaxis.set_ticks(linspace(lPrice, lPrice + mmDiff, 6))
+        ax.set_ylim([lPrice - mmDiff*0.1, (lPrice + mmDiff + mmDiff*0.1)])
+    ax.set_xlim(min(dmin), max(dmax))
+    ax.tick_params(length = 5, width = 1.5, axis = "both", which = "major", labelsize = 15)
+    ax.axhline(y = 1, color = "black", linestyle = "--", linewidth = 0.8)
 
 # Test the above function
 buildPlot("1hr", ["BTC", "ETH", "ADA", "UNI", "LTC"])
@@ -230,6 +242,7 @@ buildPlot("1m", ["BTC", "ETH", "ADA", "UNI", "LTC"])
 buildPlot("3m", ["BTC", "ETH", "ADA", "UNI", "LTC"])
 buildPlot("6m", ["BTC", "ETH", "ADA", "UNI", "LTC"])
 buildPlot("1yr", ["BTC", "ETH", "ADA", "UNI", "LTC"])
+buildPlot("max", ["BTC", "ETH", "ADA", "UNI", "LTC"])
 
 
 

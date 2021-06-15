@@ -11,12 +11,11 @@ import matplotlib.dates
 from matplotlib.ticker import StrMethodFormatter
 from matplotlib import pyplot
 import dateutil.parser as dp
-from datetime import datetime
-from datetime import timedelta
 from numpy import linspace
 from numpy import argmax
 from numpy import argmin
 from pandas import *
+import datetime
 import decimal
 import seaborn
 import math
@@ -74,7 +73,8 @@ def getPriceData(tFrame, currency):
     
     # Define internal function to convert timestamp to ISO format
     def tsToISO(ts):
-        return datetime.utcfromtimestamp(ts).isoformat()
+        tz = datetime.datetime.now().astimezone().tzinfo
+        return datetime.datetime.fromtimestamp(ts, tz).isoformat()
     
     # Pull data from CoinbasePro API
     if nBlocks <= 1:    
@@ -178,37 +178,40 @@ def buildPlot(tFrame, currencyList):
     # Will later use pre-defined colours for each currency
     colours = seaborn.color_palette("tab10", len(currencyList))
     
+    # Get current time zone
+    tz = datetime.datetime.now().astimezone().tzinfo
+    
     # Set axis time format depending on timeframe
     if tFrame == "1hr":
-        formatter = matplotlib.dates.DateFormatter("%H:%M")
+        formatter = matplotlib.dates.DateFormatter("%H:%M", tz)
         intvMj = matplotlib.dates.MinuteLocator(interval = 10)
         intvMi = matplotlib.dates.MinuteLocator(interval = 1)
     elif tFrame == "1d":
-        formatter = matplotlib.dates.DateFormatter("%H:%M")
+        formatter = matplotlib.dates.DateFormatter("%H:%M", tz)
         intvMj = matplotlib.dates.HourLocator(interval = 4)
         intvMi = matplotlib.dates.HourLocator(interval = 1)
     elif tFrame == "1wk":
-        formatter = matplotlib.dates.DateFormatter("%m/%d")
+        formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.DayLocator(interval = 1)
         intvMi = matplotlib.dates.HourLocator(interval = 4)
     elif tFrame == "1m":
-        formatter = matplotlib.dates.DateFormatter("%m/%d")
+        formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.DayLocator(interval = 7)
         intvMi = matplotlib.dates.DayLocator(interval = 1)
     elif tFrame == "3m":
-        formatter = matplotlib.dates.DateFormatter("%m/%d")
+        formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.DayLocator(interval = 14)
         intvMi = matplotlib.dates.DayLocator(interval = 1)
     elif tFrame == "6m":
-        formatter = matplotlib.dates.DateFormatter("%m/%d")
+        formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.MonthLocator(interval = 1)
         intvMi = matplotlib.dates.DayLocator(interval = 7)
     elif tFrame == "1yr":
-        formatter = matplotlib.dates.DateFormatter("%m/%Y")
+        formatter = matplotlib.dates.DateFormatter("%m/%Y", tz)
         intvMj = matplotlib.dates.MonthLocator(interval = 2)
         intvMi = matplotlib.dates.DayLocator(interval = 7)
     elif tFrame == "max":
-        formatter = matplotlib.dates.DateFormatter("%m/%Y")
+        formatter = matplotlib.dates.DateFormatter("%m/%Y", tz)
         intvMj = matplotlib.dates.YearLocator()
         intvMi = matplotlib.dates.MonthLocator(interval = 1)
     

@@ -297,17 +297,17 @@ pyplot.scatter(nums["tdelta"], nums["pct"], alpha = 0.3)
 # Substitute API key and secret key with the user's actual key codes
 client = Client("api_key", "api_secret")
 
-# List accounts
-account = client.get_accounts()
-
 # List current holdings for each cryptocurrency
 def currentHoldings():
     
-    # Generate empty lists
+    # Get account
+    account = client.get_accounts()
+    
+    # Initialise lists
     currency = []
     amount = []
     
-    # Populate lists for help currencies
+    # Populate lists with held currencies
     for wallet in account.data:
         value = float(str(wallet["native_balance"]).replace("USD ", ""))
         if value > 0:
@@ -321,7 +321,23 @@ def currentHoldings():
     
 # List current portfolio value
 def currentValue():
-    return(sum(currentHoldings()["Amount"]))  
+    return(sum(currentHoldings()["Amount"]))
+
+# Generate donut plot of held currencies
+def currentPlot():
+    
+    # Get current holdings for each cryptocurrency
+    values = currentHoldings()
+    total = currentValue()
+    
+    # Combine currencies with small holdings into "other" category
+    minor = values[values["Amount"] < total*0.02]
+    minorTotal = DataFrame(["OTHER", sum(minor["Amount"])], ["Currency", "Amount"]).transpose()
+    values = values[values["Amount"] >= total*0.02].append(minorTotal)
+    
+    # Generate donut plot
+    pyplot.pie(values["Amount"], labels = values["Currency"])
+    pyplot.gcf().gca().add_artist(pyplot.Circle( (0,0), 0.7, color = "white"))
 
 # Possible algorithm for auto buys/sells:
 # Set maximum

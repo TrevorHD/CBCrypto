@@ -291,29 +291,37 @@ pyplot.scatter(nums["tdelta"], nums["pct"], alpha = 0.3)
 
 
 
-##### Wallet operations -----------------------------------------------------------------------------------
+##### Generate user wallet summary ------------------------------------------------------------------------
 
 # Access client using secure keys
 # Substitute API key and secret key with the user's actual key codes
-client = Client("api_key", "secret_key")
-
-# Get prices using API
-# Note: this can be done like earlier without needing an API key
-# Will probably remove this later
-dat = client._make_api_object(client._get('v2', 'prices', 'BTC-USD', 'historic'), APIObject)
+client = Client("api_key", "api_secret")
 
 # List accounts
 account = client.get_accounts()
 
 # List current holdings for each cryptocurrency
-total = 0
-message = []
-for wallet in account.data:
-    message.append(str(wallet["name"]) + " " + str(wallet["native_balance"]) )
-    value = str(wallet["native_balance"]).replace("USD", "")
-    total += float(value)
-message.append("Total Balance: " + "USD " + str(total))
-print "\n".join(message)
+def currentHoldings():
+    
+    # Generate empty lists
+    currency = []
+    amount = []
+    
+    # Populate lists for help currencies
+    for wallet in account.data:
+        value = float(str(wallet["native_balance"]).replace("USD ", ""))
+        if value > 0:
+            amount.append(value)
+            currency.append(str(wallet["name"]).replace(" Wallet", ""))
+    dfCurrency = DataFrame([currency, amount],
+                           ["Currency", "Amount"]).transpose().sort_values("Amount", ascending = False) 
+    
+    # Return dataframe of held currencies
+    return(dfCurrency)
+    
+# List current portfolio value
+def currentValue():
+    return(sum(currentHoldings()["Amount"]))  
 
 # Possible algorithm for auto buys/sells:
 # Set maximum

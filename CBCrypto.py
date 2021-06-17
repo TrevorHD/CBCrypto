@@ -265,6 +265,42 @@ priceCheck("6m", ["BTC", "ETH", "ADA", "UNI", "LTC"])
 priceCheck("1yr", ["BTC", "ETH", "ADA", "UNI", "LTC"])
 priceCheck("max", ["BTC", "ETH", "ADA", "UNI", "LTC"])   
 
+# Function that returns top movers over 24h
+def currentMovers():
+
+    # Activate public client and get currency info
+    p_client = cbpro.PublicClient()
+    currencyInfo = p_client.get_currencies()
+    
+    # Initialise lists
+    currencyList1 = []
+    currencyList2 = []
+    delta = []
+    
+    # Calculate 24h percent change for each currency
+    for i in range(0, len(currencyInfo)):
+        currencyList1.append(currencyInfo[i]["id"])
+        currencyList2.append(currencyInfo[i]["id"])
+        vals = p_client.get_product_24hr_stats(currencyList1[i] + "-USD")
+        try:
+            delta.append((float(vals["last"]) - float(vals["open"]))/float(vals["open"])*100)
+        except ZeroDivisionError:
+            del currencyList2[-1]
+            pass
+        except KeyError:
+            del currencyList2[-1]
+            pass
+        
+    # Create data frame of all currencies
+    df = DataFrame([currencyList2, delta], ["Currency", "Change"]).transpose()
+    
+    # Get top and bottom performers
+    dfTop = df.sort_values("Change", ascending = False).iloc[[0, 1, 2]]
+    dfBottom = df.sort_values("Change").iloc[[0, 1, 2]]
+    
+    # Return new data frame
+    return(dfTop.append(dfBottom))
+
 
 
 
@@ -337,7 +373,7 @@ def currentPlot():
     
     # Generate donut plot
     pyplot.pie(values["Amount"], labels = values["Currency"])
-    pyplot.gcf().gca().add_artist(pyplot.Circle( (0,0), 0.7, color = "white"))
+    pyplot.gcf().gca().add_artist(pyplot.Circle((0,0), 0.7, color = "white"))
 
 # Possible algorithm for auto buys/sells:
 # Set maximum

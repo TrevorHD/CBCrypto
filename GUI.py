@@ -2,8 +2,15 @@
 
 # Import packages for GUI
 from tkinter import *
+from tkinter import ttk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+
+
+
+
+##### Plot price data -------------------------------------------------------------------------------------
 
 # Build time series plots specifically for use in GUI
 def buildPlot():
@@ -96,13 +103,13 @@ def buildPlot():
         intvMi = matplotlib.dates.MonthLocator(interval = 1)
     
     # Plot value relative to opening value
-    fig = Figure(figsize = (9, 6))
+    fig = Figure(figsize = (9, 6), facecolor = "#33393b")
     whitespace = fig.add_axes([0, 0, 1, 1])
     whitespace.axis("off")
     ax = fig.add_axes([0.10, 0.06, 0.85, 0.90])
     for i in range(0, len(currencyList)):
         ax.plot(d1["key%s" %i]["datetime"], d2["key%s" %i], linestyle = "-",
-                    linewidth = 1.2, label = currencyList[i], color = colours[i])
+                linewidth = 1.2, label = currencyList[i], color = colours[i])
     ax.xaxis.set_major_formatter(formatter)
     ax.xaxis.set_major_locator(intvMj)
     ax.xaxis.set_minor_locator(intvMi)
@@ -115,26 +122,44 @@ def buildPlot():
         ax.set_ylim([lPrice - mmDiff*0.1, (lPrice + mmDiff + mmDiff*0.1)])
     ax.set_xlim(min(dmin), max(dmax))
     ax.tick_params(length = 5, width = 1.5, axis = "both", which = "major", labelsize = 15)
-    ax.axhline(y = 1, color = "black", linestyle = "--", linewidth = 0.8)
+    ax.axhline(y = 1, color = "white", linestyle = "--", linewidth = 0.8)
+    ax.set_facecolor("#33393b")
+    for i in ax.spines:
+        ax.spines[i].set_color("white")
+    for i in ("x", "y"):
+        ax.tick_params(axis = i, color = "white")
+    for i in ax.get_yticklabels():
+        i.set_color("white")
+    for i in ax.get_xticklabels():
+        i.set_color("white")
     
     # Create Tkinter canvas with Matplotlib figure
     canvas = FigureCanvasTkAgg(fig, master = window)  
     canvas.draw()
   
     # Place canvas in Tkinter window
-    canvas.get_tk_widget().place(x = 75, y = 80)   
+    canvas.get_tk_widget().place(x = 50, y = 50)   
   
+
+
+
+
+##### Run GUI ---------------------------------------------------------------------------------------------
+   
 # Create Tkinter window
 window = Tk()
-  
+
+# Set theme
+window.tk.call('lappend', 'auto_path', 'C:/Users/Trevor Drees/Downloads/awthemes-10.4.0')
+window.tk.call('package', 'require', 'awdark') 
+ttk.Style().theme_use("awdark") 
+ 
 # Set window title
 window.title("CBCrypto: Cryptocurrency Dashboard")
   
-# Set window dimensions
-window.geometry("500x500")
-
-# Set timeframe button label
-#Label(window, text = "Timeframe", justify = LEFT, padx = 20).pack()
+# Set window dimensions and colour
+window.geometry("1920x1080")
+window.configure(bg = "#33393b")
 
 # Set timeframe button state
 bState = IntVar()
@@ -144,13 +169,13 @@ bState.set(2)
 buildPlot()
 
 # Control plot timeframe with radiobuttons
-Radiobutton(window, command = buildPlot, text = "1h", padx = 20, variable = bState, value = 1).pack(anchor = W)
-Radiobutton(window, command = buildPlot, text = "1d", padx = 20, variable = bState, value = 2).pack(anchor = W)
-Radiobutton(window, command = buildPlot, text = "1wk", padx = 20, variable = bState, value = 3).pack(anchor = W)
-Radiobutton(window, command = buildPlot, text = "1m", padx = 20, variable = bState, value = 4).pack(anchor = W)
-Radiobutton(window, command = buildPlot, text = "3m", padx = 20, variable = bState, value = 5).pack(anchor = W)
-Radiobutton(window, command = buildPlot, text = "6m", padx = 20, variable = bState, value = 6).pack(anchor = W)
-Radiobutton(window, command = buildPlot, text = "1yr", padx = 20, variable = bState, value = 7).pack(anchor = W)
+ttk.Radiobutton(window, command = buildPlot, text = "1h", variable = bState, value = 1).place(x = 110, y = 40) 
+ttk.Radiobutton(window, command = buildPlot, text = "1d", variable = bState, value = 2).place(x = 170, y = 40)
+ttk.Radiobutton(window, command = buildPlot, text = "1wk", variable = bState, value = 3).place(x = 230, y = 40)
+ttk.Radiobutton(window, command = buildPlot, text = "1m", variable = bState, value = 4).place(x = 290, y = 40)
+ttk.Radiobutton(window, command = buildPlot, text = "3m", variable = bState, value = 5).place(x = 350, y = 40)
+ttk.Radiobutton(window, command = buildPlot, text = "6m", variable = bState, value = 6).place(x = 410, y = 40)
+ttk.Radiobutton(window, command = buildPlot, text = "1yr", variable = bState, value = 7).place(x = 470, y = 40)
   
 # Run Tkinter window over loop
 window.mainloop()

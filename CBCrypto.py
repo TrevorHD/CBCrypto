@@ -241,16 +241,18 @@ def priceCheck(tFrame, currencyList):
     
     # Compile current prices and price versus opening price
     d1, d2 = {}, {}
-    prices, returns = [], []
+    prices, high, low, returns = [], [], [], []
     for i in range(0, len(currencyList)):
         d1["key%s" %i] = getPriceData(tFrame, currencyList[i])
         d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
         prices.append(d1["key%s" %i]["mean"].iloc[-1])
+        high.append(max(d1["key%s" %i]["high"]))
+        low.append(min(d1["key%s" %i]["low"]))
         returns.append(d2["key%s" %i].iloc[-1])
     
     # Put data into dataframe    
-    df = pandas.DataFrame([[tFrame]*5, currencyList, prices, returns],
-                          ["Timeframe", "Currency", "Price", "Return"]).transpose()
+    df = pandas.DataFrame([[tFrame]*5, currencyList, high, low, prices, returns],
+                          ["Timeframe", "Currency", "High", "Low", "Price", "Return"]).transpose()
     
     # Return dataframe
     return df
@@ -295,8 +297,8 @@ def currentMovers():
     df = DataFrame([currencyList2, delta], ["Currency", "Change"]).transpose()
     
     # Get top and bottom performers
-    dfTop = df.sort_values("Change", ascending = False).iloc[[0, 1, 2]]
-    dfBottom = df.sort_values("Change").iloc[[0, 1, 2]]
+    dfTop = df.sort_values("Change", ascending = False).iloc[0:5]
+    dfBottom = df.sort_values("Change").iloc[0:5]
     
     # Return new data frame
     return(dfTop.append(dfBottom))

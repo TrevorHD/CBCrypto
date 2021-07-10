@@ -134,13 +134,42 @@ def buildPlot():
         i.set_color("white")
     
     # Create Tkinter canvas with Matplotlib figure
-    canvas = FigureCanvasTkAgg(fig, master = window)  
-    canvas.draw()
-  
+    pyplot.gcf().canvas.draw()
+    canvas1 = FigureCanvasTkAgg(fig, master = window)
+    
     # Place canvas in Tkinter window
-    canvas.get_tk_widget().place(x = 50, y = 50)   
-  
+    canvas1.get_tk_widget().place(x = 50, y = 50)
+    
+    # Get price data for 5 popular currencies
+    pData = priceCheck(tFrame, ["BTC", "ETH", "ADA", "UNI", "LTC"])
+    names = list(pData["Currency"])
+    highs = list(pData["High"])
+    lows = list(pData["Low"])
+    returns = list(pData["Return"])
+    colours = ["red" if x < 1 else "green" for x in returns]
 
+    # Plot price data as text
+    fig2 = Figure(figsize = (9, 3), dpi = 800, facecolor = "#33393b")
+    fig2.add_axes([0, 0, 1, 1]).axis("off")
+    ax2 = fig.add_axes([0, 0, 1, 1])
+    for i in range(0, 5):
+        ax2.text(0.0, 0.25*(i - 1), names[i], color = colours[i],
+                 fontsize = 12, horizontalalignment = "left")
+        ax2.text(0.2, 0.25*(i - 1), round(highs[i], 2), color = colours[i],
+                 fontsize = 12, horizontalalignment = "left")
+        ax2.text(0.6, 0.25*(i - 1), round(lows[i], 2), color = colours[i],
+                 fontsize = 12, horizontalalignment = "left")
+        ax2.text(1.0, 0.25*(i - 1), round(returns[i], 2), color = colours[i],
+                 fontsize = 12, horizontalalignment = "left")
+        
+    # Create Tkinter canvas with Matplotlib figure
+    pyplot.gcf().canvas.draw()
+    canvas2 = FigureCanvasTkAgg(fig2, master = window)  
+    
+    # Place canvas in Tkinter window
+    canvas2.get_tk_widget().place(x = 1500, y = 700)
+
+    
 
 
 

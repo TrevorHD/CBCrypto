@@ -103,7 +103,8 @@ def buildPlot():
         intvMi = matplotlib.dates.MonthLocator(interval = 1)
     
     # Plot value relative to opening value
-    fig = Figure(figsize = (9, 6), facecolor = "#33393b")
+    fig = pyplot.figure(1, facecolor = "#33393b")
+    pyplot.clf()
     whitespace = fig.add_axes([0, 0, 1, 1])
     whitespace.axis("off")
     ax = fig.add_axes([0.10, 0.06, 0.85, 0.90])
@@ -135,13 +136,9 @@ def buildPlot():
     
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
-    canvas1 = FigureCanvasTkAgg(fig, master = window)
-    
-    # Place canvas in Tkinter window
-    canvas1.get_tk_widget().place(x = 50, y = 50)
     
     # Get price data for 5 popular currencies
-    pData = priceCheck(tFrame, ["BTC", "ETH", "ADA", "UNI", "LTC"])
+    pData = priceCheck(tFrame, ["UNI", "LTC", "ADA", "ETH", "BTC"])
     names = list(pData["Currency"])
     highs = list(pData["High"])
     lows = list(pData["Low"])
@@ -149,33 +146,30 @@ def buildPlot():
     colours = ["red" if x < 1 else "green" for x in returns]
 
     # Plot price data as text
-    fig2 = Figure(figsize = (9, 3), dpi = 800, facecolor = "#33393b")
+    fig2 = pyplot.figure(2)
+    pyplot.clf()
     fig2.add_axes([0, 0, 1, 1]).axis("off")
-    ax2 = fig.add_axes([0, 0, 1, 1])
+    ax2 = fig2.add_axes([0, 0, 1, 1])
     for i in range(0, 5):
-        ax2.text(0.0, 0.25*(i - 1), names[i], color = colours[i],
-                 fontsize = 12, horizontalalignment = "left")
-        ax2.text(0.2, 0.25*(i - 1), round(highs[i], 2), color = colours[i],
-                 fontsize = 12, horizontalalignment = "left")
-        ax2.text(0.6, 0.25*(i - 1), round(lows[i], 2), color = colours[i],
-                 fontsize = 12, horizontalalignment = "left")
-        ax2.text(1.0, 0.25*(i - 1), round(returns[i], 2), color = colours[i],
-                 fontsize = 12, horizontalalignment = "left")
+        ax2.text(0.1, 0.2*i, names[i], color = colours[i],
+                 fontsize = 20, horizontalalignment = "left")
+        ax2.text(0.3, 0.2*i, round(highs[i], 2), color = colours[i],
+                 fontsize = 20, horizontalalignment = "left")
+        ax2.text(0.5, 0.2*i, round(lows[i], 2), color = colours[i],
+                 fontsize = 20, horizontalalignment = "left")
+        ax2.text(0.7, 0.2*i, round(returns[i], 2), color = colours[i],
+                 fontsize = 20, horizontalalignment = "left")
         
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
-    canvas2 = FigureCanvasTkAgg(fig2, master = window)  
-    
-    # Place canvas in Tkinter window
-    canvas2.get_tk_widget().place(x = 1500, y = 700)
 
-    
+
 
 
 
 ##### Run GUI ---------------------------------------------------------------------------------------------
-   
-# Create Tkinter window
+
+# Create TkInter window
 window = Tk()
 
 # Set theme
@@ -190,21 +184,36 @@ window.title("CBCrypto: Cryptocurrency Dashboard")
 window.geometry("1920x1080")
 window.configure(bg = "#33393b")
 
-# Set timeframe button state
+# Plot figures
+fig1 = pyplot.figure(figsize = (9, 6), facecolor = "#33393b")
+canvas1 = FigureCanvasTkAgg(fig1, master = window)
+canvas1.get_tk_widget().place(x = 50, y = 50)
+fig2 = pyplot.figure(figsize = (9, 3), facecolor = "#33393b")
+canvas2 = FigureCanvasTkAgg(fig2, master = window)
+canvas2.get_tk_widget().place(x = 50, y = 500)
+
+# Set state variable for radiobuttons
 bState = IntVar()
-bState.set(2) 
 
-# Build initial plot
-buildPlot()
+# Control plot timeframe with radiobuttons; first define buttons, then place them
+rb1 = ttk.Radiobutton(window, command = buildPlot, text = "1h", variable = bState, value = 1) 
+rb2 = ttk.Radiobutton(window, command = buildPlot, text = "1d", variable = bState, value = 2)
+rb3 = ttk.Radiobutton(window, command = buildPlot, text = "1wk", variable = bState, value = 3)
+rb4 = ttk.Radiobutton(window, command = buildPlot, text = "1m", variable = bState, value = 4)
+rb5 = ttk.Radiobutton(window, command = buildPlot, text = "3m", variable = bState, value = 5)
+rb6 = ttk.Radiobutton(window, command = buildPlot, text = "6m", variable = bState, value = 6)
+rb7 = ttk.Radiobutton(window, command = buildPlot, text = "1yr", variable = bState, value = 7)
+rb1.place(x = 113, y = 40)
+rb2.place(x = 173, y = 40)
+rb3.place(x = 233, y = 40)
+rb4.place(x = 293, y = 40)
+rb5.place(x = 353, y = 40)
+rb6.place(x = 413, y = 40)
+rb7.place(x = 473, y = 40)
 
-# Control plot timeframe with radiobuttons
-ttk.Radiobutton(window, command = buildPlot, text = "1h", variable = bState, value = 1).place(x = 110, y = 40) 
-ttk.Radiobutton(window, command = buildPlot, text = "1d", variable = bState, value = 2).place(x = 170, y = 40)
-ttk.Radiobutton(window, command = buildPlot, text = "1wk", variable = bState, value = 3).place(x = 230, y = 40)
-ttk.Radiobutton(window, command = buildPlot, text = "1m", variable = bState, value = 4).place(x = 290, y = 40)
-ttk.Radiobutton(window, command = buildPlot, text = "3m", variable = bState, value = 5).place(x = 350, y = 40)
-ttk.Radiobutton(window, command = buildPlot, text = "6m", variable = bState, value = 6).place(x = 410, y = 40)
-ttk.Radiobutton(window, command = buildPlot, text = "1yr", variable = bState, value = 7).place(x = 470, y = 40)
-  
-# Run Tkinter window over loop
+# Set default radiobutton state
+rb2.invoke()
+
+# Run TkInter window over loop
 window.mainloop()
+

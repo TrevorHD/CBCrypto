@@ -154,13 +154,17 @@ def buildPlot():
     fig2.add_axes([0, 0, 1, 1]).axis("off")
     ax2 = fig2.add_axes([0, 0, 1, 1])
     for i in range(0, 5):
-        ax2.text(0.099, 0.2*i, names[i], color = colours[i],
+        for j in range(0, 4):
+            ax2.text([0.099, 0.437, 0.687, 0.953][j], 5/6, ["Currency", "Max", "Min", "Return"][j],
+                     horizontalalignment = ["left", "right", "right", "right"][j],
+                     color = "white", fontsize = 20)
+        ax2.text(0.099, 1/6*i, names[i], color = colours[i],
                  fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.437, 0.2*i, highs[i], color = colours[i],
+        ax2.text(0.437, 1/6*i, highs[i], color = colours[i],
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.687, 0.2*i, lows[i], color = colours[i],
+        ax2.text(0.687, 1/6*i, lows[i], color = colours[i],
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.957, 0.2*i, returns[i], color = colours[i],
+        ax2.text(0.953, 1/6*i, returns[i], color = colours[i],
                  fontsize = 20, horizontalalignment = "right")
         
     # Create Tkinter canvas with Matplotlib figure

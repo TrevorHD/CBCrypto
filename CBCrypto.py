@@ -277,7 +277,7 @@ def currentMovers():
     # Initialise lists
     currencyList1 = []
     currencyList2 = []
-    delta = []
+    openV, closeV, delta = [], [], []
     
     # Calculate 24h percent change for each currency
     for i in range(0, len(currencyInfo)):
@@ -286,6 +286,8 @@ def currentMovers():
         vals = p_client.get_product_24hr_stats(currencyList1[i] + "-USD")
         try:
             delta.append((float(vals["last"]) - float(vals["open"]))/float(vals["open"])*100)
+            openV.append(float(vals["open"]))
+            closeV.append(float(vals["last"]))
         except ZeroDivisionError:
             del currencyList2[-1]
             pass
@@ -294,11 +296,12 @@ def currentMovers():
             pass
         
     # Create data frame of all currencies
-    df = DataFrame([currencyList2, delta], ["Currency", "Change"]).transpose()
+    df = DataFrame([currencyList2, openV, closeV, delta],
+                   ["Currency", "Open", "Close", "Change"]).transpose()
     
     # Get top and bottom performers
-    dfTop = df.sort_values("Change", ascending = False).iloc[0:5]
-    dfBottom = df.sort_values("Change").iloc[0:5]
+    dfTop = df.sort_values("Change", ascending = False).iloc[0:10]
+    dfBottom = df.sort_values("Change").iloc[0:10]
     
     # Return new data frame
     return(dfTop.append(dfBottom))

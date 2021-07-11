@@ -174,6 +174,45 @@ def buildPlot():
         
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
+    
+    
+def moverPlots():
+    
+    pData = currentMovers()
+    currencyList = list(pData["Currency"])
+    changes = list(pData["Change"])
+    openV = ["{:.3f}".format(x) for x in list(pData["Open"])]
+    closeV = ["{:.3f}".format(x) for x in list(pData["Close"])]
+    
+    # Format text colour and return sign depending on value
+    colours = ["red" if x < 0 else "green" for x in changes]
+    changes = ["{:.2f}".format(x) + "%" if x < 0 else "+" + "{:.2f}".format(x) + "%" for x in changes]
+    
+    # Plot price data as text
+    fig3 = pyplot.figure(3)
+    pyplot.clf()
+    pyplot.axis("off")
+    pyplot.tight_layout()
+    ax3 = pyplot.gca()
+    ax3.set_xlim(0, 1)
+    ax3.set_ylim(0, 1)
+    
+    for i in range(0, 20):
+        for j in range(0, 4):
+            ax3.text([0.084, 0.437, 0.687, 0.968][j], 20/21, ["Currency", "Open", "Close", "Return"][j],
+                     horizontalalignment = ["left", "right", "right", "right"][j],
+                     color = "white", fontsize = 20)
+        ax3.text(0.084, 1/21*i, currencyList[i], color = colours[i],
+                 fontsize = 20, horizontalalignment = "left")
+        ax3.text(0.437, 1/21*i, openV[i], color = colours[i],
+                 fontsize = 20, horizontalalignment = "right")
+        ax3.text(0.687, 1/21*i, closeV[i], color = colours[i],
+                 fontsize = 20, horizontalalignment = "right")
+        ax3.text(0.968, 1/21*i, changes[i], color = colours[i],
+                 fontsize = 20, horizontalalignment = "right")
+        
+    # Create Tkinter canvas with Matplotlib figure
+    pyplot.gcf().canvas.draw()
 
 
 
@@ -203,6 +242,9 @@ canvas1.get_tk_widget().place(x = 50, y = 50)
 fig2 = pyplot.figure(figsize = (9, 4), facecolor = "#33393b")
 canvas2 = FigureCanvasTkAgg(fig2, master = window)
 canvas2.get_tk_widget().place(x = 50, y = 500)
+fig3 = pyplot.figure(figsize = (9, 10), facecolor = "#33393b")
+canvas3 = FigureCanvasTkAgg(fig3, master = window)
+canvas3.get_tk_widget().place(x = 800, y = 50)
 
 # Set state variable for radiobuttons
 bState = IntVar()
@@ -223,8 +265,12 @@ rb5.place(x = 353, y = 40)
 rb6.place(x = 413, y = 40)
 rb7.place(x = 473, y = 40)
 
+b1 = ttk.Button(window, text = "Refresh", command = moverPlots)
+b1.place(x = 773, y = 40)
+
 # Set default radiobutton state
 rb2.invoke()
+b1.invoke()
 
 # Run TkInter window over loop
 window.mainloop()

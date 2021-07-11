@@ -136,7 +136,7 @@ def buildPlot():
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
     
-    # Get price data for 5 popular currencies
+    # Get price data for 5 popular currencies; convert to lists
     pData = priceCheck(tFrame, currencyList)
     names = list(pData["Currency"])
     highs = ["{:.2f}".format(x) for x in list(pData["High"])]
@@ -157,7 +157,6 @@ def buildPlot():
     ax2 = pyplot.gca()
     ax2.set_xlim(0, 1)
     ax2.set_ylim(0, 1)
-    
     for i in range(0, 7):
         for j in range(0, 4):
             ax2.text([0.084, 0.437, 0.687, 0.968][j], 7/8, ["Currency", "Max", "Min", "Return"][j],
@@ -175,44 +174,68 @@ def buildPlot():
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
     
-    
+# Get data on top movers and plot as text    
 def moverPlots():
     
+    # Retrieve info on top and bottom movers
     pData = currentMovers()
-    currencyList = list(pData["Currency"])
-    changes = list(pData["Change"])
-    openV = ["{:.3f}".format(x) for x in list(pData["Open"])]
-    closeV = ["{:.3f}".format(x) for x in list(pData["Close"])]
     
-    # Format text colour and return sign depending on value
-    colours = ["red" if x < 0 else "green" for x in changes]
-    changes = ["{:.2f}".format(x) + "%" if x < 0 else "+" + "{:.2f}".format(x) + "%" for x in changes]
-    
-    # Plot price data as text
-    fig3 = pyplot.figure(3)
-    pyplot.clf()
-    pyplot.axis("off")
-    pyplot.tight_layout()
-    ax3 = pyplot.gca()
-    ax3.set_xlim(0, 1)
-    ax3.set_ylim(0, 1)
-    
-    for i in range(0, 20):
-        for j in range(0, 4):
-            ax3.text([0.084, 0.437, 0.687, 0.968][j], 20/21, ["Currency", "Open", "Close", "Return"][j],
-                     horizontalalignment = ["left", "right", "right", "right"][j],
-                     color = "white", fontsize = 20)
-        ax3.text(0.084, 1/21*i, currencyList[i], color = colours[i],
-                 fontsize = 20, horizontalalignment = "left")
-        ax3.text(0.437, 1/21*i, openV[i], color = colours[i],
-                 fontsize = 20, horizontalalignment = "right")
-        ax3.text(0.687, 1/21*i, closeV[i], color = colours[i],
-                 fontsize = 20, horizontalalignment = "right")
-        ax3.text(0.968, 1/21*i, changes[i], color = colours[i],
-                 fontsize = 20, horizontalalignment = "right")
+    # Plot top and bottom sets as text
+    for i in range(0, 2):
         
-    # Create Tkinter canvas with Matplotlib figure
-    pyplot.gcf().canvas.draw()
+        # Determine whether set is top or bottom
+        if i == 0:
+            s1, s2 = 0, 10
+            prefix = "Top"
+        else:
+            s1, s2 = 10, 21
+            prefix = "Bottom"
+        
+        # Convert movement data to lists
+        currencyList = list(pData["Currency"])[s1:s2]
+        changes = list(pData["Change"])[s1:s2]
+        openV = ["{:.3f}".format(x) for x in list(pData["Open"])][s1:s2]
+        closeV = ["{:.3f}".format(x) for x in list(pData["Close"])][s1:s2]
+        
+        # Reverse data so that most extreme movement is listed first
+        currencyList.reverse();
+        changes.reverse();
+        openV.reverse()
+        closeV.reverse()
+    
+        # Format text colour and return sign depending on value
+        colours = ["red" if x < 0 else "green" for x in changes]
+        changes = ["{:.2f}".format(x) + "%" if x < 0 else "+" + "{:.2f}".format(x) + "%" for x in changes]
+    
+        # Plot movement data as text
+        if i == 0:
+            fig3 = pyplot.figure(3)
+        else:
+            fig4 = pyplot.figure(4)
+        pyplot.clf()
+        pyplot.axis("off")
+        pyplot.tight_layout()
+        ax = pyplot.gca()
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        for j in range(0, 10):
+            for k in range(0, 4):
+                ax.text([0.084, 0.437, 0.687, 0.968][k], 10/14, ["Currency", "Open", "Close", "Return"][k],
+                        horizontalalignment = ["left", "right", "right", "right"][k],
+                        color = "white", fontsize = 20)
+            ax.text(0.084, 1/14*j, currencyList[j], color = colours[j],
+                    fontsize = 20, horizontalalignment = "left")
+            ax.text(0.437, 1/14*j, openV[j], color = colours[j],
+                    fontsize = 20, horizontalalignment = "right")
+            ax.text(0.687, 1/14*j, closeV[j], color = colours[j],
+                    fontsize = 20, horizontalalignment = "right")
+            ax.text(0.968, 1/14*j, changes[j], color = colours[j],
+                    fontsize = 20, horizontalalignment = "right")
+        ax.text(0.084, 12/14, prefix + " 24-Hour Movers", color = "white", fontsize = 35,
+                horizontalalignment = "left")
+        
+        # Create Tkinter canvas with Matplotlib figure
+        pyplot.gcf().canvas.draw()
 
 
 
@@ -242,9 +265,12 @@ canvas1.get_tk_widget().place(x = 50, y = 50)
 fig2 = pyplot.figure(figsize = (9, 4), facecolor = "#33393b")
 canvas2 = FigureCanvasTkAgg(fig2, master = window)
 canvas2.get_tk_widget().place(x = 50, y = 500)
-fig3 = pyplot.figure(figsize = (9, 10), facecolor = "#33393b")
+fig3 = pyplot.figure(figsize = (9, 5), facecolor = "#33393b")
 canvas3 = FigureCanvasTkAgg(fig3, master = window)
-canvas3.get_tk_widget().place(x = 800, y = 50)
+canvas3.get_tk_widget().place(x = 750, y = 30)
+fig4 = pyplot.figure(figsize = (9, 5), facecolor = "#33393b")
+canvas4 = FigureCanvasTkAgg(fig4, master = window)
+canvas4.get_tk_widget().place(x = 750, y = 424)
 
 # Set state variable for radiobuttons
 bState = IntVar()
@@ -266,7 +292,7 @@ rb6.place(x = 413, y = 40)
 rb7.place(x = 473, y = 40)
 
 b1 = ttk.Button(window, text = "Refresh", command = moverPlots)
-b1.place(x = 773, y = 40)
+b1.place(x = 773, y = 20)
 
 # Set default radiobutton state
 rb2.invoke()

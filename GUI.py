@@ -138,12 +138,15 @@ def buildPlot():
     pyplot.gcf().canvas.draw()
     
     # Get price data for 5 popular currencies
-    pData = priceCheck(tFrame, ["UNI", "LTC", "ADA", "ETH", "BTC"])
+    pData = priceCheck(tFrame, ["ADA", "UNI", "LTC", "ETH", "BTC"])
     names = list(pData["Currency"])
-    highs = list(pData["High"])
-    lows = list(pData["Low"])
-    returns = list(pData["Return"])
-    colours = ["red" if x < 1 else "green" for x in returns]
+    highs = ["{:.2f}".format(x) for x in list(pData["High"])]
+    lows = ["{:.2f}".format(x) for x in list(pData["Low"])]
+    returns = [(x - 1)*100 for x in list(pData["Return"])]
+    
+    # Format text colour and return sign depending on value
+    colours = ["red" if x < 0 else "green" for x in returns]
+    returns = ["{:.2f}".format(x) + "%" if x < 0 else "+" + "{:.2f}".format(x) + "%" for x in returns]
 
     # Plot price data as text
     fig2 = pyplot.figure(2)
@@ -151,14 +154,14 @@ def buildPlot():
     fig2.add_axes([0, 0, 1, 1]).axis("off")
     ax2 = fig2.add_axes([0, 0, 1, 1])
     for i in range(0, 5):
-        ax2.text(0.1, 0.2*i, names[i], color = colours[i],
+        ax2.text(0.099, 0.2*i, names[i], color = colours[i],
                  fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.3, 0.2*i, round(highs[i], 2), color = colours[i],
-                 fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.5, 0.2*i, round(lows[i], 2), color = colours[i],
-                 fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.7, 0.2*i, round(returns[i], 2), color = colours[i],
-                 fontsize = 20, horizontalalignment = "left")
+        ax2.text(0.437, 0.2*i, highs[i], color = colours[i],
+                 fontsize = 20, horizontalalignment = "right")
+        ax2.text(0.687, 0.2*i, lows[i], color = colours[i],
+                 fontsize = 20, horizontalalignment = "right")
+        ax2.text(0.957, 0.2*i, returns[i], color = colours[i],
+                 fontsize = 20, horizontalalignment = "right")
         
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()

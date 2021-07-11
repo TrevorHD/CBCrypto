@@ -16,7 +16,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 def buildPlot():
     
     # Create list of tracked currencies
-    currencyList = ["ADA", "UNI", "LTC", "ETH", "BTC"]
+    currencyList = ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]
     
     # Choose timeframe depending on button selection
     if bState.get() == 1:
@@ -62,7 +62,7 @@ def buildPlot():
         lPrice = math.floor(min(pmin)*100)/100
     
     # Generate colour palette
-    colours = ["#1e7ae3", "#8e1ee3", "#e31ed9", "#e1e809", "#e6810e"]
+    colours = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"]
     
     # Get current time zone
     tz = datetime.datetime.now().astimezone().tzinfo
@@ -150,26 +150,26 @@ def buildPlot():
     # Plot price data as text
     fig2 = pyplot.figure(2)
     pyplot.clf()
-    pyplot.scatter([0.03]*5, [x/6 + 0.035 for x in list(range(0, 5))], s = 80,
-                   marker = "s", color = ["#1e7ae3", "#8e1ee3", "#e31ed9", "#e1e809", "#e6810e"])
+    pyplot.scatter([0.03]*7, [x/8 + 0.029 for x in list(range(0, 7))], s = 80, marker = "s",
+                   color = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"])
     pyplot.axis("off")
     pyplot.tight_layout()
     ax2 = pyplot.gca()
     ax2.set_xlim(0, 1)
     ax2.set_ylim(0, 1)
     
-    for i in range(0, 5):
+    for i in range(0, 7):
         for j in range(0, 4):
-            ax2.text([0.084, 0.437, 0.687, 0.968][j], 5/6, ["Currency", "Max", "Min", "Return"][j],
+            ax2.text([0.084, 0.437, 0.687, 0.968][j], 7/8, ["Currency", "Max", "Min", "Return"][j],
                      horizontalalignment = ["left", "right", "right", "right"][j],
                      color = "white", fontsize = 20)
-        ax2.text(0.084, 1/6*i, names[i], color = colours[i],
+        ax2.text(0.084, 1/8*i, names[i], color = colours[i],
                  fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.437, 1/6*i, highs[i], color = colours[i],
+        ax2.text(0.437, 1/8*i, highs[i], color = colours[i],
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.687, 1/6*i, lows[i], color = colours[i],
+        ax2.text(0.687, 1/8*i, lows[i], color = colours[i],
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.968, 1/6*i, returns[i], color = colours[i],
+        ax2.text(0.968, 1/8*i, returns[i], color = colours[i],
                  fontsize = 20, horizontalalignment = "right")
         
     # Create Tkinter canvas with Matplotlib figure
@@ -200,7 +200,7 @@ window.configure(bg = "#33393b")
 fig1 = pyplot.figure(figsize = (9, 6), facecolor = "#33393b")
 canvas1 = FigureCanvasTkAgg(fig1, master = window)
 canvas1.get_tk_widget().place(x = 50, y = 50)
-fig2 = pyplot.figure(figsize = (9, 3), facecolor = "#33393b")
+fig2 = pyplot.figure(figsize = (9, 4), facecolor = "#33393b")
 canvas2 = FigureCanvasTkAgg(fig2, master = window)
 canvas2.get_tk_widget().place(x = 50, y = 500)
 

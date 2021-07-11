@@ -15,6 +15,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # Build time series plots specifically for use in GUI
 def buildPlot():
     
+    # Start progress bar
+    p1.start()
+    
     # Create list of tracked currencies
     currencyList = ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]
     
@@ -174,8 +177,14 @@ def buildPlot():
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
     
+    # Stop progress bar
+    p1.stop()
+    
 # Get data on top movers and plot as text    
 def moverPlots():
+    
+    # Start progress bar
+    p1.start()
     
     # Retrieve info on top and bottom movers
     pData = currentMovers()
@@ -236,6 +245,9 @@ def moverPlots():
         
         # Create Tkinter canvas with Matplotlib figure
         pyplot.gcf().canvas.draw()
+    
+    # Stop progress bar
+    p1.stop()
 
 
 
@@ -265,12 +277,12 @@ canvas1.get_tk_widget().place(x = 50, y = 50)
 fig2 = pyplot.figure(figsize = (9, 4), facecolor = "#33393b")
 canvas2 = FigureCanvasTkAgg(fig2, master = window)
 canvas2.get_tk_widget().place(x = 50, y = 500)
-fig3 = pyplot.figure(figsize = (9, 5), facecolor = "#33393b")
+fig3 = pyplot.figure(figsize = (9, 5.2), facecolor = "#33393b")
 canvas3 = FigureCanvasTkAgg(fig3, master = window)
-canvas3.get_tk_widget().place(x = 750, y = 30)
-fig4 = pyplot.figure(figsize = (9, 5), facecolor = "#33393b")
+canvas3.get_tk_widget().place(x = 775, y = 30)
+fig4 = pyplot.figure(figsize = (9, 5.2), facecolor = "#33393b")
 canvas4 = FigureCanvasTkAgg(fig4, master = window)
-canvas4.get_tk_widget().place(x = 750, y = 424)
+canvas4.get_tk_widget().place(x = 775, y = 415)
 
 # Set state variable for radiobuttons
 bState = IntVar()
@@ -291,8 +303,13 @@ rb5.place(x = 353, y = 40)
 rb6.place(x = 413, y = 40)
 rb7.place(x = 473, y = 40)
 
+# Refresh button for top movers
 b1 = ttk.Button(window, text = "Refresh", command = moverPlots)
-b1.place(x = 773, y = 20)
+b1.place(x = 1327, y = 68)
+
+# Progress bar
+p1 = ttk.Progressbar(window, orient = HORIZONTAL, length = 100, mode = "indeterminate")
+p1.place(x = 566, y = 40)
 
 # Set default radiobutton state
 rb2.invoke()

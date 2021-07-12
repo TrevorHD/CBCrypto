@@ -260,15 +260,55 @@ def currentPlot():
     minor = values[values["Percent"] < 0.02]
     minorTotal = DataFrame(["OTHER", sum(minor["Amount"]), sum(minor["Amount"])/sum(values["Amount"])],
                            ["Currency", "Amount", "Percent"]).transpose()
-    values = values[values["Percent"] >= 0.02].append(minorTotal)
+    valuesC = values[values["Percent"] >= 0.02].append(minorTotal)
+    
+    # Set colour palette
+    colours = seaborn.color_palette("tab10", len(valuesC))
     
     # Generate donut plot
     fig = pyplot.figure(7, facecolor = "#33393b")
     pyplot.clf()
-    pyplot.pie(values["Amount"], labels = values["Currency"], textprops = {"color" : "w"})
+    pyplot.pie(valuesC["Amount"], labels = valuesC["Currency"], colors = colours, textprops = {"color" : "w"})
     pyplot.gcf().gca().add_artist(pyplot.Circle((0,0), 0.7, color = "#33393b"))
     
     # Create Tkinter canvas with Matplotlib figure
+    pyplot.gcf().canvas.draw()
+    
+    # Format current holdings
+    currencyList = list(values["Currency"])
+    amounts = ["< $0.01" if x < 0.01 else "$" + "{:.2f}".format(x) for x in list(values["Amount"])]
+    pcts = ["< 0.01%" if x*100 < 0.01 else "{:.2f}".format(x*100) + "%" for x in list(values["Percent"])]
+    
+    # Reverse holdings data for plotting compatibility
+    currencyList.reverse();
+    amounts.reverse();
+    pcts.reverse()
+    colours.reverse()
+    
+    # Plot current holdings as text
+    fig2 = pyplot.figure(8)
+    pyplot.clf()
+    pyplot.scatter([0.03]*len(values), [x/(len(values) + 1) + 0.029 for x in list(range(0, len(values)))],
+                   color = [colours[0]]*(len(values) - len(valuesC)) + colours,
+                   s = 80, marker = "s")
+    pyplot.axis("off")
+    pyplot.tight_layout()
+    ax2 = pyplot.gca()
+    ax2.set_xlim(0, 1)
+    ax2.set_ylim(0, 1)
+    for i in range(0, len(values)):
+        for j in range(0, 3):
+            ax2.text([0.084, 0.437, 0.687][j], len(values)/(len(values) + 1), 
+                     ["Currency", "Value (USD)", "Percent"][j], color = "white", fontsize = 20,
+                     horizontalalignment = ["left", "right", "right", "right"][j])
+        ax2.text(0.084, 1/(len(values) + 1)*i, currencyList[i], color = "white",
+                 fontsize = 20, horizontalalignment = "left")
+        ax2.text(0.437, 1/(len(values) + 1)*i, amounts[i], color = "white",
+                 fontsize = 20, horizontalalignment = "right")
+        ax2.text(0.687, 1/(len(values) + 1)*i, pcts[i], color = "white",
+                 fontsize = 20, horizontalalignment = "right")
+        
+    # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
 
 # Display time at which a widget was last refreshed
@@ -346,6 +386,9 @@ canvas6.get_tk_widget().place(x = 1068, y = 750)
 fig7 = pyplot.figure(figsize = (9, 6), facecolor = "#33393b")
 canvas7 = FigureCanvasTkAgg(fig7, master = t2)
 canvas7.get_tk_widget().place(x = 50, y = 50)
+fig8 = pyplot.figure(figsize = (9, 3.5), facecolor = "#33393b")
+canvas8 = FigureCanvasTkAgg(fig8, master = t2)
+canvas8.get_tk_widget().place(x = 50, y = 500)
 
 # Set state variable for radiobuttons
 bState = IntVar()

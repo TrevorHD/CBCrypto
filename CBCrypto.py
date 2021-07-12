@@ -354,27 +354,24 @@ def currentHoldings():
         if value > 0:
             amount.append(value)
             currency.append(str(wallet["name"]).replace(" Wallet", ""))
-    dfCurrency = DataFrame([currency, amount],
-                           ["Currency", "Amount"]).transpose().sort_values("Amount", ascending = False) 
+    pcts = [x/sum(amount) for x in amount]
+    dfCurrency = DataFrame([currency, amount, pcts], ["Currency", "Amount", "Percent"]).transpose() 
     
-    # Return dataframe of held currencies
-    return(dfCurrency)
-    
-# List current portfolio value
-def currentValue():
-    return(sum(currentHoldings()["Amount"]))
+    # Return dataframe of held currencies, sorted by value
+    return(dfCurrency.sort_values("Amount", ascending = False))
 
 # Generate donut plot of held currencies
 def currentPlot():
     
     # Get current holdings for each cryptocurrency
     values = currentHoldings()
-    total = currentValue()
+    total = sum(values["Percent"])
     
     # Combine currencies with small holdings into "other" category
-    minor = values[values["Amount"] < total*0.02]
-    minorTotal = DataFrame(["OTHER", sum(minor["Amount"])], ["Currency", "Amount"]).transpose()
-    values = values[values["Amount"] >= total*0.02].append(minorTotal)
+    minor = values[values["Percent"] < 0.02]
+    minorTotal = DataFrame(["OTHER", sum(minor["Amount"]), sum(minor["Amount"])/sum(values["Amount"])],
+                           ["Currency", "Amount", "Percent"]).transpose()
+    values = values[values["Percent"] >= 0.02].append(minorTotal)
     
     # Generate donut plot
     pyplot.pie(values["Amount"], labels = values["Currency"])

@@ -271,6 +271,8 @@ def currentPlot():
     pyplot.pie(valuesC["Amount"], labels = valuesC["Currency"], colors = colours,
                textprops = {"color" : "w"}, radius = 1.2, startangle = 60)
     pyplot.gcf().gca().add_artist(pyplot.Circle((0,0), 0.7, color = "#33393b"))
+    pyplot.gcf().text(0.5, 0.5, "$" + "{:.2f}".format(sum(values["Amount"])), color = "white",
+                      fontsize = 20, horizontalalignment = "center")
     
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()

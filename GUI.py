@@ -293,43 +293,52 @@ window.title("CBCrypto: Cryptocurrency Dashboard")
 window.geometry("1920x1080")
 window.configure(bg = "#33393b")
 
+# Set tabs
+tC = ttk.Notebook(window)
+t1 = ttk.Frame(tC)
+t2 = ttk.Frame(tC)
+
+tC.add(t1, text = "Overview")
+tC.add(t2, text = "My Portfolio")
+tC.pack(expand = 1, fill = "both")
+
 # Plot figures
 fig1 = pyplot.figure(figsize = (9, 6), facecolor = "#33393b")
-canvas1 = FigureCanvasTkAgg(fig1, master = window)
+canvas1 = FigureCanvasTkAgg(fig1, master = t1)
 canvas1.get_tk_widget().place(x = 50, y = 50)
-fig2 = pyplot.figure(figsize = (9, 4), facecolor = "#33393b")
-canvas2 = FigureCanvasTkAgg(fig2, master = window)
+fig2 = pyplot.figure(figsize = (9, 3.5), facecolor = "#33393b")
+canvas2 = FigureCanvasTkAgg(fig2, master = t1)
 canvas2.get_tk_widget().place(x = 50, y = 500)
-fig3 = pyplot.figure(figsize = (9, 5.2), facecolor = "#33393b")
-canvas3 = FigureCanvasTkAgg(fig3, master = window)
-canvas3.get_tk_widget().place(x = 775, y = 30)
-fig4 = pyplot.figure(figsize = (9, 5.2), facecolor = "#33393b")
-canvas4 = FigureCanvasTkAgg(fig4, master = window)
-canvas4.get_tk_widget().place(x = 775, y = 415)
+fig3 = pyplot.figure(figsize = (9, 4.9), facecolor = "#33393b")
+canvas3 = FigureCanvasTkAgg(fig3, master = t1)
+canvas3.get_tk_widget().place(x = 775, y = 35)
+fig4 = pyplot.figure(figsize = (9, 4.9), facecolor = "#33393b")
+canvas4 = FigureCanvasTkAgg(fig4, master = t1)
+canvas4.get_tk_widget().place(x = 775, y = 400)
 fig5 = pyplot.figure(figsize = (5, 0.3), facecolor = "#33393b")
-canvas5 = FigureCanvasTkAgg(fig5, master = window)
-canvas5.get_tk_widget().place(x = 341, y = 785)
+canvas5 = FigureCanvasTkAgg(fig5, master = t1)
+canvas5.get_tk_widget().place(x = 341, y = 750)
 fig6 = pyplot.figure(figsize = (5, 0.3), facecolor = "#33393b")
-canvas6 = FigureCanvasTkAgg(fig6, master = window)
-canvas6.get_tk_widget().place(x = 1068, y = 785)
+canvas6 = FigureCanvasTkAgg(fig6, master = t1)
+canvas6.get_tk_widget().place(x = 1068, y = 750)
 
 # Set state variable for radiobuttons
 bState = IntVar()
 
 # Control plot timeframe with radiobuttons
-rb1 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+rb1 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
                       text = "1h", variable = bState, value = 1) 
-rb2 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+rb2 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
                       text = "1d", variable = bState, value = 2)
-rb3 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+rb3 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
                       text = "1wk", variable = bState, value = 3)
-rb4 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+rb4 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
                       text = "1m", variable = bState, value = 4)
-rb5 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+rb5 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
                       text = "3m", variable = bState, value = 5)
-rb6 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+rb6 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
                       text = "6m", variable = bState, value = 6)
-rb7 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+rb7 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
                       text = "1yr", variable = bState, value = 7)
 
 # Place radiobuttons side-by-side
@@ -342,11 +351,11 @@ rb6.place(x = 413, y = 40)
 rb7.place(x = 473, y = 40)
 
 # Refresh button for top movers
-b1 = ttk.Button(window, text = "Refresh", command = lambda:[moverPlots(), refreshTime(6)])
-b1.place(x = 1327, y = 68)
+b1 = ttk.Button(t1, text = "Refresh", command = lambda:[moverPlots(), refreshTime(6)])
+b1.place(x = 1327, y = 70)
 
 # Progress bar
-p1 = ttk.Progressbar(window, orient = HORIZONTAL, length = 100, mode = "indeterminate")
+p1 = ttk.Progressbar(t1, orient = HORIZONTAL, length = 100, mode = "indeterminate")
 p1.place(x = 566, y = 40)
 
 # Set default radiobutton state

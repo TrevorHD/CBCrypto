@@ -136,7 +136,7 @@ def buildPlot():
     for i in ax.get_xticklabels():
         i.set_color("white")
     
-    # Create Tkinter canvas with Matplotlib figure
+    # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
     
     # Get price data for 5 popular currencies; convert to lists
@@ -174,7 +174,7 @@ def buildPlot():
         ax2.text(0.968, 1/8*i, returns[i], color = colours[i],
                  fontsize = 20, horizontalalignment = "right")
         
-    # Create Tkinter canvas with Matplotlib figure
+    # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
     
     # Stop progress bar
@@ -249,6 +249,29 @@ def moverPlots():
     # Stop progress bar
     p1.stop()
 
+# Display time at which a widget was last refreshed
+def refreshTime(instance):
+    
+    # Get current time
+    cTime = datetime.datetime.now().strftime("%H:%M")
+    if instance == 5:
+        fig5 = pyplot.figure(5)
+    else:
+        fig6 = pyplot.figure(6)
+        
+    # Plot text
+    pyplot.clf()
+    pyplot.axis("off")
+    pyplot.tight_layout()
+    ax = pyplot.gca()
+    ax.set_xlim(0, 0.1)
+    ax.set_ylim(0, 0.1)
+    ax.text(0.1, 0.05, "Last updated at " + cTime, color = "white", style = "italic",
+            fontsize = 10, horizontalalignment = "right")
+    
+    # Create TkInter canvas with Matplotlib figure
+    pyplot.gcf().canvas.draw()
+
 
 
 
@@ -283,18 +306,33 @@ canvas3.get_tk_widget().place(x = 775, y = 30)
 fig4 = pyplot.figure(figsize = (9, 5.2), facecolor = "#33393b")
 canvas4 = FigureCanvasTkAgg(fig4, master = window)
 canvas4.get_tk_widget().place(x = 775, y = 415)
+fig5 = pyplot.figure(figsize = (5, 0.3), facecolor = "#33393b")
+canvas5 = FigureCanvasTkAgg(fig5, master = window)
+canvas5.get_tk_widget().place(x = 341, y = 785)
+fig6 = pyplot.figure(figsize = (5, 0.3), facecolor = "#33393b")
+canvas6 = FigureCanvasTkAgg(fig6, master = window)
+canvas6.get_tk_widget().place(x = 1068, y = 785)
 
 # Set state variable for radiobuttons
 bState = IntVar()
 
-# Control plot timeframe with radiobuttons; first define buttons, then place them
-rb1 = ttk.Radiobutton(window, command = buildPlot, text = "1h", variable = bState, value = 1) 
-rb2 = ttk.Radiobutton(window, command = buildPlot, text = "1d", variable = bState, value = 2)
-rb3 = ttk.Radiobutton(window, command = buildPlot, text = "1wk", variable = bState, value = 3)
-rb4 = ttk.Radiobutton(window, command = buildPlot, text = "1m", variable = bState, value = 4)
-rb5 = ttk.Radiobutton(window, command = buildPlot, text = "3m", variable = bState, value = 5)
-rb6 = ttk.Radiobutton(window, command = buildPlot, text = "6m", variable = bState, value = 6)
-rb7 = ttk.Radiobutton(window, command = buildPlot, text = "1yr", variable = bState, value = 7)
+# Control plot timeframe with radiobuttons
+rb1 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+                      text = "1h", variable = bState, value = 1) 
+rb2 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+                      text = "1d", variable = bState, value = 2)
+rb3 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+                      text = "1wk", variable = bState, value = 3)
+rb4 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+                      text = "1m", variable = bState, value = 4)
+rb5 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+                      text = "3m", variable = bState, value = 5)
+rb6 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+                      text = "6m", variable = bState, value = 6)
+rb7 = ttk.Radiobutton(window, command = lambda:[buildPlot(), refreshTime(5)],
+                      text = "1yr", variable = bState, value = 7)
+
+# Place radiobuttons side-by-side
 rb1.place(x = 113, y = 40)
 rb2.place(x = 173, y = 40)
 rb3.place(x = 233, y = 40)
@@ -304,7 +342,7 @@ rb6.place(x = 413, y = 40)
 rb7.place(x = 473, y = 40)
 
 # Refresh button for top movers
-b1 = ttk.Button(window, text = "Refresh", command = moverPlots)
+b1 = ttk.Button(window, text = "Refresh", command = lambda:[moverPlots(), refreshTime(6)])
 b1.place(x = 1327, y = 68)
 
 # Progress bar

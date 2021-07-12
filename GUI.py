@@ -268,7 +268,8 @@ def currentPlot():
     # Generate donut plot
     fig = pyplot.figure(7, facecolor = "#33393b")
     pyplot.clf()
-    pyplot.pie(valuesC["Amount"], labels = valuesC["Currency"], colors = colours, textprops = {"color" : "w"})
+    pyplot.pie(valuesC["Amount"], labels = valuesC["Currency"], colors = colours,
+               textprops = {"color" : "w"}, radius = 1.2, startangle = 60)
     pyplot.gcf().gca().add_artist(pyplot.Circle((0,0), 0.7, color = "#33393b"))
     
     # Create Tkinter canvas with Matplotlib figure
@@ -344,8 +345,8 @@ def refreshTime(instance):
 window = Tk()
 
 # Set theme
-window.tk.call('lappend', 'auto_path', 'C:/Users/Trevor Drees/Downloads/awthemes-10.4.0')
-window.tk.call('package', 'require', 'awdark') 
+window.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes-10.4.0")
+window.tk.call("package", "require", "awdark") 
 ttk.Style().theme_use("awdark") 
  
 # Set window title
@@ -359,7 +360,6 @@ window.configure(bg = "#33393b")
 tC = ttk.Notebook(window)
 t1 = ttk.Frame(tC)
 t2 = ttk.Frame(tC)
-
 tC.add(t1, text = "Overview")
 tC.add(t2, text = "My Portfolio")
 tC.pack(expand = 1, fill = "both")
@@ -383,9 +383,9 @@ canvas5.get_tk_widget().place(x = 341, y = 750)
 fig6 = pyplot.figure(figsize = (5, 0.3), facecolor = "#33393b")
 canvas6 = FigureCanvasTkAgg(fig6, master = t1)
 canvas6.get_tk_widget().place(x = 1068, y = 750)
-fig7 = pyplot.figure(figsize = (9, 6), facecolor = "#33393b")
+fig7 = pyplot.figure(figsize = (5.8, 5.8), facecolor = "#33393b", edgecolor = "white", linewidth = 2)
 canvas7 = FigureCanvasTkAgg(fig7, master = t2)
-canvas7.get_tk_widget().place(x = 50, y = 50)
+canvas7.get_tk_widget().place(x = 75, y = 65)
 fig8 = pyplot.figure(figsize = (9, 3.5), facecolor = "#33393b")
 canvas8 = FigureCanvasTkAgg(fig8, master = t2)
 canvas8.get_tk_widget().place(x = 50, y = 500)

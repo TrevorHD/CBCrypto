@@ -248,6 +248,28 @@ def moverPlots():
     
     # Stop progress bar
     p1.stop()
+   
+# Generate donut plot of held currencies    
+def currentPlot():
+    
+    # Get current holdings for each cryptocurrency
+    values = currentHoldings()
+    total = sum(values["Percent"])
+    
+    # Combine currencies with small holdings into "other" category
+    minor = values[values["Percent"] < 0.02]
+    minorTotal = DataFrame(["OTHER", sum(minor["Amount"]), sum(minor["Amount"])/sum(values["Amount"])],
+                           ["Currency", "Amount", "Percent"]).transpose()
+    values = values[values["Percent"] >= 0.02].append(minorTotal)
+    
+    # Generate donut plot
+    fig = pyplot.figure(7, facecolor = "#33393b")
+    pyplot.clf()
+    pyplot.pie(values["Amount"], labels = values["Currency"], textprops = {"color" : "w"})
+    pyplot.gcf().gca().add_artist(pyplot.Circle((0,0), 0.7, color = "#33393b"))
+    
+    # Create Tkinter canvas with Matplotlib figure
+    pyplot.gcf().canvas.draw()
 
 # Display time at which a widget was last refreshed
 def refreshTime(instance):
@@ -321,6 +343,9 @@ canvas5.get_tk_widget().place(x = 341, y = 750)
 fig6 = pyplot.figure(figsize = (5, 0.3), facecolor = "#33393b")
 canvas6 = FigureCanvasTkAgg(fig6, master = t1)
 canvas6.get_tk_widget().place(x = 1068, y = 750)
+fig7 = pyplot.figure(figsize = (9, 6), facecolor = "#33393b")
+canvas7 = FigureCanvasTkAgg(fig7, master = t2)
+canvas7.get_tk_widget().place(x = 50, y = 50)
 
 # Set state variable for radiobuttons
 bState = IntVar()
@@ -354,13 +379,18 @@ rb7.place(x = 473, y = 40)
 b1 = ttk.Button(t1, text = "Refresh", command = lambda:[moverPlots(), refreshTime(6)])
 b1.place(x = 1327, y = 70)
 
+# Refresh button for portfolio current holdings
+b2 = ttk.Button(t2, text = "Refresh", command = currentPlot)
+b2.place(x = 1327, y = 70)
+
 # Progress bar
 p1 = ttk.Progressbar(t1, orient = HORIZONTAL, length = 100, mode = "indeterminate")
 p1.place(x = 566, y = 40)
 
-# Set default radiobutton state
+# Set default button states
 rb2.invoke()
 b1.invoke()
+b2.invoke()
 
 # Run TkInter window over loop
 window.mainloop()

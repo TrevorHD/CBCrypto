@@ -4,6 +4,7 @@
 import cbpro
 import coinbase
 from coinbase.wallet.client import Client
+from coinbase.wallet.model import APIObject
 
 # Import other packages
 import matplotlib.dates
@@ -215,5 +216,37 @@ def currentHoldings():
     
     # Return dataframe of held currencies, sorted by value
     return(dfCurrency.sort_values("Amount", ascending = False))
+
+# List user's transaction history    
+def transactionHistory():
+
+    # Initialise lists
+    ids = []
+    currency = []
+    amountC = []
+    amountN = []
+    tType = []
+    tTime = []
+
+    # Get account
+    account = client.get_accounts()
     
+    # Get all wallet IDs
+    for wallet in account.data:
+        ids.append(wallet["id"])
     
+    # Get transactions for each wallet
+    for i in ids:
+        events = client.get_transactions(i)
+        for j in events.data:
+            currency.append(j["amount"]["currency"])
+            amountC.append(j["amount"]["amount"])
+            amountN.append(j["native_amount"]["amount"])
+            tType.append(j["type"])
+            tTime.append(j["created_at"])
+    
+    # Put all transaction info into a single data frame
+    dfTranscations = DataFrame([currency, amountC, amountN, tType, tTime],
+                               ["Currency", "Amount", "USD", "Type", "Time"]).transpose()
+        
+   

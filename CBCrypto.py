@@ -244,9 +244,16 @@ def transactionHistory():
             amountN.append(j["native_amount"]["amount"])
             tType.append(j["type"])
             tTime.append(j["created_at"])
+            
+    # Convert amount and native amount to floats
+    amountC = [float(i) for i in amountC]
+    amountN = [float(i) for i in amountN]
     
     # Put all transaction info into a single data frame
-    dfTranscations = DataFrame([currency, amountC, amountN, tType, tTime],
+    dfTransactions = DataFrame([currency, amountC, amountN, tType, tTime],
                                ["Currency", "Amount", "USD", "Type", "Time"]).transpose()
+    
+    # Return dataframe of transactions
+    return(dfTransactions)
         
    

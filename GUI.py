@@ -317,7 +317,7 @@ def currentPlot():
     # Define internal functions to read and write user data from file
     def getBalTime():
         return ["{:.2f}".format(sum(values["Amount"])),
-                datetime.datetime.now().strftime("%m/%d/%Y at %H:%M")]
+                datetime.datetime.now().strftime("%m/%d/%Y %H:%M")]
     def datRead():
         temp = open("textfile.txt", "r+")
         pList = temp.read().splitlines()
@@ -363,12 +363,50 @@ def currentPlot():
     ax2 = pyplot.gca()
     ax2.set_xlim(0, 1)
     ax2.set_ylim(0, 1)
-    ax2.text(0.0, 0.5, change1 + " (" + change2 + ") since previous update on " + pList[1],
+    ax2.text(0.08, 0.5, change1 + " (" + change2 + ") since last update on " + pList[1],
              color = "white", fontsize = 22)
     
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
 
+def transPlot():
+    
+    tHist = transactionHistory()
+    
+    currency = dfTranscations["Currency"]
+    amounts = ["< 0.0001" if x < 0.0001 else "$" + "{:.4f}".format(x) for x in list(tHist["Amount"])]
+    usd = ["< $0.01" if x < 0.01 else "$" + "{:.2f}".format(x) for x in list(tHist["Amount"])]
+    tType = tHist["Type"]
+    tTime = tHist["Time"]
+    
+    
+    
+    fig10 = pyplot.figure(10)
+    pyplot.clf()
+    pyplot.axis("off")
+    pyplot.tight_layout()
+    ax = pyplot.gca()
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    for j in range(0, 25):
+        for k in range(0, 5):
+            ax.text([0.084, 0.237, 0.487, 0.668, 0.868][k], 25/26, ["Currency", "Amount", "USD", "Type", "Time"][k],
+                    horizontalalignment = ["left", "right", "right", "right", "left"][k],
+                    color = "white", fontsize = 11)
+        ax.text(0.084, 1/26*j, currency[j], color = "white",
+                fontsize = 12, horizontalalignment = "left")
+        ax.text(0.237, 1/26*j, amounts[j], color = "white",
+                fontsize = 12, horizontalalignment = "right")
+        ax.text(0.487, 1/26*j, usd[j], color = "white",
+                fontsize = 12, horizontalalignment = "right")
+        ax.text(0.668, 1/26*j, tType[j], color = "white",
+                fontsize = 12, horizontalalignment = "right")
+        ax.text(0.868, 1/26*j, tTime[j], color = "white",
+                fontsize = 12, horizontalalignment = "right")
+        
+    # Create Tkinter canvas with Matplotlib figure
+    pyplot.gcf().canvas.draw()
+    
 # Display time at which a widget was last refreshed
 def refreshTime(instance):
     
@@ -449,6 +487,9 @@ canvas8.get_tk_widget().place(x = 50, y = 500)
 fig9 = pyplot.figure(figsize = (12, 0.6), facecolor = "#33393b")
 canvas9 = FigureCanvasTkAgg(fig9, master = t2)
 canvas9.get_tk_widget().place(x = 535, y = 71)
+fig10 = pyplot.figure(figsize = (10.8, 8.6), facecolor = "#33393b", edgecolor = "white", linewidth = 2)
+canvas10 = FigureCanvasTkAgg(fig10, master = t2)
+canvas10.get_tk_widget().place(x = 614, y = 110)
 
 # Set state variable for radiobuttons
 bState = IntVar()
@@ -483,7 +524,7 @@ b1 = ttk.Button(t1, text = "Refresh", command = lambda:[moverPlots(), refreshTim
 b1.place(x = 1327, y = 70)
 
 # Refresh button for portfolio current holdings
-b2 = ttk.Button(t2, text = "Refresh", command = currentPlot)
+b2 = ttk.Button(t2, text = "Refresh", command = lambda:[currentPlot(), transPlot()])
 b2.place(x = 1327, y = 70)
 
 # Progress bar

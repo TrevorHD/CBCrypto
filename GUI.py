@@ -313,6 +313,61 @@ def currentPlot():
         
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
+    
+    # Define internal functions to read and write user data from file
+    def getBalTime():
+        return ["{:.2f}".format(sum(values["Amount"])),
+                datetime.datetime.now().strftime("%m/%d/%Y at %H:%M")]
+    def datRead():
+        temp = open("textfile.txt", "r+")
+        pList = temp.read().splitlines()
+        temp.close()
+        return pList
+    def datWrite():
+        cList = getBalTime()
+        temp = open("textfile.txt", "w")
+        temp.writelines([cList[0] + "\n", cList[1] + "\n"])
+        temp.close()
+    
+    # Get portfolio balance and time from last refresh
+    # If first time running, create file and perform this operation
+    try:
+        pList = datRead()
+    except FileNotFoundError:
+        datWrite()
+        pList = datRead()
+    cList = getBalTime()
+    datWrite()
+    pBal, pTime = float(pList[0]), pList[1]
+    cBal, cTime = float(cList[0]), cList[1]
+    
+    # Get change and percent change in portfolio value since last update
+    change1 = cBal - pBal
+    change2 = change1/pBal*100
+    
+    # Format change and percent change for text
+    if change1 < 0:
+        change1 = "-$" + "{:.2f}".format(abs(change1))
+    else:
+        change1 = "+$" + "{:.2f}".format(change1)
+    if change2 < 0:
+        change2 = "{:.2f}".format(change2) + "%"
+    else:
+        change2 = "+" + "{:.2f}".format(change2) + "%"
+    
+    # Plot portfolio balance
+    fig2 = pyplot.figure(9)
+    pyplot.clf()
+    pyplot.axis("off")
+    pyplot.tight_layout()
+    ax2 = pyplot.gca()
+    ax2.set_xlim(0, 1)
+    ax2.set_ylim(0, 1)
+    ax2.text(0.0, 0.5, change1 + " (" + change2 + ") since previous update on " + pList[1],
+             color = "white", fontsize = 22)
+    
+    # Create Tkinter canvas with Matplotlib figure
+    pyplot.gcf().canvas.draw()
 
 # Display time at which a widget was last refreshed
 def refreshTime(instance):
@@ -391,6 +446,9 @@ canvas7.get_tk_widget().place(x = 75, y = 65)
 fig8 = pyplot.figure(figsize = (9, 3.5), facecolor = "#33393b")
 canvas8 = FigureCanvasTkAgg(fig8, master = t2)
 canvas8.get_tk_widget().place(x = 50, y = 500)
+fig9 = pyplot.figure(figsize = (12, 0.6), facecolor = "#33393b")
+canvas9 = FigureCanvasTkAgg(fig9, master = t2)
+canvas9.get_tk_widget().place(x = 535, y = 71)
 
 # Set state variable for radiobuttons
 bState = IntVar()

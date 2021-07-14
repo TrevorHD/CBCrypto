@@ -383,7 +383,11 @@ def currentPlot():
     pyplot.gcf().canvas.draw()
 
 # Function to list transaction history
-def transPlot(tHist):
+def transPlot(tHist = tHist, ref = False):
+    
+    # Get transaction history again if refeshing
+    if ref == True:
+        tHist = transactionHistory()
     
     # Get page number
     page = thMaxPage - sState.get() + 1
@@ -398,6 +402,15 @@ def transPlot(tHist):
     tHist["Time"] = [dp.parse(x) for x in list(tHist["Time"])]
     tHist["Time"] = [x.strftime("%m/%d/%Y %H:%M:%S") for x in list(tHist["Time"])]
     
+    # Internal function to format transaction types and status
+    def formatType(transaction):
+        transaction = transaction.replace("_", " ").capitalize()
+        return transaction
+    
+    # Format transaction types and status
+    tHist["Type"] = [formatType(x) for x in list(tHist["Type"])]
+    tHist["Status"] = [formatType(x) for x in list(tHist["Status"])]
+    
     # Sort transactions by date and time
     # Subset depending on page number
     tHist = tHist.sort_values(by = "Time", ascending = False)
@@ -405,13 +418,14 @@ def transPlot(tHist):
     
     # Limit data to 25 entries per page
     pageLength = len(tHist)
-    
+
     # Create lists of transaction stats
     currency = list(tHist["Currency"])
     amounts = ["< 0.0001" if 0 <= x < 0.0001 else "{:.4f}".format(x) for x in list(tHist["Amount"])]
     usd = ["< $0.01" if 0 <= x < 0.01 else "$" + "{:.2f}".format(x) for x in list(tHist["USD"])]
     tType = list(tHist["Type"])
     tTime = list(tHist["Time"])
+    tStat = list(tHist["Status"])
     
     # Plot transaction stats as text
     fig10 = pyplot.figure(10)
@@ -422,21 +436,24 @@ def transPlot(tHist):
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     for j in range(0, pageLength):
-        for k in range(0, 5):
-            ax.text([0.084, 0.237, 0.487, 0.668, 0.868][k], 25/26, ["Currency", "Amount", "USD", "Type", "Time"][k],
-                    horizontalalignment = ["left", "right", "right", "right", "left"][k],
+        for k in range(0, 6):
+            ax.text([0.075, 0.285, 0.422, 0.620, 0.820, 0.983][k], 25/26, 
+                    ["Time Initiated", "Status", "Transaction Type", "Currency", "Amount", "USD Amount"][k],
+                    horizontalalignment = ["left", "left", "left", "left", "right", "right"][k],
                     color = "white", fontsize = 13)
-        ax.text(0.031, 24/26 - j/26, tNum[j], color = "white",
+        ax.text(0.017, 24/26 - j/26, tNum[j], color = "white",
                 fontsize = 12, horizontalalignment = "left")
-        ax.text(0.084, 24/26 - j/26, currency[j], color = "white",
+        ax.text(0.075, 24/26 - j/26, tTime[j], color = "white",
                 fontsize = 12, horizontalalignment = "left")
-        ax.text(0.237, 24/26 - j/26, amounts[j], color = "white",
+        ax.text(0.285, 24/26 - j/26, tStat[j], color = "white",
+                fontsize = 12, horizontalalignment = "left")
+        ax.text(0.422, 24/26 - j/26, tType[j], color = "white",
+                fontsize = 12, horizontalalignment = "left")
+        ax.text(0.620, 24/26 - j/26, currency[j], color = "white",
+                fontsize = 12, horizontalalignment = "left")
+        ax.text(0.820, 24/26 - j/26, amounts[j], color = "white",
                 fontsize = 12, horizontalalignment = "right")
-        ax.text(0.487, 24/26 - j/26, usd[j], color = "white",
-                fontsize = 12, horizontalalignment = "right")
-        ax.text(0.668, 24/26 - j/26, tType[j], color = "white",
-                fontsize = 12, horizontalalignment = "right")
-        ax.text(0.868, 24/26 - j/26, tTime[j], color = "white",
+        ax.text(0.983, 24/26 - j/26, usd[j], color = "white",
                 fontsize = 12, horizontalalignment = "right")
         
     # Create Tkinter canvas with Matplotlib figure
@@ -495,8 +512,11 @@ tC.add(t1, text = "Overview")
 tC.add(t2, text = "My Portfolio")
 tC.pack(expand = 1, fill = "both")
 
+# Initialise transaction history
 tHist = transactionHistory()
-thMaxPage = math.ceil(len(tHist)/25)
+
+# Set maximum number of pages on transaction history
+thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Plot figures
 fig1 = pyplot.figure(figsize = (9, 6), facecolor = "#33393b")
@@ -565,12 +585,12 @@ b1 = ttk.Button(t1, text = "Refresh", command = lambda:[moverPlots(), refreshTim
 b1.place(x = 1327, y = 70)
 
 # Refresh button for portfolio current holdings
-b2 = ttk.Button(t2, text = "Refresh", command = lambda:[currentPlot(), transPlot(tHist)])
+b2 = ttk.Button(t2, text = "Refresh", command = lambda:[currentPlot(), transPlot(ref = True)])
 b2.place(x = 1327, y = 70)
 
 # Spinbox to select transaction history page
 s1 = ttk.Spinbox(t2, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,
-                 font = Font(size = 10), style = "My.TSpinbox", command = lambda:[transPlot(tHist)])
+                 font = Font(size = 10), style = "My.TSpinbox", command = lambda:[transPlot()])
 s1.state(["readonly"])
 s1.place(x = 1268, y = 71)
 

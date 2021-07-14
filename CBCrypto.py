@@ -7,6 +7,8 @@ from coinbase.wallet.client import Client
 from coinbase.wallet.model import APIObject
 
 # Import other packages
+#import matplotlib
+#matplotlib.use("TKAgg")
 import matplotlib.dates
 from matplotlib.ticker import StrMethodFormatter
 from matplotlib import pyplot
@@ -227,6 +229,7 @@ def transactionHistory():
     amountN = []
     tType = []
     tTime = []
+    tStat = []
 
     # Get account
     account = client.get_accounts()
@@ -244,14 +247,15 @@ def transactionHistory():
             amountN.append(j["native_amount"]["amount"])
             tType.append(j["type"])
             tTime.append(j["created_at"])
+            tStat.append(j["status"])
             
     # Convert amount and native amount to floats
     amountC = [float(i) for i in amountC]
     amountN = [float(i) for i in amountN]
     
     # Put all transaction info into a single data frame
-    dfTransactions = DataFrame([currency, amountC, amountN, tType, tTime],
-                               ["Currency", "Amount", "USD", "Type", "Time"]).transpose()
+    dfTransactions = DataFrame([currency, amountC, amountN, tType, tTime, tStat],
+                               ["Currency", "Amount", "USD", "Type", "Time", "Status"]).transpose()
     
     # Return dataframe of transactions
     return(dfTransactions)

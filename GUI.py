@@ -25,12 +25,12 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 ##### Set formatting functions ----------------------------------------------------------------------------
 
 # Function to format transaction types and status
-def formatType(transaction):
-    transaction = transaction.replace("_", " ").capitalize()
-    return transaction
+def ftStr(x):
+    xOutput = x.replace("_", " ").capitalize()
+    return xOutput
 
 # Function to format currency numbers and percents
-def formatCurrency(x, xType, dec = 2):
+def ftNum(x, xType, dec = 2):
     
     # Set decimal place formatter
     dFormatter = "{:." + str(dec) + "f}"
@@ -78,10 +78,10 @@ def formatCurrency(x, xType, dec = 2):
 
 
 
-##### Plot price data -------------------------------------------------------------------------------------
+##### Plot price data over a given amount of time ---------------------------------------------------------
 
-# Build time series plots specifically for use in GUI
-def buildPlot():
+# Function to plot price data over time
+def plotSeries():
     
     # Start progress bar
     p1.start()
@@ -108,7 +108,7 @@ def buildPlot():
     # Compile dicts of prices and price versus opening price
     d1, d2 = {}, {}
     for i in range(0, len(currencyList)):
-        d1["key%s" %i] = getPriceData(tFrame, currencyList[i])
+        d1["key%s" %i] = getPriceSeries(tFrame, currencyList[i])
         d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
      
     # Get min and max price versus opening price
@@ -207,16 +207,16 @@ def buildPlot():
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
     
-    # Get price data for 5 popular currencies; convert to lists
-    pData = priceCheck(tFrame, currencyList)
+    # Get price data for currencies in previous plot; convert to lists
+    pData = getPriceSummary(tFrame, currencyList)
     names = list(pData["Currency"])
-    highs = [formatCurrency(x, "value", 2) for x in list(pData["High"])]
-    lows = [formatCurrency(x, "value", 2) for x in list(pData["Low"])]
+    highs = [ftNum(x, "value", 2) for x in list(pData["High"])]
+    lows = [ftNum(x, "value", 2) for x in list(pData["Low"])]
     returns = [(x - 1)*100 for x in list(pData["Return"])]
     
     # Format text colour and return sign depending on value
     colours = ["red" if x < 0 else "green" for x in returns]
-    returns = [formatCurrency(x, "percentC", 2) for x in returns]
+    returns = [ftNum(x, "percentC", 2) for x in returns]
 
     # Plot price data as text
     fig2 = pyplot.figure(2)
@@ -247,15 +247,21 @@ def buildPlot():
     
     # Stop progress bar
     p1.stop()
+
+
+
+
+
+##### Plot information on top and bottom movers -----------------------------------------------------------
     
-# Get data on top movers and plot as text    
-def moverPlots():
+# Function to plot top and bottom movers  
+def plotMovers():
     
     # Start progress bar
     p1.start()
     
     # Retrieve info on top and bottom movers
-    pData = currentMovers()
+    pData = getCurrentMovers()
     
     # Plot top and bottom sets as text
     for i in range(0, 2):
@@ -271,8 +277,8 @@ def moverPlots():
         # Convert movement data to lists
         currencyList = list(pData["Currency"])[s1:s2]
         changes = list(pData["Change"])[s1:s2]
-        openV = [formatCurrency(x, "value", 3) for x in list(pData["Open"])][s1:s2]
-        closeV = [formatCurrency(x, "value", 3) for x in list(pData["Close"])][s1:s2]
+        openV = [ftNum(x, "value", 3) for x in list(pData["Open"])][s1:s2]
+        closeV = [ftNum(x, "value", 3) for x in list(pData["Close"])][s1:s2]
         
         # Reverse data so that most extreme movement is listed first
         currencyList.reverse();
@@ -282,7 +288,7 @@ def moverPlots():
     
         # Format text colour and return sign depending on value
         colours = ["red" if x < 0 else "green" for x in changes]
-        changes = [formatCurrency(x, "percentC", 2) for x in changes]
+        changes = [ftNum(x, "percentC", 2) for x in changes]
     
         # Plot movement data as text
         if i == 0:
@@ -316,12 +322,18 @@ def moverPlots():
     
     # Stop progress bar
     p1.stop()
-   
-# Generate donut plot of held currencies    
-def currentPlot():
+
+
+
+
+
+##### Plot information on user's current holdings ---------------------------------------------------------
+
+# Function to plot user's current holdings   
+def plotHoldings():
     
     # Get current holdings for each cryptocurrency
-    values = currentHoldings()
+    values = getCurrentHoldings()
     total = sum(values["Percent"])
     
     # Combine currencies with small holdings into "other" category
@@ -348,8 +360,8 @@ def currentPlot():
     
     # Format current holdings
     currencyList = list(values["Currency"])
-    amounts = [formatCurrency(x, "value", 2) for x in list(values["Amount"])]
-    pcts = [formatCurrency(x, "percent", 2) for x in list(values["Percent"])]
+    amounts = [ftNum(x, "value", 2) for x in list(values["Amount"])]
+    pcts = [ftNum(x, "percent", 2) for x in list(values["Percent"])]
     
     # Reverse holdings data for plotting compatibility
     currencyList.reverse();
@@ -415,8 +427,8 @@ def currentPlot():
     change2 = change1/pBal*100
     
     # Format change and percent change for text
-    change1 = formatCurrency(change1, "valueC", 2)
-    change2 = formatCurrency(change2, "percentC", 2)
+    change1 = ftNum(change1, "valueC", 2)
+    change2 = ftNum(change2, "percentC", 2)
     
     # Plot portfolio balance
     fig2 = pyplot.figure(9)
@@ -432,12 +444,18 @@ def currentPlot():
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
 
-# Function to list transaction history
-def transPlot(tHist = tHist, ref = False):
+
+
+
+
+##### Plot information on user's transaction history ---------------------------------------------------------
+
+# Function to plot user's transaction history
+def plotTransactions(tHist = tHist, ref = False):
     
     # Get transaction history again if refeshing
     if ref == True:
-        tHist = transactionHistory()
+        tHist = getTransactionHistory()
     
     # Get page number
     page = thMaxPage - sState.get() + 1
@@ -453,8 +471,8 @@ def transPlot(tHist = tHist, ref = False):
     tHist["Time"] = [x.strftime("%m/%d/%Y %H:%M:%S") for x in list(tHist["Time"])]
     
     # Format transaction types and status
-    tHist["Type"] = [formatType(x) for x in list(tHist["Type"])]
-    tHist["Status"] = [formatType(x) for x in list(tHist["Status"])]
+    tHist["Type"] = [ftStr(x) for x in list(tHist["Type"])]
+    tHist["Status"] = [ftStr(x) for x in list(tHist["Status"])]
     
     # Sort transactions by date and time
     # Subset depending on page number
@@ -466,8 +484,8 @@ def transPlot(tHist = tHist, ref = False):
 
     # Create lists of transaction stats
     currency = list(tHist["Currency"])
-    amounts = [formatCurrency(x, "amount", 4) for x in list(tHist["Amount"])]
-    usd = [formatCurrency(x, "valueC", 2) for x in list(tHist["USD"])]
+    amounts = [ftNum(x, "amount", 4) for x in list(tHist["Amount"])]
+    usd = [ftNum(x, "valueC", 2) for x in list(tHist["USD"])]
     tType = list(tHist["Type"])
     tTime = list(tHist["Time"])
     tStat = list(tHist["Status"])
@@ -503,9 +521,15 @@ def transPlot(tHist = tHist, ref = False):
         
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
+
+
+
+
+
+##### Plot information on last refresh time ---------------------------------------------------------------
     
-# Display time at which a widget was last refreshed
-def refreshTime(instance):
+# Function to display time at which a widget was last refreshed
+def plotRefresh(instance):
     
     # Get current time
     cTime = datetime.datetime.now().strftime("%H:%M")
@@ -558,12 +582,12 @@ tC.add(t2, text = "My Portfolio")
 tC.pack(expand = 1, fill = "both")
 
 # Initialise transaction history
-tHist = transactionHistory()
+tHist = getTransactionHistory()
 
 # Set maximum number of pages on transaction history
 thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
-# Plot figures
+# (Tab 1) Plot price time series data
 fig1 = pyplot.figure(figsize = (9, 6), facecolor = "#33393b")
 canvas1 = FigureCanvasTkAgg(fig1, master = t1)
 canvas1.get_tk_widget().place(x = 50, y = 50)
@@ -601,19 +625,19 @@ sState = IntVar()
 sState.set(thMaxPage)
 
 # Control plot timeframe with radiobuttons
-rb1 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
+rb1 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
                       text = "1h", variable = bState, value = 1) 
-rb2 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
+rb2 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
                       text = "1d", variable = bState, value = 2)
-rb3 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
+rb3 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
                       text = "1wk", variable = bState, value = 3)
-rb4 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
+rb4 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
                       text = "1m", variable = bState, value = 4)
-rb5 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
+rb5 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
                       text = "3m", variable = bState, value = 5)
-rb6 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
+rb6 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
                       text = "6m", variable = bState, value = 6)
-rb7 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
+rb7 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
                       text = "1yr", variable = bState, value = 7)
 
 # Place radiobuttons side-by-side
@@ -626,16 +650,16 @@ rb6.place(x = 413, y = 40)
 rb7.place(x = 473, y = 40)
 
 # Refresh button for top movers
-b1 = ttk.Button(t1, text = "Refresh", command = lambda:[moverPlots(), refreshTime(6)])
+b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefresh(6)])
 b1.place(x = 1327, y = 70)
 
 # Refresh button for portfolio current holdings
-b2 = ttk.Button(t2, text = "Refresh", command = lambda:[currentPlot(), transPlot(ref = True)])
+b2 = ttk.Button(t2, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(ref = True)])
 b2.place(x = 1327, y = 70)
 
 # Spinbox to select transaction history page
 s1 = ttk.Spinbox(t2, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,
-                 font = Font(size = 10), style = "My.TSpinbox", command = lambda:[transPlot()])
+                 font = Font(size = 10), style = "My.TSpinbox", command = lambda:[plotTransactions()])
 s1.state(["readonly"])
 s1.place(x = 1268, y = 71)
 

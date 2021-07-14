@@ -31,7 +31,7 @@ import time
 # Create function to pull price data for a given timeframe
 # Possible timeframes: 1hr, 1d (default), 1 wk, 1m, 3m, 6m, 1yr, max
 # Note: Coinbase historical data may be incomplete
-def getPriceData(tFrame, currency):
+def getPriceSeries(tFrame, currency):
 
     # Set end of timeframe
     tEnd = round(time.time())
@@ -128,7 +128,7 @@ def getPriceData(tFrame, currency):
 ##### Get top 24-hour movers or change over timeframe -----------------------------------------------------
 
 # Function that returns top movers over 24h
-def currentMovers():
+def getCurrentMovers():
 
     # Activate public client and get currency info
     p_client = cbpro.PublicClient()
@@ -167,13 +167,13 @@ def currentMovers():
     return(dfTop.append(dfBottom))
 
 # Function to get current prices and return over timeframe
-def priceCheck(tFrame, currencyList):
+def getPriceSummary(tFrame, currencyList):
     
     # Compile current prices and price versus opening price
     d1, d2 = {}, {}
     prices, high, low, returns = [], [], [], []
     for i in range(0, len(currencyList)):
-        d1["key%s" %i] = getPriceData(tFrame, currencyList[i])
+        d1["key%s" %i] = getPriceSeries(tFrame, currencyList[i])
         d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
         prices.append(d1["key%s" %i]["mean"].iloc[-1])
         high.append(max(d1["key%s" %i]["high"]))
@@ -198,7 +198,7 @@ def priceCheck(tFrame, currencyList):
 client = Client("api_key", "api_secret")
 
 # List current holdings for each cryptocurrency
-def currentHoldings():
+def getCurrentHoldings():
     
     # Get account
     account = client.get_accounts()
@@ -220,7 +220,7 @@ def currentHoldings():
     return(dfCurrency.sort_values("Amount", ascending = False))
 
 # List user's transaction history    
-def transactionHistory():
+def getTransactionHistory():
 
     # Initialise lists
     ids = []

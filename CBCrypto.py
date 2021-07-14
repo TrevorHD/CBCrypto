@@ -213,7 +213,7 @@ def currentHoldings():
         if value > 0:
             amount.append(value)
             currency.append(str(wallet["name"]).replace(" Wallet", ""))
-    pcts = [x/sum(amount) for x in amount]
+    pcts = [x/sum(amount)*100 for x in amount]
     dfCurrency = DataFrame([currency, amount, pcts], ["Currency", "Amount", "Percent"]).transpose() 
     
     # Return dataframe of held currencies, sorted by value

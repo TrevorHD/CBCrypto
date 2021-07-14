@@ -1,6 +1,5 @@
 ##### GUI To-do list --------------------------------------------------------------------------------------
 
-# Make option to refresh transaction history only
 # Put transaction times in local time zone
 # Place progress bar and loading messages up near tabs
 # Create login screen using API key and secret
@@ -20,6 +19,62 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
+
+
+
+##### Set formatting functions ----------------------------------------------------------------------------
+
+# Function to format transaction types and status
+def formatType(transaction):
+    transaction = transaction.replace("_", " ").capitalize()
+    return transaction
+
+# Function to format currency numbers and percents
+def formatCurrency(x, xType, dec = 2):
+    
+    # Set decimal place formatter
+    dFormatter = "{:." + str(dec) + "f}"
+    
+    # Format currency amounts
+    if xType == "amount":
+        xOutput = dFormatter.format(x)
+    
+    # Format percents
+    elif xType == "percent":
+        if x >= 0.01:
+            xOutput = dFormatter.format(x) + "%"
+        else:
+            xOutput = "<0.01%"
+    
+    # Format percent changes
+    elif xType == "percentC":
+        if x >= 0.01:
+            xOutput = "+" + dFormatter.format(x) + "%"
+        elif -0.01 < x < 0.01:
+            xOutput = "<0.01%"
+        elif x <= -0.01:
+            xOutput = "-" + dFormatter.format(abs(x)) + "%"
+    
+    # Format currency values        
+    elif xType == "value":
+        if x >= 0.01:
+            xOutput = "$" + dFormatter.format(x)
+        else:
+            xOutput = "<$0.01"
+    
+    # Format currency value changes
+    elif xType == "valueC":
+        if x >= 0.01:
+            xOutput = "+$" + dFormatter.format(x)
+        elif -0.01 < x < 0.01:
+            xOutput = "<$0.01"
+        elif x <= -0.01:
+            xOutput = "-$" + dFormatter.format(abs(x))
+            
+    # Return formatted number as string
+    return xOutput
+
+        
 
 
 
@@ -155,13 +210,13 @@ def buildPlot():
     # Get price data for 5 popular currencies; convert to lists
     pData = priceCheck(tFrame, currencyList)
     names = list(pData["Currency"])
-    highs = ["{:.2f}".format(x) for x in list(pData["High"])]
-    lows = ["{:.2f}".format(x) for x in list(pData["Low"])]
+    highs = [formatCurrency(x, "value", 2) for x in list(pData["High"])]
+    lows = [formatCurrency(x, "value", 2) for x in list(pData["Low"])]
     returns = [(x - 1)*100 for x in list(pData["Return"])]
     
     # Format text colour and return sign depending on value
     colours = ["red" if x < 0 else "green" for x in returns]
-    returns = ["{:.2f}".format(x) + "%" if x < 0 else "+" + "{:.2f}".format(x) + "%" for x in returns]
+    returns = [formatCurrency(x, "percentC", 2) for x in returns]
 
     # Plot price data as text
     fig2 = pyplot.figure(2)
@@ -216,8 +271,8 @@ def moverPlots():
         # Convert movement data to lists
         currencyList = list(pData["Currency"])[s1:s2]
         changes = list(pData["Change"])[s1:s2]
-        openV = ["{:.3f}".format(x) for x in list(pData["Open"])][s1:s2]
-        closeV = ["{:.3f}".format(x) for x in list(pData["Close"])][s1:s2]
+        openV = [formatCurrency(x, "value", 3) for x in list(pData["Open"])][s1:s2]
+        closeV = [formatCurrency(x, "value", 3) for x in list(pData["Close"])][s1:s2]
         
         # Reverse data so that most extreme movement is listed first
         currencyList.reverse();
@@ -227,7 +282,7 @@ def moverPlots():
     
         # Format text colour and return sign depending on value
         colours = ["red" if x < 0 else "green" for x in changes]
-        changes = ["{:.2f}".format(x) + "%" if x < 0 else "+" + "{:.2f}".format(x) + "%" for x in changes]
+        changes = [formatCurrency(x, "percentC", 2) for x in changes]
     
         # Plot movement data as text
         if i == 0:
@@ -270,10 +325,10 @@ def currentPlot():
     total = sum(values["Percent"])
     
     # Combine currencies with small holdings into "other" category
-    minor = values[values["Percent"] < 0.02]
+    minor = values[values["Percent"] < 3]
     minorTotal = DataFrame(["OTHER", sum(minor["Amount"]), sum(minor["Amount"])/sum(values["Amount"])],
                            ["Currency", "Amount", "Percent"]).transpose()
-    valuesC = values[values["Percent"] >= 0.02].append(minorTotal)
+    valuesC = values[values["Percent"] >= 3].append(minorTotal)
     
     # Set colour palette
     colours = seaborn.color_palette("tab10", len(valuesC))
@@ -283,17 +338,18 @@ def currentPlot():
     pyplot.clf()
     pyplot.pie(valuesC["Amount"], labels = valuesC["Currency"], colors = colours,
                textprops = {"color" : "w"}, radius = 1.2, startangle = 60)
-    pyplot.gcf().gca().add_artist(pyplot.Circle((0,0), 0.7, color = "#33393b"))
+    pyplot.gcf().gca().add_artist(pyplot.Circle((0, 0), 0.7, color = "#33393b"))
     pyplot.gcf().text(0.5, 0.5, "$" + "{:.2f}".format(sum(values["Amount"])), color = "white",
-                      fontsize = 20, horizontalalignment = "center")
+                      fontsize = 24, horizontalalignment = "center")
+    pyplot.subplots_adjust(left = 0.1, right = 0.9, top = 0.9, bottom = 0.1)
     
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
     
     # Format current holdings
     currencyList = list(values["Currency"])
-    amounts = ["< $0.01" if x < 0.01 else "$" + "{:.2f}".format(x) for x in list(values["Amount"])]
-    pcts = ["< 0.01%" if x*100 < 0.01 else "{:.2f}".format(x*100) + "%" for x in list(values["Percent"])]
+    amounts = [formatCurrency(x, "value", 2) for x in list(values["Amount"])]
+    pcts = [formatCurrency(x, "percent", 2) for x in list(values["Percent"])]
     
     # Reverse holdings data for plotting compatibility
     currencyList.reverse();
@@ -314,12 +370,12 @@ def currentPlot():
     ax2.set_ylim(0, 1)
     for i in range(0, len(values)):
         for j in range(0, 3):
-            ax2.text([0.084, 0.437, 0.687][j], len(values)/(len(values) + 1), 
+            ax2.text([0.084, 0.487, 0.687][j], len(values)/(len(values) + 1), 
                      ["Currency", "Value (USD)", "Percent"][j], color = "white", fontsize = 20,
                      horizontalalignment = ["left", "right", "right", "right"][j])
         ax2.text(0.084, 1/(len(values) + 1)*i, currencyList[i], color = "white",
                  fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.437, 1/(len(values) + 1)*i, amounts[i], color = "white",
+        ax2.text(0.487, 1/(len(values) + 1)*i, amounts[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
         ax2.text(0.687, 1/(len(values) + 1)*i, pcts[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
@@ -359,14 +415,8 @@ def currentPlot():
     change2 = change1/pBal*100
     
     # Format change and percent change for text
-    if change1 < 0:
-        change1 = "-$" + "{:.2f}".format(abs(change1))
-    else:
-        change1 = "+$" + "{:.2f}".format(change1)
-    if change2 < 0:
-        change2 = "{:.2f}".format(change2) + "%"
-    else:
-        change2 = "+" + "{:.2f}".format(change2) + "%"
+    change1 = formatCurrency(change1, "valueC", 2)
+    change2 = formatCurrency(change2, "percentC", 2)
     
     # Plot portfolio balance
     fig2 = pyplot.figure(9)
@@ -402,11 +452,6 @@ def transPlot(tHist = tHist, ref = False):
     tHist["Time"] = [dp.parse(x) for x in list(tHist["Time"])]
     tHist["Time"] = [x.strftime("%m/%d/%Y %H:%M:%S") for x in list(tHist["Time"])]
     
-    # Internal function to format transaction types and status
-    def formatType(transaction):
-        transaction = transaction.replace("_", " ").capitalize()
-        return transaction
-    
     # Format transaction types and status
     tHist["Type"] = [formatType(x) for x in list(tHist["Type"])]
     tHist["Status"] = [formatType(x) for x in list(tHist["Status"])]
@@ -421,8 +466,8 @@ def transPlot(tHist = tHist, ref = False):
 
     # Create lists of transaction stats
     currency = list(tHist["Currency"])
-    amounts = ["< 0.0001" if 0 <= x < 0.0001 else "{:.4f}".format(x) for x in list(tHist["Amount"])]
-    usd = ["< $0.01" if 0 <= x < 0.01 else "$" + "{:.2f}".format(x) for x in list(tHist["USD"])]
+    amounts = [formatCurrency(x, "amount", 4) for x in list(tHist["Amount"])]
+    usd = [formatCurrency(x, "valueC", 2) for x in list(tHist["USD"])]
     tType = list(tHist["Type"])
     tTime = list(tHist["Time"])
     tStat = list(tHist["Status"])

@@ -1,8 +1,21 @@
+##### GUI To-do list --------------------------------------------------------------------------------------
+
+# Make option to refresh transaction history only
+# Put transaction times in local time zone
+# Place progress bar and loading messages up near tabs
+# Create login screen using API key and secret
+# Create trading interface
+
+
+
+
+
 ##### Load packages ---------------------------------------------------------------------------------------
 
 # Import packages for GUI
 from tkinter import *
 from tkinter import ttk
+from tkinter.font import Font
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -369,18 +382,38 @@ def currentPlot():
     # Create Tkinter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
 
-def transPlot():
+# Function to list transaction history
+def transPlot(tHist):
     
-    tHist = transactionHistory()
+    # Get page number
+    page = thMaxPage - sState.get() + 1
     
-    currency = dfTranscations["Currency"]
-    amounts = ["< 0.0001" if x < 0.0001 else "$" + "{:.4f}".format(x) for x in list(tHist["Amount"])]
-    usd = ["< $0.01" if x < 0.01 else "$" + "{:.2f}".format(x) for x in list(tHist["Amount"])]
-    tType = tHist["Type"]
-    tTime = tHist["Time"]
+    # Number transactions by chronological order
+    # Subset depending on page number
+    tNum = list(range(1, len(tHist) + 1))
+    tNum.reverse()
+    tNum = tNum[((page - 1)*25):(page*25)]
     
+    # Change time string to datetime, then format appropriately
+    tHist["Time"] = [dp.parse(x) for x in list(tHist["Time"])]
+    tHist["Time"] = [x.strftime("%m/%d/%Y %H:%M:%S") for x in list(tHist["Time"])]
     
+    # Sort transactions by date and time
+    # Subset depending on page number
+    tHist = tHist.sort_values(by = "Time", ascending = False)
+    tHist = tHist.iloc[((page - 1)*25):(page*25)]
     
+    # Limit data to 25 entries per page
+    pageLength = len(tHist)
+    
+    # Create lists of transaction stats
+    currency = list(tHist["Currency"])
+    amounts = ["< 0.0001" if 0 <= x < 0.0001 else "{:.4f}".format(x) for x in list(tHist["Amount"])]
+    usd = ["< $0.01" if 0 <= x < 0.01 else "$" + "{:.2f}".format(x) for x in list(tHist["USD"])]
+    tType = list(tHist["Type"])
+    tTime = list(tHist["Time"])
+    
+    # Plot transaction stats as text
     fig10 = pyplot.figure(10)
     pyplot.clf()
     pyplot.axis("off")
@@ -388,20 +421,22 @@ def transPlot():
     ax = pyplot.gca()
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
-    for j in range(0, 25):
+    for j in range(0, pageLength):
         for k in range(0, 5):
             ax.text([0.084, 0.237, 0.487, 0.668, 0.868][k], 25/26, ["Currency", "Amount", "USD", "Type", "Time"][k],
                     horizontalalignment = ["left", "right", "right", "right", "left"][k],
-                    color = "white", fontsize = 11)
-        ax.text(0.084, 1/26*j, currency[j], color = "white",
+                    color = "white", fontsize = 13)
+        ax.text(0.031, 24/26 - j/26, tNum[j], color = "white",
                 fontsize = 12, horizontalalignment = "left")
-        ax.text(0.237, 1/26*j, amounts[j], color = "white",
+        ax.text(0.084, 24/26 - j/26, currency[j], color = "white",
+                fontsize = 12, horizontalalignment = "left")
+        ax.text(0.237, 24/26 - j/26, amounts[j], color = "white",
                 fontsize = 12, horizontalalignment = "right")
-        ax.text(0.487, 1/26*j, usd[j], color = "white",
+        ax.text(0.487, 24/26 - j/26, usd[j], color = "white",
                 fontsize = 12, horizontalalignment = "right")
-        ax.text(0.668, 1/26*j, tType[j], color = "white",
+        ax.text(0.668, 24/26 - j/26, tType[j], color = "white",
                 fontsize = 12, horizontalalignment = "right")
-        ax.text(0.868, 1/26*j, tTime[j], color = "white",
+        ax.text(0.868, 24/26 - j/26, tTime[j], color = "white",
                 fontsize = 12, horizontalalignment = "right")
         
     # Create Tkinter canvas with Matplotlib figure
@@ -443,6 +478,7 @@ window = Tk()
 window.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes-10.4.0")
 window.tk.call("package", "require", "awdark") 
 ttk.Style().theme_use("awdark") 
+ttk.Style().configure("My.TSpinbox", arrowsize = 11)
  
 # Set window title
 window.title("CBCrypto: Cryptocurrency Dashboard")
@@ -458,6 +494,9 @@ t2 = ttk.Frame(tC)
 tC.add(t1, text = "Overview")
 tC.add(t2, text = "My Portfolio")
 tC.pack(expand = 1, fill = "both")
+
+tHist = transactionHistory()
+thMaxPage = math.ceil(len(tHist)/25)
 
 # Plot figures
 fig1 = pyplot.figure(figsize = (9, 6), facecolor = "#33393b")
@@ -487,12 +526,14 @@ canvas8.get_tk_widget().place(x = 50, y = 500)
 fig9 = pyplot.figure(figsize = (12, 0.6), facecolor = "#33393b")
 canvas9 = FigureCanvasTkAgg(fig9, master = t2)
 canvas9.get_tk_widget().place(x = 535, y = 71)
-fig10 = pyplot.figure(figsize = (10.8, 8.6), facecolor = "#33393b", edgecolor = "white", linewidth = 2)
+fig10 = pyplot.figure(figsize = (10.8, 8.8), facecolor = "#33393b", edgecolor = "white", linewidth = 2)
 canvas10 = FigureCanvasTkAgg(fig10, master = t2)
 canvas10.get_tk_widget().place(x = 614, y = 110)
 
 # Set state variable for radiobuttons
 bState = IntVar()
+sState = IntVar()
+sState.set(thMaxPage)
 
 # Control plot timeframe with radiobuttons
 rb1 = ttk.Radiobutton(t1, command = lambda:[buildPlot(), refreshTime(5)],
@@ -524,8 +565,14 @@ b1 = ttk.Button(t1, text = "Refresh", command = lambda:[moverPlots(), refreshTim
 b1.place(x = 1327, y = 70)
 
 # Refresh button for portfolio current holdings
-b2 = ttk.Button(t2, text = "Refresh", command = lambda:[currentPlot(), transPlot()])
+b2 = ttk.Button(t2, text = "Refresh", command = lambda:[currentPlot(), transPlot(tHist)])
 b2.place(x = 1327, y = 70)
+
+# Spinbox to select transaction history page
+s1 = ttk.Spinbox(t2, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,
+                 font = Font(size = 10), style = "My.TSpinbox", command = lambda:[transPlot(tHist)])
+s1.state(["readonly"])
+s1.place(x = 1268, y = 71)
 
 # Progress bar
 p1 = ttk.Progressbar(t1, orient = HORIZONTAL, length = 100, mode = "indeterminate")

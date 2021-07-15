@@ -1,7 +1,6 @@
 ##### GUI To-do list --------------------------------------------------------------------------------------
 
-# See why text file is not updating
-# Place progress bar and loading messages up near tabs
+# Fix progress bar
 # Create login screen using API key and secret
 # Create trading interface
 
@@ -616,9 +615,9 @@ s1 = ttk.Spinbox(t2, from_ = 1, to = thMaxPage, textvariable = sState, width = 4
 s1.state(["readonly"])
 s1.place(x = 1268, y = 71)
 
-# Progress bar
-p1 = ttk.Progressbar(t1, orient = HORIZONTAL, length = 100, mode = "indeterminate")
-p1.place(x = 566, y = 40)
+# Progress bar indicating when application is loading
+p1 = ttk.Progressbar(window, orient = HORIZONTAL, length = 100, mode = "indeterminate")
+p1.place(x = 1360, y = 7)
 
 # Set default button states
 rbX[1].invoke()

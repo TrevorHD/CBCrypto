@@ -387,13 +387,13 @@ def plotHoldings():
         return ["{:.2f}".format(sum(values["Amount"])),
                 datetime.datetime.now().strftime("%m/%d/%Y %H:%M")]
     def datRead():
-        temp = open("textfile.txt", "r+")
+        temp = open("UserData.txt", "r+")
         pList = temp.read().splitlines()
         temp.close()
         return pList
     def datWrite():
         cList = getBalTime()
-        temp = open("textfile.txt", "w")
+        temp = open("UserData.txt", "w")
         temp.writelines([cList[0] + "\n", cList[1] + "\n"])
         temp.close()
     

@@ -1,7 +1,6 @@
 ##### GUI To-do list --------------------------------------------------------------------------------------
 
 # See why text file is not updating
-# Put transaction times in local time zone
 # Place progress bar and loading messages up near tabs
 # Create login screen using API key and secret
 # Create trading interface
@@ -454,8 +453,9 @@ def plotTransactions(tHist = tHist, ref = False):
     tNum.reverse()
     tNum = tNum[((page - 1)*25):(page*25)]
     
-    # Change time string to datetime, then format appropriately
+    # Change time string to datetime, convert from UTC to local, then format appropriately
     tHist["Time"] = [dp.parse(x) for x in list(tHist["Time"])]
+    tHist["time"] = [x.replace(tzinfo = datetime.datetime.now().astimezone().tzinfo) for x in list(tHist["Time"])]
     tHist["Time"] = [x.strftime("%m/%d/%Y %H:%M:%S") for x in list(tHist["Time"])]
     
     # Format transaction types and status

@@ -1,5 +1,6 @@
 ##### GUI To-do list --------------------------------------------------------------------------------------
 
+# See why text file is not updating
 # Put transaction times in local time zone
 # Place progress bar and loading messages up near tabs
 # Create login screen using API key and secret
@@ -90,20 +91,7 @@ def plotSeries():
     currencyList = ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]
     
     # Choose timeframe depending on button selection
-    if bState.get() == 1:
-        tFrame = "1hr"
-    elif bState.get() == 2:
-        tFrame = "1d"
-    elif bState.get() == 3:
-        tFrame = "1wk"
-    elif bState.get() == 4:
-        tFrame = "1m"
-    elif bState.get() == 5:
-        tFrame = "3m"
-    elif bState.get() == 6:
-        tFrame = "6m"
-    elif bState.get() == 7:
-        tFrame = "1yr"
+    tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][bState.get() - 1]
     
     # Compile dicts of prices and price versus opening price
     d1, d2 = {}, {}
@@ -207,14 +195,14 @@ def plotSeries():
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
     
-    # Get price data for currencies in previous plot; convert to lists
+    # Get price data for currencies in previous plot; format and convert to lists
     pData = getPriceSummary(tFrame, currencyList)
     names = list(pData["Currency"])
     highs = [ftNum(x, "value", 2) for x in list(pData["High"])]
     lows = [ftNum(x, "value", 2) for x in list(pData["Low"])]
     returns = [(x - 1)*100 for x in list(pData["Return"])]
     
-    # Format text colour and return sign depending on value
+    # Format text colour and sign depending on value
     colours = ["red" if x < 0 else "green" for x in returns]
     returns = [ftNum(x, "percentC", 2) for x in returns]
 
@@ -274,7 +262,7 @@ def plotMovers():
             s1, s2 = 10, 21
             prefix = "Bottom"
         
-        # Convert movement data to lists
+        # Convert movement data to lists, then format
         currencyList = list(pData["Currency"])[s1:s2]
         changes = list(pData["Change"])[s1:s2]
         openV = [ftNum(x, "value", 3) for x in list(pData["Open"])][s1:s2]
@@ -286,7 +274,7 @@ def plotMovers():
         openV.reverse()
         closeV.reverse()
     
-        # Format text colour and return sign depending on value
+        # Format text colour and sign depending on value
         colours = ["red" if x < 0 else "green" for x in changes]
         changes = [ftNum(x, "percentC", 2) for x in changes]
     
@@ -355,7 +343,7 @@ def plotHoldings():
                       fontsize = 24, horizontalalignment = "center")
     pyplot.subplots_adjust(left = 0.1, right = 0.9, top = 0.9, bottom = 0.1)
     
-    # Create Tkinter canvas with Matplotlib figure
+    # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
     
     # Format current holdings
@@ -441,7 +429,7 @@ def plotHoldings():
     ax2.text(0.08, 0.5, change1 + " (" + change2 + ") since last update on " + pList[1],
              color = "white", fontsize = 22)
     
-    # Create Tkinter canvas with Matplotlib figure
+    # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
 
 
@@ -519,7 +507,7 @@ def plotTransactions(tHist = tHist, ref = False):
         ax.text(0.983, 24/26 - j/26, usd[j], color = "white",
                 fontsize = 12, horizontalalignment = "right")
         
-    # Create Tkinter canvas with Matplotlib figure
+    # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
 
 
@@ -587,37 +575,18 @@ tHist = getTransactionHistory()
 # Set maximum number of pages on transaction history
 thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
-# (Tab 1) Plot price time series data
-fig1 = pyplot.figure(figsize = (9, 6), facecolor = "#33393b")
-canvas1 = FigureCanvasTkAgg(fig1, master = t1)
-canvas1.get_tk_widget().place(x = 50, y = 50)
-fig2 = pyplot.figure(figsize = (9, 3.5), facecolor = "#33393b")
-canvas2 = FigureCanvasTkAgg(fig2, master = t1)
-canvas2.get_tk_widget().place(x = 50, y = 500)
-fig3 = pyplot.figure(figsize = (9, 4.9), facecolor = "#33393b")
-canvas3 = FigureCanvasTkAgg(fig3, master = t1)
-canvas3.get_tk_widget().place(x = 775, y = 35)
-fig4 = pyplot.figure(figsize = (9, 4.9), facecolor = "#33393b")
-canvas4 = FigureCanvasTkAgg(fig4, master = t1)
-canvas4.get_tk_widget().place(x = 775, y = 400)
-fig5 = pyplot.figure(figsize = (5, 0.3), facecolor = "#33393b")
-canvas5 = FigureCanvasTkAgg(fig5, master = t1)
-canvas5.get_tk_widget().place(x = 341, y = 750)
-fig6 = pyplot.figure(figsize = (5, 0.3), facecolor = "#33393b")
-canvas6 = FigureCanvasTkAgg(fig6, master = t1)
-canvas6.get_tk_widget().place(x = 1068, y = 750)
-fig7 = pyplot.figure(figsize = (5.8, 5.8), facecolor = "#33393b", edgecolor = "white", linewidth = 2)
-canvas7 = FigureCanvasTkAgg(fig7, master = t2)
-canvas7.get_tk_widget().place(x = 75, y = 65)
-fig8 = pyplot.figure(figsize = (9, 3.5), facecolor = "#33393b")
-canvas8 = FigureCanvasTkAgg(fig8, master = t2)
-canvas8.get_tk_widget().place(x = 50, y = 500)
-fig9 = pyplot.figure(figsize = (12, 0.6), facecolor = "#33393b")
-canvas9 = FigureCanvasTkAgg(fig9, master = t2)
-canvas9.get_tk_widget().place(x = 535, y = 71)
-fig10 = pyplot.figure(figsize = (10.8, 8.8), facecolor = "#33393b", edgecolor = "white", linewidth = 2)
-canvas10 = FigureCanvasTkAgg(fig10, master = t2)
-canvas10.get_tk_widget().place(x = 614, y = 110)
+# Set up plots, each as its own canvas
+figX = [pyplot.figure(figsize = [(9, 6), (9, 3.5), (9, 4.9), (9, 4.9), (5, 0.3), (5, 0.3),
+                                 (5.8, 5.8), (9, 3.5), (12, 0.6), (10.8, 8.8)][x],
+                      edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 11)][x],
+                      facecolor = "#33393b",
+                      linewidth = 2) for x in range(0, 10)]
+canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*4)[x]) for x in range(0, len(figX))]
+
+# Place plots
+for i in range(0, len(figX)):
+    canvasX[i].get_tk_widget().place(x = [50, 50, 775, 775, 341, 1068, 75, 50, 535, 614][i], 
+                                     y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 110][i])
 
 # Set state variable for radiobuttons
 bState = IntVar()
@@ -625,29 +594,13 @@ sState = IntVar()
 sState.set(thMaxPage)
 
 # Control plot timeframe with radiobuttons
-rb1 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
-                      text = "1h", variable = bState, value = 1) 
-rb2 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
-                      text = "1d", variable = bState, value = 2)
-rb3 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
-                      text = "1wk", variable = bState, value = 3)
-rb4 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
-                      text = "1m", variable = bState, value = 4)
-rb5 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
-                      text = "3m", variable = bState, value = 5)
-rb6 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
-                      text = "6m", variable = bState, value = 6)
-rb7 = ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
-                      text = "1yr", variable = bState, value = 7)
+rbX = [ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
+                       text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
+                       variable = bState, value = x + 1) for x in range(0, 7)]
 
 # Place radiobuttons side-by-side
-rb1.place(x = 113, y = 40)
-rb2.place(x = 173, y = 40)
-rb3.place(x = 233, y = 40)
-rb4.place(x = 293, y = 40)
-rb5.place(x = 353, y = 40)
-rb6.place(x = 413, y = 40)
-rb7.place(x = 473, y = 40)
+for i in range(0, len(rbX)):
+    rbX[i].place(x = [113, 173, 233, 293, 353, 413, 473][i], y = 40)
 
 # Refresh button for top movers
 b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefresh(6)])
@@ -668,7 +621,7 @@ p1 = ttk.Progressbar(t1, orient = HORIZONTAL, length = 100, mode = "indeterminat
 p1.place(x = 566, y = 40)
 
 # Set default button states
-rb2.invoke()
+rbX[1].invoke()
 b1.invoke()
 b2.invoke()
 

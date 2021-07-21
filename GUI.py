@@ -535,13 +535,13 @@ def plotRefresh(instance):
 
 ##### Run GUI ---------------------------------------------------------------------------------------------
 
-# Get list of currencies
-cText = json.loads(requests.get("https://api.pro.coinbase.com/products").text)
-currencies = []
-for i in range(0, len(cText)):
-    currencies.append(cText[i]["base_currency"])
-currencies = list(set(currencies))
-currencies.sort()
+# Get list of currencies available for trading
+cbText = json.loads(requests.get("https://api.pro.coinbase.com/products").text)
+cbList = []
+for i in range(0, len(cbText)):
+    cbList.append(cbText[i]["base_currency"])
+cbList = list(set(cbList))
+cbList.sort()
 
 # Define function to run trade window
 def tradePopup():
@@ -561,17 +561,14 @@ def tradePopup():
 
     # Create dropdown menu to select currency to buy/sell
     # Create two dropdown menus for currency conversion
-    c1 = ttk.Combobox(popup, textvariable = cState1, values = currencies)
+    c1 = ttk.Combobox(popup, textvariable = cState1, values = [x for x in currencies if x != cState2.get()])
     c1.place(x = 100, y = 200)
     c1.state(["readonly"])
-    c1.bind("<<ComboboxSelected>>", lambda e: c1.selection_clear())
-    c2 = ttk.Combobox(popup, textvariable = cState2, values = currencies)
+    c2 = ttk.Combobox(popup, textvariable = cState2, values = [x for x in currencies if x != cState1.get()])
     c2.state(["readonly"])
-    c2.bind("<<ComboboxSelected>>", lambda e: c2.selection_clear())
-    c2.bind("<<ComboboxSelected>>", c2.configure(values = [x for x in currencies if x != cState1.get()]))
-
+    
     # Define internal function to place or remove second dropdown menu
-    def convertTest():
+    def placeMenu():
         if tState.get() == 3:
             c2.place(x = 100, y = 220)
         elif tState.get() != 3:
@@ -579,9 +576,16 @@ def tradePopup():
                 c2.place_forget()
             except NameError:
                 pass
-
+    
+    # Ensure that selection from first menu is absent from second
+    def changeList(*args):
+        c1.configure(values = [x for x in currencies if x != cState2.get()])
+        c2.configure(values = [x for x in currencies if x != cState1.get()])
+    c1.bind("<<ComboboxSelected>>", lambda e: [c1.selection_clear(), changeList()])
+    c2.bind("<<ComboboxSelected>>", lambda e: [c2.selection_clear(), changeList()])
+    
     # Control trade type with radiobuttons
-    rbXX = [ttk.Radiobutton(popup, command = convertTest, text = ["Buy", "Sell", "Convert"][x], 
+    rbXX = [ttk.Radiobutton(popup, command = placeMenu, text = ["Buy", "Sell", "Convert"][x], 
                             variable = tState, value = x + 1) for x in range(0, 3)]
 
     # Place radiobuttons side-by-side
@@ -640,6 +644,7 @@ sState = IntVar()
 cState1 = StringVar()
 cState1.set("BTC")
 cState2 = StringVar()
+cState2.set("ETH")
 sState.set(thMaxPage)
 
 # Control plot timeframe with radiobuttons

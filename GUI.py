@@ -2,7 +2,7 @@
 
 # Fix progress bar
 # Create login screen using API key and secret
-# Create trading interface
+# Create trading interface as pop-up window
 
 
 
@@ -83,7 +83,7 @@ def ftNum(x, xType, dec = 2):
 def plotSeries():
     
     # Start progress bar
-    p1.start()
+    p1.update_idletasks()
     
     # Create list of tracked currencies
     currencyList = ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]
@@ -230,9 +230,6 @@ def plotSeries():
         
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
-    
-    # Stop progress bar
-    p1.stop()
 
 
 
@@ -242,9 +239,6 @@ def plotSeries():
     
 # Function to plot top and bottom movers  
 def plotMovers():
-    
-    # Start progress bar
-    p1.start()
     
     # Retrieve info on top and bottom movers
     pData = getCurrentMovers()
@@ -305,9 +299,6 @@ def plotMovers():
         
         # Create Tkinter canvas with Matplotlib figure
         pyplot.gcf().canvas.draw()
-    
-    # Stop progress bar
-    p1.stop()
 
 
 
@@ -544,6 +535,30 @@ def plotRefresh(instance):
 
 ##### Run GUI ---------------------------------------------------------------------------------------------
 
+# Define function to run trade window
+def tradePopup():
+    
+    # Create pop-up window
+    popup = Toplevel()
+    
+    # Set window title
+    popup.wm_title("Trade")
+    
+    # Set window dimensions and colour
+    popup.geometry("500x300")
+    popup.configure(bg = "#33393b")
+
+    # Control plot timeframe with radiobuttons
+    rbXX = [ttk.Radiobutton(popup, text = ["Buy", "Sell", "Convert"][x], 
+                            variable = tState, value = x + 1) for x in range(0, 3)]
+
+    # Place radiobuttons side-by-side
+    for i in range(0, len(rbXX)):
+        rbXX[i].place(x = [113, 183, 253][i], y = 40)
+        
+    # Set default button states
+    rbXX[0].invoke()
+
 # Create TkInter window
 window = Tk()
 
@@ -590,6 +605,7 @@ for i in range(0, len(figX)):
 # Set state variable for radiobuttons
 bState = IntVar()
 sState = IntVar()
+tState = IntVar()
 sState.set(thMaxPage)
 
 # Control plot timeframe with radiobuttons
@@ -609,6 +625,10 @@ b1.place(x = 1327, y = 70)
 b2 = ttk.Button(t2, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(ref = True)])
 b2.place(x = 1327, y = 70)
 
+# Trade button to open trade window
+b3 = ttk.Button(window, text = "Trade", command = tradePopup)
+b3.place(x = 150, y = 2)
+
 # Spinbox to select transaction history page
 s1 = ttk.Spinbox(t2, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,
                  font = Font(size = 10), style = "My.TSpinbox", command = lambda:[plotTransactions()])
@@ -618,6 +638,7 @@ s1.place(x = 1268, y = 71)
 # Progress bar indicating when application is loading
 p1 = ttk.Progressbar(window, orient = HORIZONTAL, length = 100, mode = "indeterminate")
 p1.place(x = 1360, y = 7)
+p1.update_idletasks()
 
 # Set default button states
 rbX[1].invoke()

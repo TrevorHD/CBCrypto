@@ -535,6 +535,14 @@ def plotRefresh(instance):
 
 ##### Run GUI ---------------------------------------------------------------------------------------------
 
+# Get list of currencies
+cText = json.loads(requests.get("https://api.pro.coinbase.com/products").text)
+currencies = []
+for i in range(0, len(cText)):
+    currencies.append(cText[i]["base_currency"])
+currencies = list(set(currencies))
+currencies.sort()
+
 # Define function to run trade window
 def tradePopup():
     
@@ -547,15 +555,39 @@ def tradePopup():
     # Set window dimensions and colour
     popup.geometry("500x300")
     popup.configure(bg = "#33393b")
+    
+    # Set state variable for radiobuttons
+    tState = IntVar()
 
-    # Control plot timeframe with radiobuttons
-    rbXX = [ttk.Radiobutton(popup, text = ["Buy", "Sell", "Convert"][x], 
+    # Create dropdown menu to select currency to buy/sell
+    # Create two dropdown menus for currency conversion
+    c1 = ttk.Combobox(popup, textvariable = cState1, values = currencies)
+    c1.place(x = 100, y = 200)
+    c1.state(["readonly"])
+    c1.bind("<<ComboboxSelected>>", lambda e: c1.selection_clear())
+    c2 = ttk.Combobox(popup, textvariable = cState2, values = currencies)
+    c2.state(["readonly"])
+    c2.bind("<<ComboboxSelected>>", lambda e: c2.selection_clear())
+    c2.bind("<<ComboboxSelected>>", c2.configure(values = [x for x in currencies if x != cState1.get()]))
+
+    # Define internal function to place or remove second dropdown menu
+    def convertTest():
+        if tState.get() == 3:
+            c2.place(x = 100, y = 220)
+        elif tState.get() != 3:
+            try:
+                c2.place_forget()
+            except NameError:
+                pass
+
+    # Control trade type with radiobuttons
+    rbXX = [ttk.Radiobutton(popup, command = convertTest, text = ["Buy", "Sell", "Convert"][x], 
                             variable = tState, value = x + 1) for x in range(0, 3)]
 
     # Place radiobuttons side-by-side
     for i in range(0, len(rbXX)):
         rbXX[i].place(x = [113, 183, 253][i], y = 40)
-        
+    
     # Set default button states
     rbXX[0].invoke()
 
@@ -605,7 +637,9 @@ for i in range(0, len(figX)):
 # Set state variable for radiobuttons
 bState = IntVar()
 sState = IntVar()
-tState = IntVar()
+cState1 = StringVar()
+cState1.set("BTC")
+cState2 = StringVar()
 sState.set(thMaxPage)
 
 # Control plot timeframe with radiobuttons

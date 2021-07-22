@@ -582,7 +582,7 @@ figX = [pyplot.figure(figsize = [(9, 6), (9, 3.5), (9, 4.9), (9, 4.9), (5, 0.3),
                       edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 11)][x],
                       facecolor = "#33393b",
                       linewidth = 2) for x in range(0, 10)]
-canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*4)[x]) for x in range(0, len(figX))]
+canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3])[x]) for x in range(0, len(figX))]
 
 # Place all plots
 for i in range(0, len(figX)):
@@ -645,12 +645,12 @@ for i in range(0, len(rbXX)):
 b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefresh(6)])
 b1.place(x = 1327, y = 70)
 
-# Add refresh button for portfolio current holdings
-b2 = ttk.Button(t2, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(ref = True)])
+# Add refresh button for transaction history
+b2 = ttk.Button(t3, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(ref = True)])
 b2.place(x = 1327, y = 70)
 
 # Add spinbox to select transaction history page
-s1 = ttk.Spinbox(t2, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,
+s1 = ttk.Spinbox(t3, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,
                  font = Font(size = 10), style = "My.TSpinbox", command = lambda:[plotTransactions()])
 s1.state(["readonly"])
 s1.place(x = 1268, y = 71)

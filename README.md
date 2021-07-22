@@ -1,9 +1,19 @@
 # Overview
 
-An analysis and visualisation of price data for various cryptocurrencies (Bitcoin, Litecoin, Etherium, etc.) using the API from Coinbase, a popular cryptocurrency trading platform. The current version of the project focuses on analysis and visualisation of the data, with future plans including a program where users can explore the data on their own.
+A cryptocurrency desktop application built using Python, Tk, and the API from Coinbase (a popular cryptocurrency trading platform). Includes visualisation and statistics on market trends, user portfolio summary and transaction history, and trading support for buying/selling/converting various cryptocurrencies such as Bitcoin, Litecoin, Etherium, etc.
 
 <br/>
 
 # Files
 
-**CBCrypto** *(.py)* - The main script for data collection, analysis, and plotting; will almost certainly be split into multiple scripts as this project gets larger.
+## Scripts
+
+**CBCrypto** *(.py)* - Main script containing essential functions for pulling data from the Coinbase API.
+
+**GUI** *(.py)* - Script responsible for creating and running the application and GUI.
+
+## Other
+
+**OldCode** *(.py)* - Older code that is currently unused but kept just in case it is needed again.
+
+**UserData** *(.txt)* - File responsible for storing user data between application launches.

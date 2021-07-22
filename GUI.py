@@ -80,7 +80,7 @@ def ftNum(x, xType, dec = 2):
 ##### Plot price data over a given amount of time ---------------------------------------------------------
 
 # Function to plot price data over time
-def plotSeries():
+def plotSeries(trade = False):
     
     # Start progress bar
     p1.update_idletasks()
@@ -159,7 +159,10 @@ def plotSeries():
         intvMi = matplotlib.dates.MonthLocator(interval = 1)
     
     # Plot value relative to opening value
-    fig = pyplot.figure(1, facecolor = "#33393b")
+    if trade == False:
+        fig = pyplot.figure(1, facecolor = "#33393b")
+    elif trade == True:
+        fig = pyplot.figure(11, facecolor = "#33393b")
     pyplot.clf()
     whitespace = fig.add_axes([0, 0, 1, 1])
     whitespace.axis("off")
@@ -541,64 +544,12 @@ cbList = []
 for i in range(0, len(cbText)):
     cbList.append(cbText[i]["base_currency"])
 cbList = list(set(cbList))
-cbList.sort()
+cbList.sort()  
 
-# Define function to run trade window
-def tradePopup():
-    
-    # Create pop-up window
-    popup = Toplevel()
-    
-    # Set window title
-    popup.wm_title("Trade")
-    
-    # Set window dimensions and colour
-    popup.geometry("500x300")
-    popup.configure(bg = "#33393b")
-    
-    # Set state variable for radiobuttons
-    tState = IntVar()
-
-    # Create dropdown menu to select currency to buy/sell
-    # Create two dropdown menus for currency conversion
-    c1 = ttk.Combobox(popup, textvariable = cState1, values = [x for x in currencies if x != cState2.get()])
-    c1.place(x = 100, y = 200)
-    c1.state(["readonly"])
-    c2 = ttk.Combobox(popup, textvariable = cState2, values = [x for x in currencies if x != cState1.get()])
-    c2.state(["readonly"])
-    
-    # Define internal function to place or remove second dropdown menu
-    def placeMenu():
-        if tState.get() == 3:
-            c2.place(x = 100, y = 220)
-        elif tState.get() != 3:
-            try:
-                c2.place_forget()
-            except NameError:
-                pass
-    
-    # Ensure that selection from first menu is absent from second
-    def changeList(*args):
-        c1.configure(values = [x for x in currencies if x != cState2.get()])
-        c2.configure(values = [x for x in currencies if x != cState1.get()])
-    c1.bind("<<ComboboxSelected>>", lambda e: [c1.selection_clear(), changeList()])
-    c2.bind("<<ComboboxSelected>>", lambda e: [c2.selection_clear(), changeList()])
-    
-    # Control trade type with radiobuttons
-    rbXX = [ttk.Radiobutton(popup, command = placeMenu, text = ["Buy", "Sell", "Convert"][x], 
-                            variable = tState, value = x + 1) for x in range(0, 3)]
-
-    # Place radiobuttons side-by-side
-    for i in range(0, len(rbXX)):
-        rbXX[i].place(x = [113, 183, 253][i], y = 40)
-    
-    # Set default button states
-    rbXX[0].invoke()
-
-# Create TkInter window
+# Create main TkInter window
 window = Tk()
 
-# Set theme
+# Set window theme
 window.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes-10.4.0")
 window.tk.call("package", "require", "awdark") 
 ttk.Style().theme_use("awdark") 
@@ -611,18 +562,18 @@ window.title("CBCrypto: Cryptocurrency Dashboard")
 window.geometry("1920x1080")
 window.configure(bg = "#33393b")
 
-# Set tabs
+# Set window tabs
 tC = ttk.Notebook(window)
 t1 = ttk.Frame(tC)
 t2 = ttk.Frame(tC)
+t3 = ttk.Frame(tC)
 tC.add(t1, text = "Overview")
 tC.add(t2, text = "My Portfolio")
+tC.add(t3, text = "Trade")
 tC.pack(expand = 1, fill = "both")
 
-# Initialise transaction history
+# Initialise transaction history and set maximum number of pages
 tHist = getTransactionHistory()
-
-# Set maximum number of pages on transaction history
 thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Set up plots, each as its own canvas
@@ -633,54 +584,85 @@ figX = [pyplot.figure(figsize = [(9, 6), (9, 3.5), (9, 4.9), (9, 4.9), (5, 0.3),
                       linewidth = 2) for x in range(0, 10)]
 canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*4)[x]) for x in range(0, len(figX))]
 
-# Place plots
+# Place all plots
 for i in range(0, len(figX)):
     canvasX[i].get_tk_widget().place(x = [50, 50, 775, 775, 341, 1068, 75, 50, 535, 614][i], 
                                      y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 110][i])
 
-# Set state variable for radiobuttons
+# Set state variables
 bState = IntVar()
 sState = IntVar()
+sState.set(thMaxPage)
+tState = IntVar()
 cState1 = StringVar()
 cState1.set("BTC")
 cState2 = StringVar()
 cState2.set("ETH")
-sState.set(thMaxPage)
 
-# Control plot timeframe with radiobuttons
+# Control currnecy time series plot timeframe with radiobuttons
 rbX = [ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
                        text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
                        variable = bState, value = x + 1) for x in range(0, 7)]
 
-# Place radiobuttons side-by-side
+# Place plot timeframe radiobuttons side-by-side
 for i in range(0, len(rbX)):
     rbX[i].place(x = [113, 173, 233, 293, 353, 413, 473][i], y = 40)
 
-# Refresh button for top movers
+# Create dropdown menu to select currency to buy/sell
+# Create two dropdown menus for currency conversion
+c1 = ttk.Combobox(t3, textvariable = cState1, values = [x for x in currencies if x != cState2.get()])
+c1.place(x = 100, y = 200)
+c1.state(["readonly"])
+c2 = ttk.Combobox(t3, textvariable = cState2, values = [x for x in currencies if x != cState1.get()])
+c2.state(["readonly"])
+    
+# Define internal function to place or remove second dropdown menu
+def placeMenu():
+    if tState.get() == 3:
+        c2.place(x = 100, y = 220)
+    elif tState.get() != 3:
+        try:
+            c2.place_forget()
+        except NameError:
+            pass
+    
+# Ensure that selection from first menu is absent from second
+def changeList(*args):
+    c1.configure(values = [x for x in currencies if x != cState2.get()])
+    c2.configure(values = [x for x in currencies if x != cState1.get()])
+c1.bind("<<ComboboxSelected>>", lambda e: [c1.selection_clear(), changeList()])
+c2.bind("<<ComboboxSelected>>", lambda e: [c2.selection_clear(), changeList()])
+    
+# Control trade type with radiobuttons
+rbXX = [ttk.Radiobutton(t3, command = placeMenu, text = ["Buy", "Sell", "Convert"][x], 
+                        variable = tState, value = x + 1) for x in range(0, 3)]
+
+# Place trade type radiobuttons side-by-side
+for i in range(0, len(rbXX)):
+    rbXX[i].place(x = [113, 183, 253][i], y = 40)
+
+# Add refresh button for top movers
 b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefresh(6)])
 b1.place(x = 1327, y = 70)
 
-# Refresh button for portfolio current holdings
+# Add refresh button for portfolio current holdings
 b2 = ttk.Button(t2, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(ref = True)])
 b2.place(x = 1327, y = 70)
 
-# Trade button to open trade window
-b3 = ttk.Button(window, text = "Trade", command = tradePopup)
-b3.place(x = 150, y = 2)
-
-# Spinbox to select transaction history page
+# Add spinbox to select transaction history page
 s1 = ttk.Spinbox(t2, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,
                  font = Font(size = 10), style = "My.TSpinbox", command = lambda:[plotTransactions()])
 s1.state(["readonly"])
 s1.place(x = 1268, y = 71)
 
-# Progress bar indicating when application is loading
+# Add progress bar indicating when application is loading
 p1 = ttk.Progressbar(window, orient = HORIZONTAL, length = 100, mode = "indeterminate")
 p1.place(x = 1360, y = 7)
 p1.update_idletasks()
 
 # Set default button states
 rbX[1].invoke()
+rbXX[0].invoke()
 b1.invoke()
 b2.invoke()
 

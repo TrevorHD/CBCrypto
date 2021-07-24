@@ -80,18 +80,24 @@ def ftNum(x, xType, dec = 2):
 ##### Plot price data over a given amount of time ---------------------------------------------------------
 
 # Function to plot price data over time
-def plotSeries(trade):
+def plotSeries(trade = False, *args):
     
     # Start progress bar
-    p1.update_idletasks()
+    #p1.update_idletasks()
     
     # Create list of tracked currencies
-    currencyList = ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]
+    if trade == False:
+        currencyList = ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]
+    else:
+        if tState.get() == 3:
+            currencyList = [cState1.get(), cState2.get()]
+        else:
+            currencyList = [cState1.get()]
     
     # Choose timeframe depending on button selection
     if trade == False:
         tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][bState1.get() - 1]
-    elif trade == True:
+    else:
         tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][bState2.get() - 1]
     
     # Compile dicts of prices and price versus opening price
@@ -604,7 +610,6 @@ tState = IntVar()
 cState1 = StringVar()
 cState1.set("BTC")
 cState2 = StringVar()
-cState2.set("ETH")
 
 # Control currnecy time series plot timeframe with radiobuttons (Overview)
 rb1 = [ttk.Radiobutton(t1, command = lambda:[plotSeries(trade = False), plotRefresh(5)],
@@ -636,9 +641,14 @@ c2.state(["readonly"])
 def placeMenu():
     if tState.get() == 3:
         c2.place(x = 100, y = 580)
+        if currencies.index(cState1.get()) == len(currencies) - 1:
+            cState2.set(currencies[currencies.index(cState1.get()) - 1])
+        else:
+            cState2.set(currencies[currencies.index(cState1.get()) + 1])
     elif tState.get() != 3:
         try:
             c2.place_forget()
+            cState2.set("")
         except NameError:
             pass
     
@@ -646,11 +656,12 @@ def placeMenu():
 def changeList(*args):
     c1.configure(values = [x for x in currencies if x != cState2.get()])
     c2.configure(values = [x for x in currencies if x != cState1.get()])
-c1.bind("<<ComboboxSelected>>", lambda e: [c1.selection_clear(), changeList()])
-c2.bind("<<ComboboxSelected>>", lambda e: [c2.selection_clear(), changeList()])
+c1.bind("<<ComboboxSelected>>", lambda e: [c1.selection_clear(), changeList(), plotSeries(trade = True)])
+c2.bind("<<ComboboxSelected>>", lambda e: [c2.selection_clear(), changeList(), plotSeries(trade = True)])
     
 # Control trade type with radiobuttons
-rb3 = [ttk.Radiobutton(t3, command = placeMenu, text = ["Buy", "Sell", "Convert"][x], 
+rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotSeries(trade = True)],
+                       text = ["Buy", "Sell", "Convert"][x], 
                        variable = tState, value = x + 1) for x in range(0, 3)]
 
 # Place trade type radiobuttons side-by-side

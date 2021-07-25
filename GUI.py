@@ -89,7 +89,7 @@ def plotSeries(trade = False, *args):
     if trade == False:
         currencyList = ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]
     else:
-        if tState.get() == 3:
+        if tState1.get() == 3:
             currencyList = [cState1.get(), cState2.get()]
         else:
             currencyList = [cState1.get()]
@@ -606,10 +606,13 @@ bState1 = IntVar()
 bState2 = IntVar()
 sState = IntVar()
 sState.set(thMaxPage)
-tState = IntVar()
+tState1 = IntVar()
+tState2 = IntVar()
 cState1 = StringVar()
 cState1.set("BTC")
 cState2 = StringVar()
+eState1 = StringVar()
+eState2 = StringVar()
 
 # Control currnecy time series plot timeframe with radiobuttons (Overview)
 rb1 = [ttk.Radiobutton(t1, command = lambda:[plotSeries(trade = False), plotRefresh(5)],
@@ -630,25 +633,41 @@ for i in range(0, len(rb2)):
     rb2[i].place(x = [113, 173, 233, 293, 353, 413, 473][i], y = 40)
 
 # Create dropdown menu to select currency to buy/sell
-# Create two dropdown menus for currency conversion
+# Create a second dropdown menu for currency conversion
 c1 = ttk.Combobox(t3, textvariable = cState1, values = [x for x in currencies if x != cState2.get()])
 c1.place(x = 100, y = 560)
 c1.state(["readonly"])
 c2 = ttk.Combobox(t3, textvariable = cState2, values = [x for x in currencies if x != cState1.get()])
 c2.state(["readonly"])
+
+def checkKey(keyVal):
+    if tState2.get() == 1:
+        return re.match("^(\d)*(\.)?([0-9]{0,2})?$", keyVal) is not None
+    elif tState2.get() == 2:
+        return re.match("^(\d)*(\.)?([0-9])*$", keyVal) is not None
+checkKeyWrapper = (window.register(checkKey), "%P")
+
+# Create entry box to specify currency/dollar amounts
+# Create a second entry box for currency conversion
+e1 = ttk.Entry(t3, textvariable = eState1, width = 8, validate = "key", validatecommand = checkKeyWrapper)
+e1.place(x = 250, y = 560)
+e2 = ttk.Entry(t3, textvariable = eState2, width = 8, validate = "key", validatecommand = checkKeyWrapper)
     
 # Define internal function to place or remove second dropdown menu
 def placeMenu():
-    if tState.get() == 3:
+    if tState1.get() == 3:
         c2.place(x = 100, y = 580)
+        e2.place(x = 250, y = 580)
         if currencies.index(cState1.get()) == len(currencies) - 1:
             cState2.set(currencies[currencies.index(cState1.get()) - 1])
         else:
             cState2.set(currencies[currencies.index(cState1.get()) + 1])
-    elif tState.get() != 3:
+    elif tState1.get() != 3:
         try:
             c2.place_forget()
             cState2.set("")
+            e2.place_forget()
+            eState2.set("")
         except NameError:
             pass
     
@@ -658,15 +677,29 @@ def changeList(*args):
     c2.configure(values = [x for x in currencies if x != cState1.get()])
 c1.bind("<<ComboboxSelected>>", lambda e: [c1.selection_clear(), changeList(), plotSeries(trade = True)])
 c2.bind("<<ComboboxSelected>>", lambda e: [c2.selection_clear(), changeList(), plotSeries(trade = True)])
+
+# Ensure that entry box is cleared when switching from dollars to crypto or vice-versa
+def clearBox():
+    e1.delete(0, "end")
+    e2.delete(0, "end")
     
 # Control trade type with radiobuttons
 rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotSeries(trade = True)],
                        text = ["Buy", "Sell", "Convert"][x], 
-                       variable = tState, value = x + 1) for x in range(0, 3)]
+                       variable = tState1, value = x + 1) for x in range(0, 3)]
 
 # Place trade type radiobuttons side-by-side
 for i in range(0, len(rb3)):
     rb3[i].place(x = [113, 183, 253][i], y = 530)
+
+# Control trade dollar/crypto with radiobuttons
+rb4 = [ttk.Radiobutton(t3, command = lambda:[clearBox()],
+                       text = ["Dollars", "Crypto"][x], 
+                       variable = tState2, value = x + 1) for x in range(0, 2)]
+
+# Place trade dollar/crypto radiobuttons side-by-side
+for i in range(0, len(rb4)):
+    rb4[i].place(x = [113, 183][i], y = 630)
 
 # Add refresh button for top movers
 b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefresh(6)])
@@ -691,6 +724,7 @@ p1.update_idletasks()
 rb1[1].invoke()
 rb2[1].invoke()
 rb3[0].invoke()
+rb4[0].invoke()
 b1.invoke()
 b2.invoke()
 

@@ -634,12 +634,14 @@ for i in range(0, len(rb2)):
 
 # Create dropdown menu to select currency to buy/sell
 # Create a second dropdown menu for currency conversion
-c1 = ttk.Combobox(t3, textvariable = cState1, values = [x for x in currencies if x != cState2.get()])
-c1.place(x = 100, y = 560)
-c1.state(["readonly"])
-c2 = ttk.Combobox(t3, textvariable = cState2, values = [x for x in currencies if x != cState1.get()])
-c2.state(["readonly"])
+c1 = ttk.Combobox(t3, textvariable = cState1, width = 6, state = "readonly",
+                  values = [x for x in currencies if x != cState2.get()])
+c1.place(x = 100, y = 652)
+c2 = ttk.Combobox(t3, textvariable = cState2, width = 6, state = "readonly",
+                  values = [x for x in currencies if x != cState1.get()])
+c2.place(x = 100, y = 672)
 
+# Define function to validate entry in trade entry boxes
 def checkKey(keyVal):
     if tState2.get() == 1:
         return re.match("^(\d)*(\.)?([0-9]{0,2})?$", keyVal) is not None
@@ -649,24 +651,27 @@ checkKeyWrapper = (window.register(checkKey), "%P")
 
 # Create entry box to specify currency/dollar amounts
 # Create a second entry box for currency conversion
-e1 = ttk.Entry(t3, textvariable = eState1, width = 8, validate = "key", validatecommand = checkKeyWrapper)
-e1.place(x = 250, y = 560)
-e2 = ttk.Entry(t3, textvariable = eState2, width = 8, validate = "key", validatecommand = checkKeyWrapper)
+e1 = ttk.Entry(t3, textvariable = eState1, width = 7, validate = "key",
+               validatecommand = checkKeyWrapper)
+e1.place(x = 169, y = 652)
+e2 = ttk.Entry(t3, textvariable = eState2, width = 7, validate = "key",
+               validatecommand = checkKeyWrapper)
+e2.place(x = 169, y = 672)
     
 # Define internal function to place or remove second dropdown menu
 def placeMenu():
     if tState1.get() == 3:
-        c2.place(x = 100, y = 580)
-        e2.place(x = 250, y = 580)
+        c2.configure(state = "readonly")
+        e2.configure(state = "normal")
         if currencies.index(cState1.get()) == len(currencies) - 1:
             cState2.set(currencies[currencies.index(cState1.get()) - 1])
         else:
             cState2.set(currencies[currencies.index(cState1.get()) + 1])
     elif tState1.get() != 3:
         try:
-            c2.place_forget()
+            c2.configure(state = "disabled")
             cState2.set("")
-            e2.place_forget()
+            e2.configure(state = "disabled")
             eState2.set("")
         except NameError:
             pass
@@ -690,7 +695,7 @@ rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotSeri
 
 # Place trade type radiobuttons side-by-side
 for i in range(0, len(rb3)):
-    rb3[i].place(x = [113, 183, 253][i], y = 530)
+    rb3[i].place(x = 100, y = [501, 521, 541][i])
 
 # Control trade dollar/crypto with radiobuttons
 rb4 = [ttk.Radiobutton(t3, command = lambda:[clearBox()],
@@ -699,7 +704,7 @@ rb4 = [ttk.Radiobutton(t3, command = lambda:[clearBox()],
 
 # Place trade dollar/crypto radiobuttons side-by-side
 for i in range(0, len(rb4)):
-    rb4[i].place(x = [113, 183][i], y = 630)
+    rb4[i].place(x = 100, y = [582, 602][i])
 
 # Add refresh button for top movers
 b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefresh(6)])
@@ -708,6 +713,10 @@ b1.place(x = 1327, y = 70)
 # Add refresh button for transaction history
 b2 = ttk.Button(t3, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(ref = True)])
 b2.place(x = 1327, y = 35)
+
+# Add trade button to buy/sell/convert currency
+b3 = ttk.Button(t3, text = "Confirm Trade")
+b3.place(x = 100, y = 726)
 
 # Add spinbox to select transaction history page
 s1 = ttk.Spinbox(t3, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,

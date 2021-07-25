@@ -167,7 +167,7 @@ def getCurrentMovers():
     dfBottom = df.sort_values("Change").iloc[0:10]
     
     # Return new data frame
-    return(dfTop.append(dfBottom))
+    return dfTop.append(dfBottom)
 
 # Function to get current prices and return over timeframe
 def getPriceSummary(tFrame, currencyList):
@@ -200,7 +200,7 @@ def getPriceSummary(tFrame, currencyList):
 # Substitute API key and secret key with the user's actual key codes
 client = Client("api_key", "api_secret")
 
-# List current holdings for each cryptocurrency
+# Function to list current holdings for each cryptocurrency
 def getCurrentHoldings():
     
     # Get account
@@ -220,9 +220,9 @@ def getCurrentHoldings():
     dfCurrency = DataFrame([currency, amount, pcts], ["Currency", "Amount", "Percent"]).transpose() 
     
     # Return dataframe of held currencies, sorted by value
-    return(dfCurrency.sort_values("Amount", ascending = False))
+    return dfCurrency.sort_values("Amount", ascending = False)
 
-# List user's transaction history    
+# Function to list user's transaction history    
 def getTransactionHistory():
 
     # Initialise lists
@@ -261,6 +261,53 @@ def getTransactionHistory():
                                ["Currency", "Amount", "USD", "Type", "Time", "Status"]).transpose()
     
     # Return dataframe of transactions
-    return(dfTransactions)
-        
-   
+    return dfTransactions 
+
+
+
+
+
+##### Buy/sell/convert cryptocurrency ---------------------------------------------------------------------
+
+# Function to get buy/sell prices for a given crypto
+def getQuote(tType, amount, currency1, currency2 = None):
+    
+    # Initialise lists
+    ids = []
+    currency = []
+    accts = []
+    aType = []
+    
+    # Get account
+    account = client.get_accounts()
+    
+    # Get all wallet IDs
+    for wallet in account.data:
+        ids.append(wallet["id"])
+        currency.append(wallet["currency"])
+    
+    # Get payment method ID and types
+    payments = client.get_payment_methods()
+    for method in payments.data:
+        aType.append(method["type"])
+        accts.append(method["id"])
+    
+    # Get price quote for buy
+    if tType == "buy":
+        conf = client.buy(ids[currency.index(currency1)], amount = amount, quote = True,
+                          currency = currency1, payment_method = accts[aType.index("ach_bank_account")])
+    
+    # Get price quote for sell
+    if tType == "sell":
+       conf =  client.sell(ids[currency.index(currency1)], amount = amount, quote = True,
+                           currency = currency1, payment_method = accts[aType.index("fiat_account")])
+       
+    # Compile quote data
+    qData = [conf["subtotal"]["amount"], conf["fee"]["amount"], conf["total"]["amount"],
+             conf["unit_price"]["amount"]]
+    
+    # Still need to implement currency conversion
+    
+    # Return quote data
+    return qData
+

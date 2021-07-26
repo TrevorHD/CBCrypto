@@ -538,15 +538,20 @@ def plotTrade(tType1 = tState1.get(), tType2 = tState2.get(),
     # Get trade order information
     tInfo = getQuote(itType1, itType2, amount, currency)
     
-    # Get trade text
+    # Get trade text (part 1)
+    tT1 = " " + currency + " (\$"
+    tT2 = ") at \$" + ftNum(tInfo[3], "amount") + " each"
+    tT3 = "-" if itType1 == "sell" else ""
+    
+    # Get trade text (part 2)
     if tType1 == 1 and tType2 == 1:
-        tText = "Buy \$" + str(tInfo[4]) + " of " + currency + " at \$" + str(tInfo[3]) + " each"
+        tText = "Buy " + ftNum(tInfo[4]/tInfo[3], "amount") + tT1 + ftNum(tInfo[4], "amount") + tT2
     elif tType1 == 1 and tType2 == 2:
-        tText = "Buy " + str(tInfo[4]) + " of " + currency + " at \$" + str(tInfo[3]) + " each"
+        tText = "Buy " + ftNum(tInfo[4], "amount") + tT1 + ftNum(tInfo[4]*tInfo[3], "amount") + tT2
     elif tType1 == 2 and tType2 == 1:
-        tText = "Sell \$" + str(tInfo[4]) + currency + " at \$" + str(tInfo[3]) + " each"
+        tText = "Sell " + ftNum(tInfo[4]/tInfo[3], "amount") + tT1 + ftNum(tInfo[4], "amount") + tT2
     elif tType1 == 2 and tType2 == 2:
-        tText = "Sell " + str(tInfo[4]) + currency + " at \$" + str(tInfo[3]) + " each"
+        tText = "Sell " + ftNum(tInfo[4], "amount") + tT1 + ftNum(tInfo[4]*tInfo[3], "amount") + tT2
     
     # Plot trade order information as text
     fig10 = pyplot.figure(12)
@@ -557,11 +562,11 @@ def plotTrade(tType1 = tState1.get(), tType2 = tState2.get(),
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.text(0.017, 1, tText, color = "black", fontsize = 12, horizontalalignment = "left")
-    ax.text(0.017, 0.8, "Subtotal: $" + str(tInfo[0]), color = "black",
+    ax.text(0.017, 0.8, "Subtotal: $" + ftNum(tInfo[0], "amount"), color = "black",
             fontsize = 12, horizontalalignment = "left")
-    ax.text(0.017, 0.6, "Fees: $" + str(tInfo[1]), color = "black",
+    ax.text(0.017, 0.6, "Fees: " + tT3 + "$" + ftNum(tInfo[1], "amount"), color = "black",
             fontsize = 12, horizontalalignment = "left")
-    ax.text(0.017, 0.4, "Total: $" + str(tInfo[2]), color = "black",
+    ax.text(0.017, 0.4, "Total: $" + ftNum(tInfo[2], "amount"), color = "black",
             fontsize = 12, horizontalalignment = "left")
     
     # Create TkInter canvas with Matplotlib figure

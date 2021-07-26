@@ -304,15 +304,15 @@ def getQuote(tType1, tType2, amount, currency1, currency2 = None):
     # Get price quote for sell
     if tType1 == "sell":
         if tType2 == "crypto":
-            conf =  client.sell(ids[currency.index(currency1)], amount = amount, quote = True,
-                                currency = currency1, payment_method = accts[aType.index("fiat_account")])
+            conf = client.sell(ids[currency.index(currency1)], amount = amount, quote = True,
+                               currency = currency1, payment_method = accts[aType.index("fiat_account")])
         if tType2 == "dollar":
-            conf = client.buy(ids[currency.index(currency1)], total = amount, quote = True,
-                              currency = "USD", payment_method = accts[aType.index("fiat_account")])
+            conf = client.sell(ids[currency.index(currency1)], total = amount, quote = True,
+                               currency = "USD", payment_method = accts[aType.index("fiat_account")])
        
     # Compile quote data
-    qData = [conf["subtotal"]["amount"], conf["fee"]["amount"], conf["total"]["amount"],
-             conf["unit_price"]["amount"], amount]
+    qData = [float(conf["subtotal"]["amount"]), float(conf["fee"]["amount"]),
+             float(conf["total"]["amount"]), float(conf["unit_price"]["amount"]), amount]
     
     # Still need to implement currency conversion
     

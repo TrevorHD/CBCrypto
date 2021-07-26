@@ -519,6 +519,58 @@ def plotTransactions(tHist = tHist, ref = False):
 
 
 
+##### Plot information on trade orders --------------------------------------------------------------------
+
+# Function to plot trade orders
+def plotTrade(tType1 = tState1.get(), tType2 = tState2.get(),
+              amount = eState1.get(), currency = cState1.get()):
+    
+    # Convert state indicators to acceptable arguments for getQuote
+    if tType1 == 1:
+        itType1 = "buy"
+    elif tType1 == 2:
+        itType1 = "sell"
+    if tType2 == 1:
+        itType2 = "dollar"
+    elif tType2 == 2:
+        itType2 = "crypto"
+    
+    # Get trade order information
+    tInfo = getQuote(itType1, itType2, amount, currency)
+    
+    # Get trade text
+    if tType1 == 1 and tType2 == 1:
+        tText = "Buy \$" + str(tInfo[4]) + " of " + currency + " at \$" + str(tInfo[3]) + " each"
+    elif tType1 == 1 and tType2 == 2:
+        tText = "Buy " + str(tInfo[4]) + " of " + currency + " at \$" + str(tInfo[3]) + " each"
+    elif tType1 == 2 and tType2 == 1:
+        tText = "Sell \$" + str(tInfo[4]) + currency + " at \$" + str(tInfo[3]) + " each"
+    elif tType1 == 2 and tType2 == 2:
+        tText = "Sell " + str(tInfo[4]) + currency + " at \$" + str(tInfo[3]) + " each"
+    
+    # Plot trade order information as text
+    fig10 = pyplot.figure(12)
+    pyplot.clf()
+    pyplot.axis("off")
+    pyplot.tight_layout()
+    ax = pyplot.gca()
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.text(0.017, 1, tText, color = "black", fontsize = 12, horizontalalignment = "left")
+    ax.text(0.017, 0.8, "Subtotal: $" + str(tInfo[0]), color = "black",
+            fontsize = 12, horizontalalignment = "left")
+    ax.text(0.017, 0.6, "Fees: $" + str(tInfo[1]), color = "black",
+            fontsize = 12, horizontalalignment = "left")
+    ax.text(0.017, 0.4, "Total: $" + str(tInfo[2]), color = "black",
+            fontsize = 12, horizontalalignment = "left")
+    
+    # Create TkInter canvas with Matplotlib figure
+    pyplot.gcf().canvas.draw()
+
+
+
+
+
 ##### Plot information on last refresh time ---------------------------------------------------------------
     
 # Function to display time at which a widget was last refreshed

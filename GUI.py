@@ -522,36 +522,57 @@ def plotTransactions(tHist = tHist, ref = False):
 ##### Plot information on trade orders --------------------------------------------------------------------
 
 # Function to plot trade orders
-def plotTrade(tType1 = tState1.get(), tType2 = tState2.get(),
-              amount = eState1.get(), currency = cState1.get()):
+def plotTrade():
     
     # Convert state indicators to acceptable arguments for getQuote
-    if tType1 == 1:
-        itType1 = "buy"
-    elif tType1 == 2:
-        itType1 = "sell"
-    if tType2 == 1:
-        itType2 = "dollar"
-    elif tType2 == 2:
-        itType2 = "crypto"
+    currency = cState1.get()
+    amount = eState1.get()
+    if tState1.get() == 1:
+        tType1 = "buy"
+    elif tState1.get() == 2:
+        tType1 = "sell"
+    if tState2.get() == 1:
+        tType2 = "dollar"
+    elif tState2.get() == 2:
+        tType2 = "crypto"
+    if eState1.get() == "":
+        blank = True
     
     # Get trade order information
-    tInfo = getQuote(itType1, itType2, amount, currency)
+    if blank == False:
+        tInfo = getQuote(tType1, tType2, float(amount), currency)     
     
     # Get trade text (part 1)
     tT1 = " " + currency + " (\$"
-    tT2 = ") at \$" + ftNum(tInfo[3], "amount") + " each"
-    tT3 = "-" if itType1 == "sell" else ""
+    if blank == False:
+        tT2 = ") at \$" + ftNum(tInfo[3], "amount") + " each"
+    else:
+        tT2 = ") at \$--- each"
+    tT3 = "-" if tType1 == "sell" else ""
     
     # Get trade text (part 2)
-    if tType1 == 1 and tType2 == 1:
-        tText = "Buy " + ftNum(tInfo[4]/tInfo[3], "amount") + tT1 + ftNum(tInfo[4], "amount") + tT2
-    elif tType1 == 1 and tType2 == 2:
-        tText = "Buy " + ftNum(tInfo[4], "amount") + tT1 + ftNum(tInfo[4]*tInfo[3], "amount") + tT2
-    elif tType1 == 2 and tType2 == 1:
-        tText = "Sell " + ftNum(tInfo[4]/tInfo[3], "amount") + tT1 + ftNum(tInfo[4], "amount") + tT2
-    elif tType1 == 2 and tType2 == 2:
-        tText = "Sell " + ftNum(tInfo[4], "amount") + tT1 + ftNum(tInfo[4]*tInfo[3], "amount") + tT2
+    if blank == False:
+        if tType1 == "buy" and tType2 == "dollar":
+            tText = "Buy " + ftNum(tInfo[4]/tInfo[3], "amount") + tT1 + ftNum(tInfo[4], "amount") + tT2
+        elif tType1 == "buy" and tType2 == "crypto":
+            tText = "Buy " + ftNum(tInfo[4], "amount") + tT1 + ftNum(tInfo[4]*tInfo[3], "amount") + tT2
+        elif tType1 == "sell" and tType2 == "dollar":
+            tText = "Sell " + ftNum(tInfo[4]/tInfo[3], "amount") + tT1 + ftNum(tInfo[4], "amount") + tT2
+        elif tType1 == "sell" and tType2 == "crypto":
+            tText = "Sell " + ftNum(tInfo[4], "amount") + tT1 + ftNum(tInfo[4]*tInfo[3], "amount") + tT2
+    else:
+        if tType1 == "buy":
+            tText = "Buy ---" + tT1 + "---" + tT2
+        elif tType1 == "sell":
+            tText = "Sell ---" + tT1 + "---" + tT2
+            
+    # Get trade text (part 3)
+    if blank == False:
+        tT4 = "Subtotal: $" + ftNum(tInfo[0], "amount")
+        tT5 = "Fees: " + tT3 + "$" + ftNum(tInfo[1], "amount")
+        tT6 = "Total: $" + ftNum(tInfo[2], "amount")
+    else:
+        tT4, tT5, tT6 = "Subtotal: $---", "Fees: $---", "Total: $---"
     
     # Plot trade order information as text
     fig10 = pyplot.figure(12)
@@ -561,13 +582,10 @@ def plotTrade(tType1 = tState1.get(), tType2 = tState2.get(),
     ax = pyplot.gca()
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
-    ax.text(0.017, 1, tText, color = "black", fontsize = 12, horizontalalignment = "left")
-    ax.text(0.017, 0.8, "Subtotal: $" + ftNum(tInfo[0], "amount"), color = "black",
-            fontsize = 12, horizontalalignment = "left")
-    ax.text(0.017, 0.6, "Fees: " + tT3 + "$" + ftNum(tInfo[1], "amount"), color = "black",
-            fontsize = 12, horizontalalignment = "left")
-    ax.text(0.017, 0.4, "Total: $" + ftNum(tInfo[2], "amount"), color = "black",
-            fontsize = 12, horizontalalignment = "left")
+    ax.text(1.00, 0.95, tText, color = "white", fontsize = 16, horizontalalignment = "right")
+    ax.text(1.00, 0.65, tT4, color = "white", fontsize = 16, horizontalalignment = "right")
+    ax.text(1.00, 0.35, tT5, color = "white", fontsize = 16, horizontalalignment = "right")
+    ax.text(1.00, 0.05, tT6, color = "white", fontsize = 16, horizontalalignment = "right")
     
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
@@ -646,17 +664,17 @@ tHist = getTransactionHistory()
 thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Set up plots, each as its own canvas
-figX = [pyplot.figure(figsize = [(9, 6), (9, 3.5), (9, 4.9), (9, 4.9), (5, 0.3), (5, 0.3),
-                                 (5.8, 5.8), (9, 3.5), (12, 0.6), (10.8, 9.5), (7.5, 6)][x],
-                      edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 12)][x],
+figX = [pyplot.figure(figsize = [(9, 6), (9, 3.5), (9, 4.9), (9, 4.9), (5, 0.3), (5, 0.3), (5.8, 5.8),
+                                 (9, 3.5), (12, 0.6), (10.8, 9.5), (7.5, 6), (6, 2)][x],
+                      edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 13)][x],
                       facecolor = "#33393b",
-                      linewidth = 2) for x in range(0, 11)]
-canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*2)[x]) for x in range(0, len(figX))]
+                      linewidth = 2) for x in range(0, 12)]
+canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3)[x]) for x in range(0, len(figX))]
 
 # Place all plots
 for i in range(0, len(figX)):
-    canvasX[i].get_tk_widget().place(x = [50, 50, 775, 775, 341, 1068, 75, 50, 535, 614, 50][i], 
-                                     y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 67, 50][i])
+    canvasX[i].get_tk_widget().place(x = [50, 50, 775, 775, 341, 1068, 75, 50, 535, 614, 50, 140][i], 
+                                     y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 67, 50, 510][i])
 
 # Set state variables
 bState1 = IntVar()
@@ -737,8 +755,10 @@ def placeMenu():
 def changeList(*args):
     c1.configure(values = [x for x in currencies if x != cState2.get()])
     c2.configure(values = [x for x in currencies if x != cState1.get()])
-c1.bind("<<ComboboxSelected>>", lambda e: [c1.selection_clear(), changeList(), plotSeries(trade = True)])
-c2.bind("<<ComboboxSelected>>", lambda e: [c2.selection_clear(), changeList(), plotSeries(trade = True)])
+c1.bind("<<ComboboxSelected>>", lambda e: [c1.selection_clear(), changeList(), plotTrade(),
+                                           plotSeries(trade = True)])
+c2.bind("<<ComboboxSelected>>", lambda e: [c2.selection_clear(), changeList(), plotTrade(),
+                                           plotSeries(trade = True)])
 
 # Ensure that entry box is cleared when switching from dollars to crypto or vice-versa
 def clearBox():
@@ -746,7 +766,8 @@ def clearBox():
     e2.delete(0, "end")
     
 # Control trade type with radiobuttons
-rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotSeries(trade = True)],
+rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotTrade(),
+                                             plotSeries(trade = True)],
                        text = ["Buy", "Sell", "Convert"][x], 
                        variable = tState1, value = x + 1) for x in range(0, 3)]
 
@@ -755,7 +776,7 @@ for i in range(0, len(rb3)):
     rb3[i].place(x = 100, y = [501, 521, 541][i])
 
 # Control trade dollar/crypto with radiobuttons
-rb4 = [ttk.Radiobutton(t3, command = lambda:[clearBox()],
+rb4 = [ttk.Radiobutton(t3, command = lambda:[clearBox(), plotTrade()],
                        text = ["Dollars", "Crypto"][x], 
                        variable = tState2, value = x + 1) for x in range(0, 2)]
 

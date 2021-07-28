@@ -817,6 +817,15 @@ rb4[0].invoke()
 b1.invoke()
 b2.invoke()
 
+# Set system for updating trade information when entry typing stops
+afterNum = None
+def entryWait(*args, aN = afterNum):
+    if aN is not None:
+        e1.after_cancel(aN)
+    global test; afterNum = e1.after(3000, plotTrade)
+e1.bind("<Key>", entryWait)
+e2.bind("<Key>", entryWait)
+
 # Run TkInter window over loop
 window.mainloop()
 

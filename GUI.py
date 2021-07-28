@@ -570,11 +570,11 @@ def plotTrade():
             
     # Get trade text (part 3)
     if blank == False:
-        tT4 = "Subtotal: $" + ftNum(tInfo[0], "amount")
-        tT5 = "Fees: " + tT3 + "$" + ftNum(tInfo[1], "amount")
-        tT6 = "Total: $" + ftNum(tInfo[2], "amount")
+        tT4 = "$" + ftNum(tInfo[0], "amount")
+        tT5 = tT3 + "$" + ftNum(tInfo[1], "amount")
+        tT6 = "$" + ftNum(tInfo[2], "amount")
     else:
-        tT4, tT5, tT6 = "Subtotal: $---", "Fees: $---", "Total: $---"
+        tT4, tT5, tT6 = "$---", "$---", "$---"
     
     # Plot trade order information as text
     fig10 = pyplot.figure(12)
@@ -584,10 +584,13 @@ def plotTrade():
     ax = pyplot.gca()
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
-    ax.text(1.00, 0.95, tText, color = "white", fontsize = 16, horizontalalignment = "right")
-    ax.text(1.00, 0.65, tT4, color = "white", fontsize = 16, horizontalalignment = "right")
-    ax.text(1.00, 0.35, tT5, color = "white", fontsize = 16, horizontalalignment = "right")
-    ax.text(1.00, 0.05, tT6, color = "white", fontsize = 16, horizontalalignment = "right")
+    ax.text(0.000, 0.01, tText, color = "white", fontsize = 20, horizontalalignment = "left")
+    ax.text(0.450, 0.95, "Subtotal:", color = "white", fontsize = 20, horizontalalignment = "left")
+    ax.text(0.450, 0.75, "Coinbase Fee:", color = "white", fontsize = 20, horizontalalignment = "left")
+    ax.text(0.450, 0.55, "Final Total:", color = "white", fontsize = 20, horizontalalignment = "left")
+    ax.text(0.986, 0.95, tT4, color = "white", fontsize = 20, horizontalalignment = "right")
+    ax.text(0.986, 0.75, tT5, color = "white", fontsize = 20, horizontalalignment = "right")
+    ax.text(0.986, 0.55, tT6, color = "white", fontsize = 20, horizontalalignment = "right")
     
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
@@ -667,7 +670,7 @@ thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Set up plots, each as its own canvas
 figX = [pyplot.figure(figsize = [(9, 6), (9, 3.5), (9, 4.9), (9, 4.9), (5, 0.3), (5, 0.3), (5.8, 5.8),
-                                 (9, 3.5), (12, 0.6), (10.8, 9.5), (7.5, 6), (6, 2)][x],
+                                 (9, 3.5), (12, 0.6), (10.8, 9.5), (7.5, 6), (6.8, 3.6)][x],
                       edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 13)][x],
                       facecolor = "#33393b",
                       linewidth = 2) for x in range(0, 12)]
@@ -675,8 +678,8 @@ canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3)[x]) fo
 
 # Place all plots
 for i in range(0, len(figX)):
-    canvasX[i].get_tk_widget().place(x = [50, 50, 775, 775, 341, 1068, 75, 50, 535, 614, 50, 140][i], 
-                                     y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 67, 50, 510][i])
+    canvasX[i].get_tk_widget().place(x = [50, 50, 775, 775, 341, 1068, 75, 50, 535, 614, 50, 90][i], 
+                                     y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 67, 50, 500][i])
 
 # Set state variables
 bState1 = IntVar()
@@ -711,12 +714,12 @@ for i in range(0, len(rb2)):
 
 # Create dropdown menu to select currency to buy/sell
 # Create a second dropdown menu for currency conversion
-c1 = ttk.Combobox(t3, textvariable = cState1, width = 6, state = "readonly",
+c1 = ttk.Combobox(t3, textvariable = cState1, width = 8, state = "readonly",
                   values = [x for x in cbList if x != cState2.get()])
-c1.place(x = 100, y = 652)
-c2 = ttk.Combobox(t3, textvariable = cState2, width = 6, state = "readonly",
+c1.place(x = 100, y = 586)
+c2 = ttk.Combobox(t3, textvariable = cState2, width = 8, state = "readonly",
                   values = [x for x in cbList if x != cState1.get()])
-c2.place(x = 100, y = 672)
+c2.place(x = 100, y = 606)
 
 # Define function to validate entry in trade entry boxes
 def checkKey(keyVal):
@@ -728,12 +731,12 @@ checkKeyWrapper = (window.register(checkKey), "%P")
 
 # Create entry box to specify currency/dollar amounts
 # Create a second entry box for currency conversion
-e1 = ttk.Entry(t3, textvariable = eState1, width = 7, validate = "key",
+e1 = ttk.Entry(t3, textvariable = eState1, width = 9, validate = "key",
                validatecommand = checkKeyWrapper)
-e1.place(x = 169, y = 652)
-e2 = ttk.Entry(t3, textvariable = eState2, width = 7, validate = "key",
+e1.place(x = 180, y = 586)
+e2 = ttk.Entry(t3, textvariable = eState2, width = 9, validate = "key",
                validatecommand = checkKeyWrapper)
-e2.place(x = 169, y = 672)
+e2.place(x = 180, y = 606)
     
 # Define internal function to place or remove second dropdown menu
 def placeMenu():
@@ -784,7 +787,7 @@ rb4 = [ttk.Radiobutton(t3, command = lambda:[clearBox(), plotTrade()],
 
 # Place trade dollar/crypto radiobuttons side-by-side
 for i in range(0, len(rb4)):
-    rb4[i].place(x = 100, y = [582, 602][i])
+    rb4[i].place(x = 185, y = [501, 521][i])
 
 # Add refresh button for top movers
 b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefresh(6)])
@@ -795,8 +798,12 @@ b2 = ttk.Button(t3, text = "Refresh", command = lambda:[plotHoldings(), plotTran
 b2.place(x = 1327, y = 35)
 
 # Add trade button to buy/sell/convert currency
-b3 = ttk.Button(t3, text = "Confirm Trade")
-b3.place(x = 100, y = 726)
+b3 = ttk.Button(t3, text = "Confirm", width = 9)
+b3.place(x = 100, y = 660)
+
+# Add button to reset trade settings
+b4 = ttk.Button(t3, text = "Reset", width = 9.1)
+b4.place(x = 178, y = 660)
 
 # Add spinbox to select transaction history page
 s1 = ttk.Spinbox(t3, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,

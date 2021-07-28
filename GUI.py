@@ -443,7 +443,7 @@ def plotHoldings():
 ##### Plot information on user's transaction history ---------------------------------------------------------
 
 # Function to plot user's transaction history
-def plotTransactions(tHist = tHist, ref = False):
+def plotTransactions(tHist, ref = False):
     
     # Get transaction history again if refeshing
     if ref == True:
@@ -537,6 +537,8 @@ def plotTrade():
         tType2 = "crypto"
     if eState1.get() == "":
         blank = True
+    else:
+        blank = False
     
     # Get trade order information
     if blank == False:
@@ -710,10 +712,10 @@ for i in range(0, len(rb2)):
 # Create dropdown menu to select currency to buy/sell
 # Create a second dropdown menu for currency conversion
 c1 = ttk.Combobox(t3, textvariable = cState1, width = 6, state = "readonly",
-                  values = [x for x in currencies if x != cState2.get()])
+                  values = [x for x in cbList if x != cState2.get()])
 c1.place(x = 100, y = 652)
 c2 = ttk.Combobox(t3, textvariable = cState2, width = 6, state = "readonly",
-                  values = [x for x in currencies if x != cState1.get()])
+                  values = [x for x in cbList if x != cState1.get()])
 c2.place(x = 100, y = 672)
 
 # Define function to validate entry in trade entry boxes
@@ -738,10 +740,10 @@ def placeMenu():
     if tState1.get() == 3:
         c2.configure(state = "readonly")
         e2.configure(state = "normal")
-        if currencies.index(cState1.get()) == len(currencies) - 1:
-            cState2.set(currencies[currencies.index(cState1.get()) - 1])
+        if cbList.index(cState1.get()) == len(cbList) - 1:
+            cState2.set(cbList[cbList.index(cState1.get()) - 1])
         else:
-            cState2.set(currencies[currencies.index(cState1.get()) + 1])
+            cState2.set(cbList[cbList.index(cState1.get()) + 1])
     elif tState1.get() != 3:
         try:
             c2.configure(state = "disabled")
@@ -753,8 +755,8 @@ def placeMenu():
     
 # Ensure that selection from first menu is absent from second
 def changeList(*args):
-    c1.configure(values = [x for x in currencies if x != cState2.get()])
-    c2.configure(values = [x for x in currencies if x != cState1.get()])
+    c1.configure(values = [x for x in cbList if x != cState2.get()])
+    c2.configure(values = [x for x in cbList if x != cState1.get()])
 c1.bind("<<ComboboxSelected>>", lambda e: [c1.selection_clear(), changeList(), plotTrade(),
                                            plotSeries(trade = True)])
 c2.bind("<<ComboboxSelected>>", lambda e: [c2.selection_clear(), changeList(), plotTrade(),
@@ -789,7 +791,7 @@ b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefres
 b1.place(x = 1327, y = 70)
 
 # Add refresh button for transaction history
-b2 = ttk.Button(t3, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(ref = True)])
+b2 = ttk.Button(t3, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(tHist = tHist, ref = True)])
 b2.place(x = 1327, y = 35)
 
 # Add trade button to buy/sell/convert currency
@@ -798,7 +800,7 @@ b3.place(x = 100, y = 726)
 
 # Add spinbox to select transaction history page
 s1 = ttk.Spinbox(t3, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,
-                 font = Font(size = 10), style = "My.TSpinbox", command = lambda:[plotTransactions()])
+                 font = Font(size = 10), style = "My.TSpinbox", command = lambda:[plotTransactions(tHist = tHist)])
 s1.state(["readonly"])
 s1.place(x = 1268, y = 36)
 

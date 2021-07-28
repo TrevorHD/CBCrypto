@@ -309,12 +309,28 @@ def getQuote(tType1, tType2, amount, currency1, currency2 = None):
         if tType2 == "dollar":
             conf = client.sell(ids[currency.index(currency1)], total = amount, quote = True,
                                currency = "USD", payment_method = accts[aType.index("fiat_account")])
-       
-    # Compile quote data
-    qData = [float(conf["subtotal"]["amount"]), float(conf["fee"]["amount"]),
-             float(conf["total"]["amount"]), float(conf["unit_price"]["amount"]), amount]
+            
+    # Get price quote for conversion (sell then buy)
+    if tType1 == "convert":
+        if tType2 == "crypto":
+            conf1 = client.sell(ids[currency.index(currency1)], amount = amount, quote = True,
+                                currency = currency1, payment_method = accts[aType.index("fiat_account")])
+        if tType2 == "dollar":
+            conf1 = client.sell(ids[currency.index(currency1)], total = amount, quote = True,
+                                currency = "USD", payment_method = accts[aType.index("fiat_account")])
+        conf2 = client.buy(ids[currency.index(currency2)], total = float(conf1["total"]["amount"]),
+                           quote = True, currency = "USD",
+                           payment_method = accts[aType.index("ach_bank_account")])
     
-    # Still need to implement currency conversion
+    # Compile quote data
+    if tType1 != "convert":
+        qData = [float(conf["subtotal"]["amount"]), float(conf["fee"]["amount"]),
+                 float(conf["total"]["amount"]), float(conf["unit_price"]["amount"])]
+    else:
+        qData = [float(conf1["subtotal"]["amount"]), float(conf1["fee"]["amount"]),
+                 float(conf1["total"]["amount"]), float(conf1["unit_price"]["amount"]),
+                 float(conf2["subtotal"]["amount"]), float(conf2["fee"]["amount"]),
+                 float(conf2["total"]["amount"]), float(conf2["unit_price"]["amount"])]
     
     # Return quote data
     return qData

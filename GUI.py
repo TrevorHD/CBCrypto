@@ -96,27 +96,33 @@ def plotSeries(trade = False, *args):
     
     # Choose timeframe depending on button selection
     if trade == False:
-        tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][bState1.get() - 1]
+        h = bState1.get() - 1
+        tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h]
     else:
+        h = 0
         tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][bState2.get() - 1]
     
     # Compile dicts of prices and price versus opening price
-    d1, d2 = {}, {}
-    for i in range(0, len(currencyList)):
-        d1["key%s" %i] = getPriceSeries(tFrame, currencyList[i])
-        d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
+    if trade == False:
+        L1, L2, D1 = sData1, sData2, mData
+    else:
+        d1, d2 = {}, {}
+        for i in range(0, len(currencyList)):
+            d1["key%s" %i] = getPriceSeries(tFrame, currencyList[i])
+            d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
+        L1, L2 = [d1], [d2]
      
     # Get min and max price versus opening price
     pmin, pmax = [], []
     for i in range(0, len(currencyList)):
-        pmin.append(min(d2["key%s" %i]))
-        pmax.append(max(d2["key%s" %i]))
+        pmin.append(min(L2[h]["key%s" %i]))
+        pmax.append(max(L2[h]["key%s" %i]))
     
     # Get earliest and latest available datetimes
     dmin, dmax = [], []
     for i in range(0, len(currencyList)):
-        dmin.append(min(d1["key%s" %i]["datetime"]))
-        dmax.append(max(d1["key%s" %i]["datetime"]))
+        dmin.append(min(L1[h]["key%s" %i]["datetime"]))
+        dmax.append(max(L1[h]["key%s" %i]["datetime"]))
                 
     # Get difference between min and max price versus opening price, for scaling purposes
     mmDiff = math.ceil((max(pmax) - min(pmin))*100/5)*5/100
@@ -177,7 +183,7 @@ def plotSeries(trade = False, *args):
     whitespace.axis("off")
     ax = fig.add_axes([0.10, 0.06, 0.85, 0.90])
     for i in range(0, len(currencyList)):
-        ax.plot(d1["key%s" %i]["datetime"], d2["key%s" %i], linestyle = "-",
+        ax.plot(L1[h]["key%s" %i]["datetime"], L2[h]["key%s" %i], linestyle = "-",
                 linewidth = 1.2, label = currencyList[i], color = colours[i])
     ax.xaxis.set_major_formatter(formatter)
     ax.xaxis.set_major_locator(intvMj)
@@ -209,11 +215,11 @@ def plotSeries(trade = False, *args):
     if trade == False:
     
         # Get price data for currencies in previous plot; format and convert to lists
-        pData = getPriceSummary(tFrame, currencyList)
-        names = list(pData["Currency"])
-        highs = [ftNum(x, "value", 2) for x in list(pData["High"])]
-        lows = [ftNum(x, "value", 2) for x in list(pData["Low"])]
-        returns = [(x - 1)*100 for x in list(pData["Return"])]
+        #pData = getPriceSummary(tFrame, currencyList)
+        names = list(D1[h]["Currency"])
+        highs = [ftNum(x, "value", 2) for x in list(D1[h]["High"])]
+        lows = [ftNum(x, "value", 2) for x in list(D1[h]["Low"])]
+        returns = [(x - 1)*100 for x in list(D1[h]["Return"])]
     
         # Format text colour and sign depending on value
         colours = ["red" if x < 0 else "green" for x in returns]
@@ -626,6 +632,19 @@ def plotRefresh(instance):
 
 
 ##### Run GUI ---------------------------------------------------------------------------------------------
+
+# Initialise time series data for featured currencies
+sData1, sData2, mData = [], [], []
+for h in range(0, 7):
+    d1, d2 = {}, {}
+    for i in range(0, 7):
+        d1["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
+                                        ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"][i])
+        d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
+    sData1.append(d1)
+    sData2.append(d2)
+    mData.append(getPriceSummary(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
+                                 ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]))
 
 # Get list of currencies available for trading
 cbText = json.loads(requests.get("https://api.pro.coinbase.com/products").text)

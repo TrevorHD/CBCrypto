@@ -184,7 +184,7 @@ def getPriceSummary(tFrame, currencyList):
         returns.append(d2["key%s" %i].iloc[-1])
     
     # Put data into dataframe    
-    df = pandas.DataFrame([[tFrame]*5, currencyList, high, low, prices, returns],
+    df = pandas.DataFrame([[tFrame]*len(currencyList), currencyList, high, low, prices, returns],
                           ["Timeframe", "Currency", "High", "Low", "Price", "Return"]).transpose()
     
     # Return dataframe

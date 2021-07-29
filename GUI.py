@@ -545,7 +545,7 @@ def plotTrade():
     
     # Get trade order information
     if blank == False:
-        tInfo = getQuote(tType1, tType2, float(amount), currency1)     
+        tInfo = getQuote(tType1, tType2, float(amount), currency1, currency2)     
     
     # Get currency owned text
     oT1 = currency1 + " owned: "
@@ -557,8 +557,12 @@ def plotTrade():
     # Get trade text
     if blank == False:
         tT1 = "$" + ftNum(tInfo[0], "amount")
-        tT2 = ("-" if tType1 == "sell" else "") + "$" + ftNum(tInfo[1], "amount")
-        tT3 = "$" + ftNum(tInfo[2], "amount")
+        if tType1 != "convert":
+            tT2 = ("-" if tType1 == "sell" else "") + "$" + ftNum(tInfo[1], "amount")
+            tT3 = "$" + ftNum(tInfo[2], "amount")
+        else:
+            tT2 = "-$" + ftNum(tInfo[1] + tInfo[5], "amount")
+            tT3 = "$" + ftNum(tInfo[4], "amount")
     else:
         tT1, tT2, tT3 = "$---", "$---", "$---"
     
@@ -574,8 +578,8 @@ def plotTrade():
     ax = pyplot.gca()
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
-    ax.text(0.450, 0.89, oT1, color = "white", fontsize = 14, horizontalalignment = "left")
-    ax.text(0.450, 0.80, oT2, color = "white", fontsize = 14, horizontalalignment = "left")
+    ax.text(0.450, 0.87, oT1, color = "white", fontsize = 14, horizontalalignment = "left")
+    ax.text(0.450, 0.78, oT2, color = "white", fontsize = 14, horizontalalignment = "left")
     ax.text(0.450, 0.53, "Subtotal:", color = "white", fontsize = 20, horizontalalignment = "left")
     ax.text(0.450, 0.37, "Coinbase Fee:", color = "white", fontsize = 20, horizontalalignment = "left")
     ax.text(0.450, 0.21, "Final Total:", color = "white", fontsize = 20, horizontalalignment = "left")
@@ -794,8 +798,15 @@ b2.place(x = 1327, y = 35)
 b3 = ttk.Button(t3, text = "Confirm", width = 9)
 b3.place(x = 101, y = 675)
 
+# Function to reset radiobuttons and text fields
+def resetTrades():
+    tState1.set(1)
+    tState2.set(1)
+
 # Add button to reset trade settings
-b4 = ttk.Button(t3, text = "Reset", width = 9)
+b4 = ttk.Button(t3, text = "Reset", width = 9,
+                command = lambda:[resetTrades(), clearBox(), placeMenu(),
+                                  changeList(), plotTrade(), plotSeries(trade = True)])
 b4.place(x = 180, y = 675)
 
 # Add spinbox to select transaction history page

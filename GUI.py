@@ -134,7 +134,6 @@ def plotSeries(trade = False, *args):
         pmin, pmax = [0.98], [1.03]
     
     # Get earliest and latest available datetimes
-    # Force axis values and timeframe when no data is plotted
     dmin, dmax = [], []
     for i in range(0, len(currencyList)):
         try:
@@ -144,10 +143,6 @@ def plotSeries(trade = False, *args):
             pass
         except ValueError:
             pass
-    if dmin == dmax == []:
-        tFrame = "1d"
-        dmin = [datetime.datetime.now() - timedelta(hours = 24)]
-        dmax = [datetime.datetime.now()]
                 
     # Get difference between min and max price versus opening price, for scaling purposes
     mmDiff = math.ceil((max(pmax) - min(pmin))*100/5)*5/100
@@ -168,31 +163,39 @@ def plotSeries(trade = False, *args):
     tz = datetime.datetime.now().astimezone().tzinfo
     
     # Set axis time format depending on timeframe
+    # Force axis values and timescale when no data is plotted
     if tFrame == "1hr":
+        tDelta = timedelta(hours = 1)
         formatter = matplotlib.dates.DateFormatter("%H:%M", tz)
         intvMj = matplotlib.dates.MinuteLocator(interval = 10)
         intvMi = matplotlib.dates.MinuteLocator(interval = 1)
     elif tFrame == "1d":
+        tDelta = timedelta(hours = 24)
         formatter = matplotlib.dates.DateFormatter("%H:%M", tz)
         intvMj = matplotlib.dates.HourLocator(interval = 4)
         intvMi = matplotlib.dates.HourLocator(interval = 1)
     elif tFrame == "1wk":
+        tDelta = timedelta(days = 7)
         formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.DayLocator(interval = 1)
         intvMi = matplotlib.dates.HourLocator(interval = 4)
     elif tFrame == "1m":
+        tDelta = timedelta(days = 30)
         formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.DayLocator(interval = 7)
         intvMi = matplotlib.dates.DayLocator(interval = 1)
     elif tFrame == "3m":
+        tDelta = timedelta(days = 90)
         formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.DayLocator(interval = 14)
         intvMi = matplotlib.dates.DayLocator(interval = 1)
     elif tFrame == "6m":
+        tDelta = timedelta(days = 180)
         formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.MonthLocator(interval = 1)
         intvMi = matplotlib.dates.DayLocator(interval = 7)
     elif tFrame == "1yr":
+        tDelta = timedelta(days = 365)
         formatter = matplotlib.dates.DateFormatter("%m/%Y", tz)
         intvMj = matplotlib.dates.MonthLocator(interval = 2)
         intvMi = matplotlib.dates.DayLocator(interval = 7)
@@ -200,6 +203,9 @@ def plotSeries(trade = False, *args):
         formatter = matplotlib.dates.DateFormatter("%m/%Y", tz)
         intvMj = matplotlib.dates.YearLocator()
         intvMi = matplotlib.dates.MonthLocator(interval = 1)
+    if dmax == dmin == []:
+        dmax = [datetime.datetime.now(tz)]
+        dmin = [datetime.datetime.now(tz) - tDelta]
     
     # Initialise plot
     if trade == False:
@@ -625,6 +631,8 @@ def plotTrade():
     ax.set_ylim(0, 1)
     ax.text(0.450, 0.87, oT1, color = "white", fontsize = 14, horizontalalignment = "left")
     ax.text(0.450, 0.78, oT2, color = "white", fontsize = 14, horizontalalignment = "left")
+    ax.text(0.450, 0.87, currency1 + " ", color = "#b809ed", fontsize = 14, horizontalalignment = "left")
+    ax.text(0.450, 0.78, currency2 + " ", color = "#09e5ed", fontsize = 14, horizontalalignment = "left")
     ax.text(0.450, 0.53, "Subtotal:", color = "white", fontsize = 20, horizontalalignment = "left")
     ax.text(0.450, 0.37, "Coinbase Fee:", color = "white", fontsize = 20, horizontalalignment = "left")
     ax.text(0.450, 0.21, "Final Total:", color = "white", fontsize = 20, horizontalalignment = "left")

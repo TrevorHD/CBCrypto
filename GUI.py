@@ -103,26 +103,51 @@ def plotSeries(trade = False, *args):
         tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][bState2.get() - 1]
     
     # Compile dicts of prices and price versus opening price
+    # If price data does not exist, record problematic currencies
+    errList = []
     if trade == False:
         L1, L2, D1 = sData1, sData2, mData
     else:
         d1, d2 = {}, {}
         for i in range(0, len(currencyList)):
-            d1["key%s" %i] = getPriceSeries(tFrame, currencyList[i])
-            d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
-        L1, L2 = [d1], [d2]
-     
+            try:
+                d1["key%s" %i] = getPriceSeries(tFrame, currencyList[i])
+                d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
+            except KeyError:
+                errList.append(currencyList[i])
+                del d1["key%s" %i]
+                pass
+        L1, L2 = [d1], [d2]  
+    
     # Get min and max price versus opening price
+    # Force axis values when no data is plotted
     pmin, pmax = [], []
     for i in range(0, len(currencyList)):
-        pmin.append(min(L2[h]["key%s" %i]))
-        pmax.append(max(L2[h]["key%s" %i]))
+        try:
+            pmin.append(min(L2[h]["key%s" %i]))
+            pmax.append(max(L2[h]["key%s" %i]))
+        except KeyError:
+            pass
+        except ValueError:
+            pass
+    if pmin == pmax == []:
+        pmin, pmax = [0.98], [1.03]
     
     # Get earliest and latest available datetimes
+    # Force axis values and timeframe when no data is plotted
     dmin, dmax = [], []
     for i in range(0, len(currencyList)):
-        dmin.append(min(L1[h]["key%s" %i]["datetime"]))
-        dmax.append(max(L1[h]["key%s" %i]["datetime"]))
+        try:
+            dmin.append(min(L1[h]["key%s" %i]["datetime"]))
+            dmax.append(max(L1[h]["key%s" %i]["datetime"]))
+        except KeyError:
+            pass
+        except ValueError:
+            pass
+    if dmin == dmax == []:
+        tFrame = "1d"
+        dmin = [datetime.datetime.now() - timedelta(hours = 24)]
+        dmax = [datetime.datetime.now()]
                 
     # Get difference between min and max price versus opening price, for scaling purposes
     mmDiff = math.ceil((max(pmax) - min(pmin))*100/5)*5/100
@@ -134,7 +159,10 @@ def plotSeries(trade = False, *args):
         lPrice = math.floor(min(pmin)*100)/100
     
     # Generate colour palette
-    colours = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"]
+    if trade == False:
+        colours = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"]
+    else:
+        colours = ["#b809ed", "#09e5ed"]
     
     # Get current time zone
     tz = datetime.datetime.now().astimezone().tzinfo
@@ -173,7 +201,7 @@ def plotSeries(trade = False, *args):
         intvMj = matplotlib.dates.YearLocator()
         intvMi = matplotlib.dates.MonthLocator(interval = 1)
     
-    # Plot value relative to opening value
+    # Initialise plot
     if trade == False:
         fig = pyplot.figure(1, facecolor = "#33393b")
     elif trade == True:
@@ -182,9 +210,20 @@ def plotSeries(trade = False, *args):
     whitespace = fig.add_axes([0, 0, 1, 1])
     whitespace.axis("off")
     ax = fig.add_axes([0.10, 0.06, 0.85, 0.90])
+    
+    # Plot value relative to opening value for each currency
+    # Do not plot if no data exists
     for i in range(0, len(currencyList)):
-        ax.plot(L1[h]["key%s" %i]["datetime"], L2[h]["key%s" %i], linestyle = "-",
-                linewidth = 1.2, label = currencyList[i], color = colours[i])
+        try:
+            ax.plot(L1[h]["key%s" %i]["datetime"], L2[h]["key%s" %i], linestyle = "-",
+                    linewidth = 1.2, label = currencyList[i], color = colours[i])
+        except KeyError:
+            pass
+    if len(errList) > 0 and trade == True:
+        errText = "*" + " and ".join(errList) + " missing price data"
+        ax.text(0.01, 0.96, errText, color = "white", fontsize = 12, transform = ax.transAxes)
+        
+    # Format plot axes
     ax.xaxis.set_major_formatter(formatter)
     ax.xaxis.set_major_locator(intvMj)
     ax.xaxis.set_minor_locator(intvMi)

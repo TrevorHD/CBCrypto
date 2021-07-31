@@ -227,6 +227,24 @@ def getCurrentHoldings():
     # Return dataframe of held currencies, sorted by value
     return dfCurrency.sort_values("Amount", ascending = False)
 
+# Function to list current holdings for only a single cryptocurrency (or trading pair)
+def getSpecificCurrency(currency1, currency2 = None):
+    
+    # Initialise lists
+    cAmnt = []
+    
+    # Get crypto and native balance for each specified currency
+    cHold1 = client.get_account(initIDs.loc[initIDs["Currency"] == currency1]["ID"].values[0])
+    cAmnt.append(cHold1["balance"]["amount"])
+    cAmnt.append(cHold1["native_balance"]["amount"])
+    if currency2 not in [None, ""]:
+        cHold2 = client.get_account(initIDs.loc[initIDs["Currency"] == currency2]["ID"].values[0])
+        cAmnt.append(cHold2["balance"]["amount"])
+        cAmnt.append(cHold2["native_balance"]["amount"])
+        
+    # Return list of crypto and native balances
+    return cAmnt
+
 # Function to list user's transaction history    
 def getTransactionHistory():
 

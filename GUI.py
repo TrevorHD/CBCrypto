@@ -3,9 +3,7 @@
 # Fix progress bar
 # Move refresh button and text to top-right
     # Allow refresh button to refresh everything at once
-# Pre-load data to decrease loading times
-    # Get number of each currency held
-    # Use current prices to estimate dollar values
+# Add to/from conversion specification
 # Create login screen using API key and secret
 # Automatically convert between crypto amounts in trade entry boxes
 # Automatically make dollar amounts identical in trade entry boxes
@@ -605,11 +603,14 @@ def plotTrade():
     # Get trade order information
     if blank == False:
         tInfo = getQuote(tType1, tType2, float(amount), currency1, currency2)
+        
+    # Get currency owned information
+    cInfo = getSpecificCurrency(currency1, currency2)
     
     # Get currency owned text
-    oT1 = currency1 + " owned: "
+    oT1 = currency1 + " owned: " + ftNum(float(cInfo[0]), "amount", 4) + " ($" + cInfo[1] + ")"
     if tType1 == "convert":
-        oT2 = currency2 + " owned: "
+        oT2 = currency2 + " owned: " + ftNum(float(cInfo[2]), "amount", 4) + " ($" + cInfo[3] + ")"
     else:
         oT2 = ""
     
@@ -637,13 +638,13 @@ def plotTrade():
     ax = pyplot.gca()
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
-    ax.text(0.450, 0.87, oT1, color = "white", fontsize = 14, horizontalalignment = "left")
-    ax.text(0.450, 0.78, oT2, color = "white", fontsize = 14, horizontalalignment = "left")
-    ax.text(0.450, 0.87, currency1 + " ", color = "#b809ed", fontsize = 14, horizontalalignment = "left")
-    ax.text(0.450, 0.78, currency2 + " ", color = "#09e5ed", fontsize = 14, horizontalalignment = "left")
-    ax.text(0.450, 0.53, "Subtotal:", color = "white", fontsize = 20, horizontalalignment = "left")
-    ax.text(0.450, 0.37, "Coinbase Fee:", color = "white", fontsize = 20, horizontalalignment = "left")
-    ax.text(0.450, 0.21, "Final Total:", color = "white", fontsize = 20, horizontalalignment = "left")
+    ax.text(0.430, 0.87, oT1, color = "white", fontsize = 14, horizontalalignment = "left")
+    ax.text(0.430, 0.78, oT2, color = "white", fontsize = 14, horizontalalignment = "left")
+    ax.text(0.430, 0.87, currency1 + " ", color = "#b809ed", fontsize = 14, horizontalalignment = "left")
+    ax.text(0.430, 0.78, currency2 + " ", color = "#09e5ed", fontsize = 14, horizontalalignment = "left")
+    ax.text(0.430, 0.53, "Subtotal:", color = "white", fontsize = 20, horizontalalignment = "left")
+    ax.text(0.430, 0.37, "Fees:", color = "white", fontsize = 20, horizontalalignment = "left")
+    ax.text(0.430, 0.21, "Total:", color = "white", fontsize = 20, horizontalalignment = "left")
     ax.text(0.000, 0.05, dT1, color = "white", fontsize = 10, horizontalalignment = "left")
     ax.text(0.000, 0.00, dT2, color = "white", fontsize = 10, horizontalalignment = "left")
     ax.text(0.986, 0.53, tT1, color = "white", fontsize = 20, horizontalalignment = "right")
@@ -689,7 +690,7 @@ def plotRefresh(instance):
 ##### Run GUI ---------------------------------------------------------------------------------------------
 
 # Initialise account data
-initAccount = client.get_accounts()
+initAccount = client.get_accounts(limit = 100)
 initIDs = getIDs()
 initPmt = getPmt()
 

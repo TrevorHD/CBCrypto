@@ -204,21 +204,25 @@ client = Client("api_key", "api_secret")
 # Function to list current holdings for each cryptocurrency
 def getCurrentHoldings():
     
-    # Get account
-    account = client.get_accounts()
-    
     # Initialise lists
+    ids = []
     currency = []
     amount = []
+    crypto = []
     
     # Populate lists with held currencies
-    for wallet in account.data:
+    for wallet in initAccount.data:
+        idn = wallet["id"]
+        crncy = str(wallet["name"]).replace(" Wallet", "")
         value = float(str(wallet["native_balance"]).replace("USD ", ""))
         if value > 0:
+            ids.append(idn)
+            currency.append(crncy)
+            crypto.append(float(str(wallet["balance"]).replace(crncy + " ", "")))
             amount.append(value)
-            currency.append(str(wallet["name"]).replace(" Wallet", ""))
     pcts = [x/sum(amount)*100 for x in amount]
-    dfCurrency = DataFrame([currency, amount, pcts], ["Currency", "Amount", "Percent"]).transpose() 
+    dfCurrency = DataFrame([ids, currency, crypto, amount, pcts],
+                           ["ID", "Currency", "Crypto", "Amount", "Percent"]).transpose() 
     
     # Return dataframe of held currencies, sorted by value
     return dfCurrency.sort_values("Amount", ascending = False)
@@ -261,7 +265,7 @@ def getTransactionHistory():
     dfTransactions = DataFrame([currency, amountC, amountN, tType, tTime, tStat],
                                ["Currency", "Amount", "USD", "Type", "Time", "Status"]).transpose()
     
-    # Return dataframe of transactions
+    # Return data frame of transactions
     return dfTransactions 
 
 
@@ -270,58 +274,83 @@ def getTransactionHistory():
 
 ##### Buy/sell/convert cryptocurrency ---------------------------------------------------------------------
 
-# Function to get buy/sell prices for a given crypto
-def getQuote(tType1, tType2, amount, currency1, currency2 = None):
+# Function to get all wallet IDs available for trading
+def getIDs():
     
-    # Initialise lists
+    # Initialise list
     ids = []
     currency = []
-    accts = []
-    aType = []
-    
-    # Get account
-    account = client.get_accounts()
     
     # Get all wallet IDs
-    for wallet in account.data:
+    for wallet in initAccount.data:
         ids.append(wallet["id"])
         currency.append(wallet["currency"])
+        
+    # Put wallet ID and currency into a data frame
+    dfIDs = DataFrame([ids, currency], ["ID", "Currency"]).transpose()
+    
+    # Return data frame of IDs  
+    return(dfIDs)
+
+# Function to get all payment IDs available for trading
+def getPmt():
+    
+    # Initialise lists
+    accts = []
+    aType = []
     
     # Get payment method ID and types
     payments = client.get_payment_methods()
     for method in payments.data:
         aType.append(method["type"])
         accts.append(method["id"])
+        
+    # Put payment ID and type into a data frame
+    dfPmt = DataFrame([accts, aType], ["ID", "Type"]).transpose()
+    
+    # Return data frame of payment methods  
+    return(dfPmt)
+
+# Function to get buy/sell prices for a given crypto
+def getQuote(tType1, tType2, amount, currency1, currency2 = None): 
+    
+    # Get wallet IDs for each currency
+    id1 = initIDs.loc[initIDs["Currency"] == currency1]["ID"].values[0]
+    if currency2 not in [None, ""]:
+        id2 = initIDs.loc[initIDs["Currency"] == currency2]["ID"].values[0]
+        
+    # Get payment method IDs
+    bank = initPmt.loc[initPmt["Type"] == "ach_bank_account"]["ID"].values[0]
+    fiat = initPmt.loc[initPmt["Type"] == "fiat_account"]["ID"].values[0]
     
     # Get price quote for buy
     if tType1 == "buy":
         if tType2 == "crypto":
-            conf = client.buy(ids[currency.index(currency1)], amount = amount, quote = True,
-                              currency = currency1, payment_method = accts[aType.index("ach_bank_account")])
+            conf = client.buy(id1, amount = amount, quote = True,
+                              currency = currency1, payment_method = bank)
         if tType2 == "dollar":
-            conf = client.buy(ids[currency.index(currency1)], total = amount, quote = True,
-                              currency = "USD", payment_method = accts[aType.index("ach_bank_account")])    
+            conf = client.buy(id1, total = amount, quote = True,
+                              currency = "USD", payment_method = bank)    
     
     # Get price quote for sell
     if tType1 == "sell":
         if tType2 == "crypto":
-            conf = client.sell(ids[currency.index(currency1)], amount = amount, quote = True,
-                               currency = currency1, payment_method = accts[aType.index("fiat_account")])
+            conf = client.sell(id1, amount = amount, quote = True,
+                               currency = currency1, payment_method = fiat)
         if tType2 == "dollar":
-            conf = client.sell(ids[currency.index(currency1)], total = amount, quote = True,
-                               currency = "USD", payment_method = accts[aType.index("fiat_account")])
+            conf = client.sell(id1, total = amount, quote = True,
+                               currency = "USD", payment_method = fiat)
             
     # Get price quote for conversion (sell then buy)
     if tType1 == "convert":
         if tType2 == "crypto":
-            conf1 = client.sell(ids[currency.index(currency1)], amount = amount, quote = True,
-                                currency = currency1, payment_method = accts[aType.index("fiat_account")])
+            conf1 = client.sell(id1, amount = amount, quote = True,
+                                currency = currency1, payment_method = fiat)
         if tType2 == "dollar":
-            conf1 = client.sell(ids[currency.index(currency1)], total = amount, quote = True,
-                                currency = "USD", payment_method = accts[aType.index("fiat_account")])
-        conf2 = client.buy(ids[currency.index(currency2)], total = float(conf1["total"]["amount"]),
-                           quote = True, currency = "USD",
-                           payment_method = accts[aType.index("ach_bank_account")])
+            conf1 = client.sell(id1, total = amount, quote = True,
+                                currency = "USD", payment_method = fiat)
+        conf2 = client.buy(id2, total = float(conf1["total"]["amount"]),
+                           quote = True, currency = "USD", payment_method = bank)
     
     # Compile quote data
     if tType1 != "convert":

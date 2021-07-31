@@ -4,13 +4,12 @@
 # Move refresh button and text to top-right
     # Allow refresh button to refresh everything at once
 # Pre-load data to decrease loading times
-    # Get wallet IDs for each currency
     # Get number of each currency held
     # Use current prices to estimate dollar values
 # Create login screen using API key and secret
 # Automatically convert between crypto amounts in trade entry boxes
 # Automatically make dollar amounts identical in trade entry boxes
-# fully implement trade functionality
+# Fully implement trade functionality
 # Add content to portfolio page
 
 
@@ -689,6 +688,11 @@ def plotRefresh(instance):
 
 ##### Run GUI ---------------------------------------------------------------------------------------------
 
+# Initialise account data
+initAccount = client.get_accounts()
+initIDs = getIDs()
+initPmt = getPmt()
+
 # Initialise time series data for featured currencies
 sData1, sData2, mData = [], [], []
 for h in range(0, 7):
@@ -908,7 +912,7 @@ afterNum = None
 def entryWait(*args, aN = afterNum):
     if aN is not None:
         e1.after_cancel(aN)
-    global test; afterNum = e1.after(3000, plotTrade)
+    global test; afterNum = e1.after(2000, plotTrade)
 e1.bind("<Key>", entryWait)
 e2.bind("<Key>", entryWait)
 

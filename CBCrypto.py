@@ -249,23 +249,15 @@ def getSpecificCurrency(currency1, currency2 = None):
 def getTransactionHistory():
 
     # Initialise lists
-    ids = []
     currency = []
     amountC = []
     amountN = []
     tType = []
     tTime = []
     tStat = []
-
-    # Get account
-    account = client.get_accounts()
-    
-    # Get all wallet IDs
-    for wallet in account.data:
-        ids.append(wallet["id"])
     
     # Get transactions for each wallet
-    for i in ids:
+    for i in list(initIDs["ID"].values):
         events = client.get_transactions(i)
         for j in events.data:
             currency.append(j["amount"]["currency"])
@@ -291,6 +283,23 @@ def getTransactionHistory():
 
 
 ##### Buy/sell/convert cryptocurrency ---------------------------------------------------------------------
+
+# Function to get list of currencies available for trading
+def getTradeList():
+    
+    # Get trading pairs from Coinbase website
+    cbText = json.loads(requests.get("https://api.pro.coinbase.com/products").text)
+    
+    # Initialise list
+    cbList = []
+    
+    # Get only unique USD-XXX trading pairs
+    for i in range(0, len(cbText)):
+        cbList.append(cbText[i]["base_currency"])
+    cbList = list(set(cbList))
+    
+    # Return list of currencies available for trading
+    return(cbList.sort())
 
 # Function to get all wallet IDs available for trading
 def getIDs():

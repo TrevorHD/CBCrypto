@@ -708,12 +708,7 @@ for h in range(0, 7):
                                  ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]))
 
 # Get list of currencies available for trading
-cbText = json.loads(requests.get("https://api.pro.coinbase.com/products").text)
-cbList = []
-for i in range(0, len(cbText)):
-    cbList.append(cbText[i]["base_currency"])
-cbList = list(set(cbList))
-cbList.sort()  
+cbList = getTradeList()
 
 # Create main TkInter window
 window = Tk()

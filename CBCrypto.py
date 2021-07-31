@@ -297,9 +297,10 @@ def getTradeList():
     for i in range(0, len(cbText)):
         cbList.append(cbText[i]["base_currency"])
     cbList = list(set(cbList))
+    cbList.sort()
     
     # Return list of currencies available for trading
-    return(cbList.sort())
+    return(cbList)
 
 # Function to get all wallet IDs available for trading
 def getIDs():

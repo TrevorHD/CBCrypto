@@ -1,8 +1,17 @@
 ##### GUI To-do list --------------------------------------------------------------------------------------
 
 # Fix progress bar
+# Move refresh button and text to top-right
+    # Allow refresh button to refresh everything at once
+# Pre-load data to decrease loading times
+    # Get wallet IDs for each currency
+    # Get number of each currency held
+    # Use current prices to estimate dollar values
 # Create login screen using API key and secret
-# Create trading interface as pop-up window
+# Automatically convert between crypto amounts in trade entry boxes
+# Automatically make dollar amounts identical in trade entry boxes
+# fully implement trade functionality
+# Add content to portfolio page
 
 
 
@@ -596,7 +605,7 @@ def plotTrade():
     
     # Get trade order information
     if blank == False:
-        tInfo = getQuote(tType1, tType2, float(amount), currency1, currency2)     
+        tInfo = getQuote(tType1, tType2, float(amount), currency1, currency2)
     
     # Get currency owned text
     oT1 = currency1 + " owned: "

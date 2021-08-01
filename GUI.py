@@ -3,10 +3,7 @@
 # Fix progress bar
 # Move refresh button and text to top-right
     # Allow refresh button to refresh everything at once
-# Add to/from conversion specification
 # Create login screen using API key and secret
-# Automatically convert between crypto amounts in trade entry boxes
-# Automatically make dollar amounts identical in trade entry boxes
 # Fully implement trade functionality
 # Add content to portfolio page
 
@@ -584,7 +581,12 @@ def plotTrade():
     # Convert state indicators to acceptable arguments for getQuote
     currency1 = cState1.get()
     currency2 = cState2.get()
-    amount = eState1.get()
+    if eState1.get() == "":
+        cT1, cT2 = currency2, currency1
+        amount = eState2.get()
+    elif eState2.get() == "":
+        cT1, cT2 = currency1, currency2
+        amount = eState1.get()
     if tState1.get() == 1:
         tType1 = "buy"
     elif tState1.get() == 2:
@@ -595,14 +597,14 @@ def plotTrade():
         tType2 = "dollar"
     elif tState2.get() == 2:
         tType2 = "crypto"
-    if eState1.get() == "":
+    if amount == "":
         blank = True
     else:
         blank = False
     
     # Get trade order information
     if blank == False:
-        tInfo = getQuote(tType1, tType2, float(amount), currency1, currency2)
+        tInfo = getQuote(tType1, tType2, float(amount), cT1, cT2)
         
     # Get currency owned information
     cInfo = getSpecificCurrency(currency1, currency2)
@@ -832,15 +834,20 @@ def placeMenu():
 def changeList(*args):
     c1.configure(values = [x for x in cbList if x != cState2.get()])
     c2.configure(values = [x for x in cbList if x != cState1.get()])
-c1.bind("<<ComboboxSelected>>", lambda e: [c1.selection_clear(), changeList(), plotTrade(),
-                                           plotSeries(trade = True)])
-c2.bind("<<ComboboxSelected>>", lambda e: [c2.selection_clear(), changeList(), plotTrade(),
-                                           plotSeries(trade = True)])
+c1.bind("<<ComboboxSelected>>", lambda e:[c1.selection_clear(), changeList(), plotTrade(),
+                                          plotSeries(trade = True)])
+c2.bind("<<ComboboxSelected>>", lambda e:[c2.selection_clear(), changeList(), plotTrade(),
+                                          plotSeries(trade = True)])
 
 # Ensure that entry box is cleared when switching from dollars to crypto or vice-versa
-def clearBox():
-    e1.delete(0, "end")
-    e2.delete(0, "end")
+def clearBox(target = None, *args):
+    if target == None:
+        e1.delete(0, "end")
+        e2.delete(0, "end")
+    elif target == 1:
+        e1.delete(0, "end")
+    elif target == 2:
+        e2.delete(0, "end")
     
 # Control trade type with radiobuttons
 rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotTrade(),
@@ -909,8 +916,8 @@ def entryWait(*args, aN = afterNum):
     if aN is not None:
         e1.after_cancel(aN)
     global test; afterNum = e1.after(2000, plotTrade)
-e1.bind("<Key>", entryWait)
-e2.bind("<Key>", entryWait)
+e1.bind("<Key>", lambda e:[entryWait(), clearBox(2)])
+e2.bind("<Key>", lambda e:[entryWait(), clearBox(1)])
 
 # Run TkInter window over loop
 window.mainloop()

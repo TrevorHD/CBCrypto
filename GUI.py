@@ -17,6 +17,8 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
+from PIL import Image
+from PIL import ImageTk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -728,6 +730,10 @@ window.title("CBCrypto: Cryptocurrency Dashboard")
 window.geometry("1920x1080")
 window.configure(bg = "#33393b")
 
+# Set window icon
+icon = ImageTk.PhotoImage(Image.open("Logo.png"))
+window.wm_iconphoto(False, icon)
+
 # Set window tabs
 tC = ttk.Notebook(window)
 t1 = ttk.Frame(tC)
@@ -852,7 +858,7 @@ def clearBox(target = None, *args):
 # Function to create pop-up window for trade confirmation
 def tradeWindow():
     
-    # Create pop-up window; set title and dimensions
+    # Create pop-up window; set window details
     p1 = Toplevel()
     p1.title("Trade Confirmation")
     p1.geometry("350x150")

@@ -848,6 +848,27 @@ def clearBox(target = None, *args):
         e1.delete(0, "end")
     elif target == 2:
         e2.delete(0, "end")
+
+# Function to create pop-up window for trade confirmation
+def tradeWindow():
+    
+    # Create pop-up window; set title and dimensions
+    p1 = Toplevel()
+    p1.title("Trade Confirmation")
+    p1.geometry("350x150")
+    p1.resizable(width = False, height = False)
+    p1.configure(bg = "#33393b")
+    
+    # Create buttons to confirm or cancel trade
+    b1_p1 = ttk.Button(p1, text = "Yes", width = 9)
+    b1_p1.place(x = 55, y = 100)
+    b2_p1 = ttk.Button(p1, text = "No", command = p1.destroy, width = 9)
+    b2_p1.place(x = 250, y = 100)
+
+# Function to reset radiobuttons and text fields
+def resetTrades():
+    tState1.set(1)
+    tState2.set(1)
     
 # Control trade type with radiobuttons
 rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotTrade(),
@@ -877,13 +898,8 @@ b2 = ttk.Button(t3, text = "Refresh", command = lambda:[plotHoldings(), plotTran
 b2.place(x = 1327, y = 35)
 
 # Add trade button to buy/sell/convert currency
-b3 = ttk.Button(t3, text = "Confirm", width = 9)
+b3 = ttk.Button(t3, text = "Confirm", command = tradeWindow, width = 9)
 b3.place(x = 101, y = 675)
-
-# Function to reset radiobuttons and text fields
-def resetTrades():
-    tState1.set(1)
-    tState2.set(1)
 
 # Add button to reset trade settings
 b4 = ttk.Button(t3, text = "Reset", width = 9,

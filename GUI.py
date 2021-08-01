@@ -635,7 +635,7 @@ def plotTrade():
     dT2 = "A detailed schedule of transaction fees can be found on Coinbase (www.coinbase.com)."
     
     # Plot trade order information as text
-    fig10 = pyplot.figure(12)
+    fig12 = pyplot.figure(12)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -655,6 +655,54 @@ def plotTrade():
     ax.text(0.986, 0.37, tT2, color = "white", fontsize = 20, horizontalalignment = "right")
     ax.text(0.986, 0.21, tT3, color = "white", fontsize = 20, horizontalalignment = "right")
     
+    # Create TkInter canvas with Matplotlib figure
+    pyplot.gcf().canvas.draw()
+
+# Function to plot trade confirmation text
+def plotTradeConfirmation():
+    
+    # Convert state indicators to text
+    currency1 = cState1.get()
+    currency2 = cState2.get()
+    if eState1.get() == "":
+        cT1, cT2 = currency2, currency1
+        amount = eState2.get()
+    elif eState2.get() == "":
+        cT1, cT2 = currency1, currency2
+        amount = eState1.get()
+    if tState1.get() == 1:
+        tType1 = "Buy"
+    elif tState1.get() == 2:
+        tType1 = "Sell"
+    elif tState1.get() == 3:
+        tType1 = "Convert"
+    if tState2.get() == 1:
+        tType2 = "Dollar"
+    elif tState2.get() == 2:
+        tType2 = "Crypto"
+    
+    # Create message text
+    if tType1 in ["Buy", "Sell"]:
+        if tType2 == "Dollar":
+            tText = tType1 + " $" + amount + " of " + currency1 + "?"
+        elif tType2 == "Crypto":
+            tText = tType1 + " " + amount + " " + currency1 + "?"
+    if tType1 == "Convert":
+        if tType2 == "Dollar":
+            tText = tType1 + " $" + amount + " of " + currency1 + " to " + currency2 + "?"
+        elif tType2 == "Crypto":
+            tText = tType1 + " " + amount + " " + currency1 + " to " + currency2 + "?"
+    
+    # Plot trade order information as text
+    fig13 = pyplot.figure(13)
+    pyplot.clf()
+    pyplot.axis("off")
+    pyplot.tight_layout()
+    ax = pyplot.gca()
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.text(0.5, 0.4, tText, color = "white", fontsize = 22, horizontalalignment = "center")
+
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
 
@@ -730,10 +778,6 @@ window.title("CBCrypto: Cryptocurrency Dashboard")
 window.geometry("1920x1080")
 window.configure(bg = "#33393b")
 
-# Set window icon
-icon = ImageTk.PhotoImage(Image.open("Logo.png"))
-window.wm_iconphoto(False, icon)
-
 # Set window tabs
 tC = ttk.Notebook(window)
 t1 = ttk.Frame(tC)
@@ -760,6 +804,9 @@ canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3)[x]) fo
 for i in range(0, len(figX)):
     canvasX[i].get_tk_widget().place(x = [50, 50, 775, 775, 341, 1068, 75, 50, 535, 614, 50, 90][i], 
                                      y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 67, 50, 500][i])
+    
+# Set up trade confirmation plot for pop-up window
+figP = pyplot.figure(figsize = (4.9, 1.3), facecolor = "#33393b")
 
 # Set state variables
 bState1 = IntVar()
@@ -864,12 +911,18 @@ def tradeWindow():
     p1.geometry("350x150")
     p1.resizable(width = False, height = False)
     p1.configure(bg = "#33393b")
+    p1.wm_iconphoto(False, icon)
     
     # Create buttons to confirm or cancel trade
     b1_p1 = ttk.Button(p1, text = "Yes", width = 9)
     b1_p1.place(x = 55, y = 100)
     b2_p1 = ttk.Button(p1, text = "No", command = p1.destroy, width = 9)
     b2_p1.place(x = 250, y = 100)
+    
+    # Set up message plot and canvas
+    plotTradeConfirmation()
+    canvasP = FigureCanvasTkAgg(figP, master = p1)
+    canvasP.get_tk_widget().place(x = 0, y = 0)
 
 # Function to reset radiobuttons and text fields
 def resetTrades():
@@ -940,6 +993,10 @@ def entryWait(*args, aN = afterNum):
     global test; afterNum = e1.after(2000, plotTrade)
 e1.bind("<Key>", lambda e:[entryWait(), clearBox(2)])
 e2.bind("<Key>", lambda e:[entryWait(), clearBox(1)])
+
+# Set window icon
+icon = ImageTk.PhotoImage(Image.open("Logo.png"))
+window.wm_iconphoto(False, icon)
 
 # Run TkInter window over loop
 window.mainloop()

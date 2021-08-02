@@ -665,33 +665,22 @@ def plotTradeConfirmation():
     currency1 = cState1.get()
     currency2 = cState2.get()
     if eState1.get() == "":
-        cT1, cT2 = currency2, currency1
+        c1, c2 = currency2, currency1
         amount = eState2.get()
     elif eState2.get() == "":
-        cT1, cT2 = currency1, currency2
+        c1, c2 = currency1, currency2
         amount = eState1.get()
     if tState1.get() == 1:
         tType1 = "Buy"
+        cT1, cT2 = "USD ($)", c1
     elif tState1.get() == 2:
         tType1 = "Sell"
+        cT1, cT2 = c1, "USD ($)"
     elif tState1.get() == 3:
         tType1 = "Convert"
-    if tState2.get() == 1:
-        tType2 = "Dollar"
-    elif tState2.get() == 2:
-        tType2 = "Crypto"
-    
-    # Create message text
-    if tType1 in ["Buy", "Sell"]:
-        if tType2 == "Dollar":
-            tText = tType1 + " $" + amount + " of " + currency1 + "?"
-        elif tType2 == "Crypto":
-            tText = tType1 + " " + amount + " " + currency1 + "?"
-    if tType1 == "Convert":
-        if tType2 == "Dollar":
-            tText = tType1 + " $" + amount + " of " + currency1 + " to " + currency2 + "?"
-        elif tType2 == "Crypto":
-            tText = tType1 + " " + amount + " " + currency1 + " to " + currency2 + "?"
+        cT1, cT2 = c1, c2
+        if tState2.get() == 1:
+            amount = "$" + amount
     
     # Plot trade order information as text
     fig13 = pyplot.figure(13)
@@ -701,7 +690,11 @@ def plotTradeConfirmation():
     ax = pyplot.gca()
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
-    ax.text(0.5, 0.4, tText, color = "white", fontsize = 22, horizontalalignment = "center")
+    for i in range(0, 4):
+        ax.text(0.38, 0.85 - i*0.2, ["Type: " +  tType1, "Amount: " + amount,
+                                    "From: " + cT1, "To: " + cT2][i],
+                horizontalalignment = "left", color = "white", fontsize = 13)
+    ax.text(0.045, 0.85, "Confirm?", horizontalalignment = "left", color = "white", fontsize = 13)
 
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
@@ -806,7 +799,7 @@ for i in range(0, len(figX)):
                                      y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 67, 50, 500][i])
     
 # Set up trade confirmation plot for pop-up window
-figP = pyplot.figure(figsize = (4.9, 1.3), facecolor = "#33393b")
+figP = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
 
 # Set state variables
 bState1 = IntVar()
@@ -908,21 +901,21 @@ def tradeWindow():
     # Create pop-up window; set window details
     p1 = Toplevel()
     p1.title("Trade Confirmation")
-    p1.geometry("350x150")
+    p1.geometry("300x120")
     p1.resizable(width = False, height = False)
     p1.configure(bg = "#33393b")
     p1.wm_iconphoto(False, icon)
-    
-    # Create buttons to confirm or cancel trade
-    b1_p1 = ttk.Button(p1, text = "Yes", width = 9)
-    b1_p1.place(x = 55, y = 100)
-    b2_p1 = ttk.Button(p1, text = "No", command = p1.destroy, width = 9)
-    b2_p1.place(x = 250, y = 100)
     
     # Set up message plot and canvas
     plotTradeConfirmation()
     canvasP = FigureCanvasTkAgg(figP, master = p1)
     canvasP.get_tk_widget().place(x = 0, y = 0)
+    
+    # Create buttons to confirm or cancel trade
+    b1_p1 = ttk.Button(p1, text = "Yes", width = 9)
+    b1_p1.place(x = 20, y = 45)
+    b2_p1 = ttk.Button(p1, text = "No", command = p1.destroy, width = 9)
+    b2_p1.place(x = 20, y = 80)
 
 # Function to reset radiobuttons and text fields
 def resetTrades():

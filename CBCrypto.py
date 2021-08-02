@@ -340,7 +340,7 @@ def getPmt():
     return(dfPmt)
 
 # Function to get buy/sell prices for a given crypto
-def getQuote(tType1, tType2, amount, currency1, currency2 = None): 
+def getQuote(tType1, tType2, amount, currency1, currency2 = None, push = False): 
     
     # Get wallet IDs for each currency
     id1 = initIDs.loc[initIDs["Currency"] == currency1]["ID"].values[0]
@@ -351,45 +351,74 @@ def getQuote(tType1, tType2, amount, currency1, currency2 = None):
     bank = initPmt.loc[initPmt["Type"] == "ach_bank_account"]["ID"].values[0]
     fiat = initPmt.loc[initPmt["Type"] == "fiat_account"]["ID"].values[0]
     
-    # Get price quote for buy
-    if tType1 == "buy":
-        if tType2 == "crypto":
-            conf = client.buy(id1, amount = amount, quote = True,
-                              currency = currency1, payment_method = bank)
-        if tType2 == "dollar":
-            conf = client.buy(id1, total = amount, quote = True,
-                              currency = "USD", payment_method = bank)    
+    # Get quotes and store data if push is false
+    if push == False:
     
-    # Get price quote for sell
-    if tType1 == "sell":
-        if tType2 == "crypto":
-            conf = client.sell(id1, amount = amount, quote = True,
-                               currency = currency1, payment_method = fiat)
-        if tType2 == "dollar":
-            conf = client.sell(id1, total = amount, quote = True,
-                               currency = "USD", payment_method = fiat)
+        # Get price quote for buy
+        if tType1 == "buy":
+           if tType2 == "crypto":
+               conf = client.buy(id1, amount = amount, quote = True,
+                                 currency = currency1, payment_method = bank)
+           elif tType2 == "dollar":
+               conf = client.buy(id1, total = amount, quote = True,
+                                 currency = "USD", payment_method = bank)    
+    
+        # Get price quote for sell
+        if tType1 == "sell":
+            if tType2 == "crypto":
+                conf = client.sell(id1, amount = amount, quote = True,
+                                   currency = currency1, payment_method = fiat)
+            elif tType2 == "dollar":
+                conf = client.sell(id1, total = amount, quote = True,
+                                   currency = "USD", payment_method = fiat)
             
-    # Get price quote for conversion (sell then buy)
-    if tType1 == "convert":
-        if tType2 == "crypto":
-            conf1 = client.sell(id1, amount = amount, quote = True,
-                                currency = currency1, payment_method = fiat)
-        if tType2 == "dollar":
-            conf1 = client.sell(id1, total = amount, quote = True,
-                                currency = "USD", payment_method = fiat)
-        conf2 = client.buy(id2, total = float(conf1["total"]["amount"]),
-                           quote = True, currency = "USD", payment_method = bank)
+        # Get price quote for conversion (sell then buy)
+        if tType1 == "convert":
+            if tType2 == "crypto":
+                conf1 = client.sell(id1, amount = amount, quote = True,
+                                     currency = currency1, payment_method = fiat)
+            elif tType2 == "dollar":
+                conf1 = client.sell(id1, total = amount, quote = True,
+                                    currency = "USD", payment_method = fiat)
+            conf2 = client.buy(id2, total = float(conf1["total"]["amount"]),
+                               quote = True, currency = "USD", payment_method = bank)
     
-    # Compile quote data
-    if tType1 != "convert":
-        qData = [float(conf["subtotal"]["amount"]), float(conf["fee"]["amount"]),
-                 float(conf["total"]["amount"]), float(conf["unit_price"]["amount"])]
-    else:
-        qData = [float(conf1["subtotal"]["amount"]), float(conf1["fee"]["amount"]),
-                 float(conf1["total"]["amount"]), float(conf1["unit_price"]["amount"]),
-                 float(conf2["subtotal"]["amount"]), float(conf2["fee"]["amount"]),
-                 float(conf2["total"]["amount"]), float(conf2["unit_price"]["amount"])]
+        # Compile quote data
+        if tType1 != "convert":
+            qData = [float(conf["subtotal"]["amount"]), float(conf["fee"]["amount"]),
+                     float(conf["total"]["amount"]), float(conf["unit_price"]["amount"])]
+        else:
+            qData = [float(conf1["subtotal"]["amount"]), float(conf1["fee"]["amount"]),
+                     float(conf1["total"]["amount"]), float(conf1["unit_price"]["amount"]),
+                     float(conf2["subtotal"]["amount"]), float(conf2["fee"]["amount"]),
+                     float(conf2["total"]["amount"]), float(conf2["unit_price"]["amount"])]
     
-    # Return quote data
-    return qData
+        # Return quote data
+        return qData
+    
+    # Perform trade if push is true
+    elif push == True:
+        
+        # Execute buy order
+        if tType1 == "buy":
+           if tType2 == "crypto":
+               client.buy(id1, amount = amount, currency = currency1, payment_method = bank)
+           elif tType2 == "dollar":
+               client.buy(id1, total = amount, currency = "USD", payment_method = bank)    
+    
+        # Execute sell order
+        if tType1 == "sell":
+            if tType2 == "crypto":
+                client.sell(id1, amount = amount, currency = currency1, payment_method = fiat)
+            elif tType2 == "dollar":
+                client.sell(id1, total = amount, currency = "USD", payment_method = fiat)
+            
+        # Execute currency conversion
+        if tType1 == "convert":
+            if tType2 == "crypto":
+                 client.sell(id1, amount = amount, currency = currency1, payment_method = fiat)
+            elif tType2 == "dollar":
+                client.sell(id1, total = amount, currency = "USD", payment_method = fiat)
+            client.buy(id2, total = float(conf1["total"]["amount"]),
+                       currency = "USD", payment_method = bank)
 

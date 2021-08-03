@@ -933,6 +933,13 @@ def resetTrades():
     tState1.set(1)
     tState2.set(1)
     
+# Function to disable trade confirmation button when no input is provided
+def disableTrades():
+    if eState1 == "" and eState2 == "":
+        b3.configure(state = "disabled")
+    else:
+        b3.configure(state = "normal")
+    
 # Control trade type with radiobuttons
 rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotTrade(),
                                              plotSeries(trade = True)],
@@ -988,6 +995,7 @@ rb3[0].invoke()
 rb4[0].invoke()
 b1.invoke()
 b2.invoke()
+b3.state(["disabled"])
 
 # Set system for updating trade information when entry typing stops
 afterNum = None
@@ -995,8 +1003,8 @@ def entryWait(*args, aN = afterNum):
     if aN is not None:
         e1.after_cancel(aN)
     global test; afterNum = e1.after(2000, plotTrade)
-e1.bind("<Key>", lambda e:[entryWait(), clearBox(2)])
-e2.bind("<Key>", lambda e:[entryWait(), clearBox(1)])
+e1.bind("<Key>", lambda e:[entryWait(), clearBox(2), disableTrades()])
+e2.bind("<Key>", lambda e:[entryWait(), clearBox(1), disableTrades()])
 
 # Set window icon
 icon = ImageTk.PhotoImage(Image.open("Logo.png"))

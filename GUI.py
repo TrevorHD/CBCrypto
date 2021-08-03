@@ -578,7 +578,7 @@ def plotTransactions(tHist, ref = False):
 ##### Plot information on trade orders --------------------------------------------------------------------
 
 # Function to plot trade orders
-def plotTrade():
+def plotTrade(push = False):
     
     # Convert state indicators to acceptable arguments for getQuote
     currency1 = cState1.get()
@@ -604,59 +604,66 @@ def plotTrade():
     else:
         blank = False
     
-    # Get trade order information
-    if blank == False:
-        tInfo = getQuote(tType1, tType2, float(amount), cT1, cT2)
+    # If push is set to false, only get a quote and plot info
+    if push == False:
+    
+        # Get trade order information
+        if blank == False:
+            tInfo = getQuote(tType1, tType2, float(amount), cT1, cT2)
         
-    # Get currency owned information
-    cInfo = getSpecificCurrency(currency1, currency2)
+        # Get currency owned information
+        cInfo = getSpecificCurrency(currency1, currency2)
     
-    # Get currency owned text
-    oT1 = currency1 + " owned: " + ftNum(float(cInfo[0]), "amount", 4) + " ($" + cInfo[1] + ")"
-    if tType1 == "convert":
-        oT2 = currency2 + " owned: " + ftNum(float(cInfo[2]), "amount", 4) + " ($" + cInfo[3] + ")"
-    else:
-        oT2 = ""
-    
-    # Get trade text
-    if blank == False:
-        tT1 = "$" + ftNum(tInfo[0], "amount")
-        if tType1 != "convert":
-            tT2 = ("-" if tType1 == "sell" else "") + "$" + ftNum(tInfo[1], "amount")
-            tT3 = "$" + ftNum(tInfo[2], "amount")
+        # Get currency owned text
+        oT1 = currency1 + " owned: " + ftNum(float(cInfo[0]), "amount", 4) + " ($" + cInfo[1] + ")"
+        if tType1 == "convert":
+            oT2 = currency2 + " owned: " + ftNum(float(cInfo[2]), "amount", 4) + " ($" + cInfo[3] + ")"
         else:
-            tT2 = "-$" + ftNum(tInfo[1] + tInfo[5], "amount")
-            tT3 = "$" + ftNum(tInfo[4], "amount")
-    else:
-        tT1, tT2, tT3 = "$---", "$---", "$---"
+            oT2 = ""
     
-    # List disclaimer text
-    dT1 = "Rates may differ at the time of transaction completion due to changes in market conditions."
-    dT2 = "A detailed schedule of transaction fees can be found on Coinbase (www.coinbase.com)."
+        # Get trade text
+        if blank == False:
+            tT1 = "$" + ftNum(tInfo[0], "amount")
+            if tType1 != "convert":
+                tT2 = ("-" if tType1 == "sell" else "") + "$" + ftNum(tInfo[1], "amount")
+                tT3 = "$" + ftNum(tInfo[2], "amount")
+            else:
+                tT2 = "-$" + ftNum(tInfo[1] + tInfo[5], "amount")
+                tT3 = "$" + ftNum(tInfo[4], "amount")
+        else:
+            tT1, tT2, tT3 = "$---", "$---", "$---"
     
-    # Plot trade order information as text
-    fig12 = pyplot.figure(12)
-    pyplot.clf()
-    pyplot.axis("off")
-    pyplot.tight_layout()
-    ax = pyplot.gca()
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 1)
-    ax.text(0.430, 0.87, oT1, color = "white", fontsize = 14, horizontalalignment = "left")
-    ax.text(0.430, 0.78, oT2, color = "white", fontsize = 14, horizontalalignment = "left")
-    ax.text(0.430, 0.87, currency1 + " ", color = "#b809ed", fontsize = 14, horizontalalignment = "left")
-    ax.text(0.430, 0.78, currency2 + " ", color = "#09e5ed", fontsize = 14, horizontalalignment = "left")
-    ax.text(0.430, 0.53, "Subtotal:", color = "white", fontsize = 20, horizontalalignment = "left")
-    ax.text(0.430, 0.37, "Fees:", color = "white", fontsize = 20, horizontalalignment = "left")
-    ax.text(0.430, 0.21, "Total:", color = "white", fontsize = 20, horizontalalignment = "left")
-    ax.text(0.000, 0.05, dT1, color = "white", fontsize = 10, horizontalalignment = "left")
-    ax.text(0.000, 0.00, dT2, color = "white", fontsize = 10, horizontalalignment = "left")
-    ax.text(0.986, 0.53, tT1, color = "white", fontsize = 20, horizontalalignment = "right")
-    ax.text(0.986, 0.37, tT2, color = "white", fontsize = 20, horizontalalignment = "right")
-    ax.text(0.986, 0.21, tT3, color = "white", fontsize = 20, horizontalalignment = "right")
+        # List disclaimer text
+        dT1 = "Rates may differ at the time of transaction completion due to changes in market conditions."
+        dT2 = "A detailed schedule of transaction fees can be found on Coinbase (www.coinbase.com)."
     
-    # Create TkInter canvas with Matplotlib figure
-    pyplot.gcf().canvas.draw()
+        # Plot trade order information as text
+        fig12 = pyplot.figure(12)
+        pyplot.clf()
+        pyplot.axis("off")
+        pyplot.tight_layout()
+        ax = pyplot.gca()
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.text(0.430, 0.87, oT1, color = "white", fontsize = 14, horizontalalignment = "left")
+        ax.text(0.430, 0.78, oT2, color = "white", fontsize = 14, horizontalalignment = "left")
+        ax.text(0.430, 0.87, currency1 + " ", color = "#b809ed", fontsize = 14, horizontalalignment = "left")
+        ax.text(0.430, 0.78, currency2 + " ", color = "#09e5ed", fontsize = 14, horizontalalignment = "left")
+        ax.text(0.430, 0.53, "Subtotal:", color = "white", fontsize = 20, horizontalalignment = "left")
+        ax.text(0.430, 0.37, "Fees:", color = "white", fontsize = 20, horizontalalignment = "left")
+        ax.text(0.430, 0.21, "Total:", color = "white", fontsize = 20, horizontalalignment = "left")
+        ax.text(0.000, 0.05, dT1, color = "white", fontsize = 10, horizontalalignment = "left")
+        ax.text(0.000, 0.00, dT2, color = "white", fontsize = 10, horizontalalignment = "left")
+        ax.text(0.986, 0.53, tT1, color = "white", fontsize = 20, horizontalalignment = "right")
+        ax.text(0.986, 0.37, tT2, color = "white", fontsize = 20, horizontalalignment = "right")
+        ax.text(0.986, 0.21, tT3, color = "white", fontsize = 20, horizontalalignment = "right")
+    
+        # Create TkInter canvas with Matplotlib figure
+        pyplot.gcf().canvas.draw()
+    
+    # If push is set to true, execute trade without plotting
+    elif push == True:
+        tInfo = getQuote(tType1, tType2, float(amount), cT1, cT2, push = True)
 
 # Function to plot trade confirmation text
 def plotTradeConfirmation():
@@ -912,10 +919,14 @@ def tradeWindow():
     canvasP.get_tk_widget().place(x = 0, y = 0)
     
     # Create buttons to confirm or cancel trade
-    b1_p1 = ttk.Button(p1, text = "Yes", width = 9)
+    b1_p1 = ttk.Button(p1, text = "Yes", command = lambda:[plotTransactions(tHist = tHist, ref = True), p1.destroy()], width = 9)
     b1_p1.place(x = 20, y = 45)
     b2_p1 = ttk.Button(p1, text = "No", command = p1.destroy, width = 9)
     b2_p1.place(x = 20, y = 80)
+
+    # Confirmation button with actual trade functionality
+    # Temporarily disabled to avoid accidental purchases while testing
+    #b1_p1 = ttk.Button(p1, text = "Yes", command = lambda:[plotTrade(push = True), plotTransactions(tHist = tHist, ref = True), p1.destroy()], width = 9)    
 
 # Function to reset radiobuttons and text fields
 def resetTrades():

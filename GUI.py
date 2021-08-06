@@ -6,6 +6,7 @@
 # Create login screen using API key and secret
 # Fully implement trade functionality
 # Add content to portfolio page
+# Redo radiobutton and figure numbering to make code more clear
 
 
 
@@ -85,14 +86,16 @@ def ftNum(x, xType, dec = 2):
 ##### Plot price data over a given amount of time ---------------------------------------------------------
 
 # Function to plot price data over time
-def plotSeries(trade = False, *args):
+def plotSeries(dType = "overview", currencies = None, *args):
     
     # Start progress bar
     #p1.update_idletasks()
     
     # Create list of tracked currencies
-    if trade == False:
+    if dType == "overview":
         currencyList = ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]
+    elif dType == "portfolio":
+        currencyList = currencies
     else:
         if tState1.get() == 3:
             currencyList = [cState1.get(), cState2.get()]
@@ -100,8 +103,11 @@ def plotSeries(trade = False, *args):
             currencyList = [cState1.get()]
     
     # Choose timeframe depending on button selection
-    if trade == False:
+    if dType == "overview":
         h = bState1.get() - 1
+        tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h]
+    elif dType == "portfolio":
+        h = bState3.get() - 1
         tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h]
     else:
         h = 0
@@ -110,8 +116,10 @@ def plotSeries(trade = False, *args):
     # Compile dicts of prices and price versus opening price
     # If price data does not exist, record problematic currencies
     errList = []
-    if trade == False:
+    if dType == "overview":
         L1, L2, D1 = sData1, sData2, mData
+    elif dType == "portfolio":
+        L1, L2 = hData1, hData2
     else:
         d1, d2 = {}, {}
         for i in range(0, len(currencyList)):
@@ -159,8 +167,10 @@ def plotSeries(trade = False, *args):
         lPrice = math.floor(min(pmin)*100)/100
     
     # Generate colour palette
-    if trade == False:
+    if dType == "overview":
         colours = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"]
+    elif dType == "portfolio":
+        colours = seaborn.color_palette("tab10", len(currencies))
     else:
         colours = ["#b809ed", "#09e5ed"]
     
@@ -213,10 +223,12 @@ def plotSeries(trade = False, *args):
         dmin = [datetime.datetime.now(tz) - tDelta]
     
     # Initialise plot
-    if trade == False:
+    if dType == "overview":
         fig = pyplot.figure(1, facecolor = "#33393b")
-    elif trade == True:
+    elif dType == "trade":
         fig = pyplot.figure(11, facecolor = "#33393b")
+    elif dType == "portfolio":
+        fig = pyplot.figure(13, facecolor = "#33393b")
     pyplot.clf()
     whitespace = fig.add_axes([0, 0, 1, 1])
     whitespace.axis("off")
@@ -230,7 +242,7 @@ def plotSeries(trade = False, *args):
                     linewidth = 1.2, label = currencyList[i], color = colours[i])
         except KeyError:
             pass
-    if len(errList) > 0 and trade == True:
+    if len(errList) > 0 and dType == "trade":
         errText = "*" + " and ".join(errList) + " missing price data"
         ax.text(0.01, 0.96, errText, color = "white", fontsize = 12, transform = ax.transAxes)
         
@@ -262,7 +274,7 @@ def plotSeries(trade = False, *args):
     pyplot.gcf().canvas.draw()
     
     # Plot price data
-    if trade == False:
+    if dType == "overview":
     
         # Get price data for currencies in previous plot; format and convert to lists
         #pData = getPriceSummary(tFrame, currencyList)
@@ -747,15 +759,20 @@ initIDs = getIDs()
 initPmt = getPmt()
 
 # Initialise time series data for featured currencies
-sData1, sData2, mData = [], [], []
+sData1, sData2, mData, cData, hData1, hData2 = [], [], [], [], [], []
+cData = list(getCurrentHoldings()["Currency"])
 for h in range(0, 7):
-    d1, d2 = {}, {}
+    d1, d2, d3, d4 = {}, {}, {}, {}
     for i in range(0, 7):
         d1["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
                                         ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"][i])
         d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
+        d3["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h], cData[i])
+        d4["key%s" %i] = d3["key%s" %i]["mean"]/(d3["key%s" %i]["mean"][0])
     sData1.append(d1)
     sData2.append(d2)
+    hData1.append(d3)
+    hData2.append(d4)
     mData.append(getPriceSummary(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
                                  ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]))
 
@@ -794,16 +811,16 @@ thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Set up plots, each as its own canvas
 figX = [pyplot.figure(figsize = [(9, 6), (9, 3.5), (9, 4.9), (9, 4.9), (5, 0.3), (5, 0.3), (5.8, 5.8),
-                                 (9, 3.5), (12, 0.6), (10.8, 9.5), (7.5, 6), (6.8, 3.6)][x],
+                                 (9, 3.5), (12, 0.6), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (9, 6)][x],
                       edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 13)][x],
                       facecolor = "#33393b",
                       linewidth = 2) for x in range(0, 12)]
-canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3)[x]) for x in range(0, len(figX))]
+canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3 + [t2])[x]) for x in range(0, len(figX))]
 
 # Place all plots
 for i in range(0, len(figX)):
-    canvasX[i].get_tk_widget().place(x = [50, 50, 775, 775, 341, 1068, 75, 50, 535, 614, 50, 90][i], 
-                                     y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 67, 50, 500][i])
+    canvasX[i].get_tk_widget().place(x = [50, 50, 775, 775, 341, 1068, 75, 50, 535, 614, 50, 90, 500][i], 
+                                     y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 67, 50, 500, 250][i])
     
 # Set up trade confirmation plot for pop-up window
 figP = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
@@ -811,6 +828,7 @@ figP = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
 # Set state variables
 bState1 = IntVar()
 bState2 = IntVar()
+bState3 = IntVar()
 sState = IntVar()
 sState.set(thMaxPage)
 tState1 = IntVar()
@@ -822,7 +840,7 @@ eState1 = StringVar()
 eState2 = StringVar()
 
 # Control currnecy time series plot timeframe with radiobuttons (Overview)
-rb1 = [ttk.Radiobutton(t1, command = lambda:[plotSeries(trade = False), plotRefresh(5)],
+rb1 = [ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
                        text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
                        variable = bState1, value = x + 1) for x in range(0, 7)]
 
@@ -831,13 +849,22 @@ for i in range(0, len(rb1)):
     rb1[i].place(x = [113, 173, 233, 293, 353, 413, 473][i], y = 40)
     
 # Control currnecy time series plot timeframe with radiobuttons (Trade)
-rb2 = [ttk.Radiobutton(t3, command = lambda:[plotSeries(trade = True)],
+rb2 = [ttk.Radiobutton(t3, command = lambda:[plotSeries(dType = "trade")],
                        text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
                        variable = bState2, value = x + 1) for x in range(0, 7)]
 
 # Place plot timeframe radiobuttons side-by-side (Trade)
 for i in range(0, len(rb2)):
     rb2[i].place(x = [113, 173, 233, 293, 353, 413, 473][i], y = 40)
+    
+# Control currnecy time series plot timeframe with radiobuttons (Portfolio)
+rb5 = [ttk.Radiobutton(t2, command = lambda:[plotSeries(dType = "portfolio", currencies = cData)],
+                       text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
+                       variable = bState3, value = x + 1) for x in range(0, 7)]
+
+# Place plot timeframe radiobuttons side-by-side (Trade)
+for i in range(0, len(rb5)):
+    rb5[i].place(x = [113, 173, 233, 293, 353, 413, 473][i], y = 40)
 
 # Create dropdown menu to select currency to buy/sell
 # Create a second dropdown menu for currency conversion
@@ -888,9 +915,9 @@ def changeList(*args):
     c1.configure(values = [x for x in cbList if x != cState2.get()])
     c2.configure(values = [x for x in cbList if x != cState1.get()])
 c1.bind("<<ComboboxSelected>>", lambda e:[c1.selection_clear(), changeList(), plotTrade(),
-                                          plotSeries(trade = True)])
+                                          plotSeries(dType = "trade")])
 c2.bind("<<ComboboxSelected>>", lambda e:[c2.selection_clear(), changeList(), plotTrade(),
-                                          plotSeries(trade = True)])
+                                          plotSeries(dType = "trade")])
 
 # Ensure that entry box is cleared when switching from dollars to crypto or vice-versa
 def clearBox(target = None, *args):
@@ -944,7 +971,7 @@ def disableTrades():
     
 # Control trade type with radiobuttons
 rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotTrade(),
-                                             plotSeries(trade = True)],
+                                             plotSeries(dType = "trade")],
                        text = ["Buy", "Sell", "Convert"][x], 
                        variable = tState1, value = x + 1) for x in range(0, 3)]
 
@@ -976,7 +1003,7 @@ b3.place(x = 101, y = 675)
 # Add button to reset trade settings
 b4 = ttk.Button(t3, text = "Reset", width = 9,
                 command = lambda:[resetTrades(), clearBox(), placeMenu(), changeList(), 
-                                  disableTrades(), plotTrade(), plotSeries(trade = True)])
+                                  disableTrades(), plotTrade(), plotSeries(dType = "trade")])
 b4.place(x = 180, y = 675)
 
 # Add spinbox to select transaction history page
@@ -995,6 +1022,7 @@ rb1[1].invoke()
 rb2[1].invoke()
 rb3[0].invoke()
 rb4[0].invoke()
+rb5[0].invoke()
 b1.invoke()
 b2.invoke()
 b3.state(["disabled"])

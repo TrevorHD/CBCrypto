@@ -935,10 +935,12 @@ def resetTrades():
     
 # Function to disable trade confirmation button when no input is provided
 def disableTrades():
-    if eState1 == "" and eState2 == "":
-        b3.configure(state = "disabled")
+    if eState1.get() == "" and eState2.get() == "":
+        b3.state(["disabled"])
+        window.update()
     else:
-        b3.configure(state = "normal")
+        b3.state(["!disabled"])
+        window.update()
     
 # Control trade type with radiobuttons
 rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotTrade(),
@@ -973,8 +975,8 @@ b3.place(x = 101, y = 675)
 
 # Add button to reset trade settings
 b4 = ttk.Button(t3, text = "Reset", width = 9,
-                command = lambda:[resetTrades(), clearBox(), placeMenu(),
-                                  changeList(), plotTrade(), plotSeries(trade = True)])
+                command = lambda:[resetTrades(), clearBox(), placeMenu(), changeList(), 
+                                  disableTrades(), plotTrade(), plotSeries(trade = True)])
 b4.place(x = 180, y = 675)
 
 # Add spinbox to select transaction history page
@@ -1002,7 +1004,7 @@ afterNum = None
 def entryWait(*args, aN = afterNum):
     if aN is not None:
         e1.after_cancel(aN)
-    global test; afterNum = e1.after(2000, plotTrade)
+    global afterNum; afterNum = e1.after(2000, plotTrade)
 e1.bind("<Key>", lambda e:[entryWait(), clearBox(2), disableTrades()])
 e2.bind("<Key>", lambda e:[entryWait(), clearBox(1), disableTrades()])
 

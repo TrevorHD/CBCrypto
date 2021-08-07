@@ -807,7 +807,7 @@ tHist = getTransactionHistory()
 thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Set up plots, each as its own canvas
-figX = [pyplot.figure(figsize = [(9, 6), (9, 3.5), (9, 4.9), (9, 4.9), (5, 0.3), (5, 0.3), (6.5, 5.45),
+figX = [pyplot.figure(figsize = [(10.6, 6), (10.6, 3.5), (9, 4.9), (9, 4.9), (5, 0.3), (5, 0.3), (6.5, 5.45),
                                  (9, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
                       edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 14)][x],
                       facecolor = "#33393b",
@@ -816,7 +816,7 @@ canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3 + [t2])
 
 # Place all plots
 for i in range(0, len(figX)):
-    canvasX[i].get_tk_widget().place(x = [40, 40, 775, 775, 341, 1068, 923, 40, 748, 614, 51, 90, 19][i], 
+    canvasX[i].get_tk_widget().place(x = [35, 35, 777, 777, 341, 1068, 923, 40, 748, 614, 51, 90, 19][i], 
                                      y = [50, 500, 35, 400, 750, 750, 65, 500, 43, 67, 50, 500, 50][i])
     
 # Set up trade confirmation plot for pop-up window

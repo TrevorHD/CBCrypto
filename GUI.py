@@ -491,15 +491,15 @@ def plotHoldings():
     change2 = ftNum(change2, "percentC", 2)
     
     # Plot portfolio balance
-    fig2 = pyplot.figure(9)
+    fig3 = pyplot.figure(9)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
-    ax2 = pyplot.gca()
-    ax2.set_xlim(0, 1)
-    ax2.set_ylim(0, 1)
-    ax2.text(0.08, 0.5, change1 + " (" + change2 + ") since last update on " + pList[1],
-             color = "white", fontsize = 22)
+    ax3 = pyplot.gca()
+    ax3.set_xlim(0, 1)
+    ax3.set_ylim(0, 1)
+    ax3.text(0.99, 0.5, change1 + " (" + change2 + ") since last update on " + pList[1],
+             color = "white", fontsize = 14, horizontalalignment = "right")
     
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
@@ -810,17 +810,17 @@ tHist = getTransactionHistory()
 thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Set up plots, each as its own canvas
-figX = [pyplot.figure(figsize = [(9, 6), (9, 3.5), (9, 4.9), (9, 4.9), (5, 0.3), (5, 0.3), (5.8, 5.8),
-                                 (9, 3.5), (12, 0.6), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (9, 6)][x],
-                      edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 13)][x],
+figX = [pyplot.figure(figsize = [(9, 6), (9, 3.5), (9, 4.9), (9, 4.9), (5, 0.3), (5, 0.3), (6.5, 5.45),
+                                 (9, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
+                      edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 14)][x],
                       facecolor = "#33393b",
-                      linewidth = 2) for x in range(0, 12)]
+                      linewidth = 2) for x in range(0, 13)]
 canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3 + [t2])[x]) for x in range(0, len(figX))]
 
 # Place all plots
 for i in range(0, len(figX)):
-    canvasX[i].get_tk_widget().place(x = [50, 50, 775, 775, 341, 1068, 75, 50, 535, 614, 50, 90, 500][i], 
-                                     y = [50, 500, 35, 400, 750, 750, 65, 500, 71, 67, 50, 500, 250][i])
+    canvasX[i].get_tk_widget().place(x = [40, 40, 775, 775, 341, 1068, 923, 40, 748, 614, 51, 90, 19][i], 
+                                     y = [50, 500, 35, 400, 750, 750, 65, 500, 43, 67, 50, 500, 50][i])
     
 # Set up trade confirmation plot for pop-up window
 figP = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
@@ -846,7 +846,7 @@ rb1 = [ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
 
 # Place plot timeframe radiobuttons side-by-side (Overview)
 for i in range(0, len(rb1)):
-    rb1[i].place(x = [113, 173, 233, 293, 353, 413, 473][i], y = 40)
+    rb1[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
     
 # Control currnecy time series plot timeframe with radiobuttons (Trade)
 rb2 = [ttk.Radiobutton(t3, command = lambda:[plotSeries(dType = "trade")],
@@ -855,16 +855,16 @@ rb2 = [ttk.Radiobutton(t3, command = lambda:[plotSeries(dType = "trade")],
 
 # Place plot timeframe radiobuttons side-by-side (Trade)
 for i in range(0, len(rb2)):
-    rb2[i].place(x = [113, 173, 233, 293, 353, 413, 473][i], y = 40)
+    rb2[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
     
 # Control currnecy time series plot timeframe with radiobuttons (Portfolio)
 rb5 = [ttk.Radiobutton(t2, command = lambda:[plotSeries(dType = "portfolio", currencies = cData)],
                        text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
                        variable = bState3, value = x + 1) for x in range(0, 7)]
 
-# Place plot timeframe radiobuttons side-by-side (Trade)
+# Place plot timeframe radiobuttons side-by-side (Portfolio)
 for i in range(0, len(rb5)):
-    rb5[i].place(x = [113, 173, 233, 293, 353, 413, 473][i], y = 40)
+    rb5[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
 
 # Create dropdown menu to select currency to buy/sell
 # Create a second dropdown menu for currency conversion
@@ -1022,7 +1022,7 @@ rb1[1].invoke()
 rb2[1].invoke()
 rb3[0].invoke()
 rb4[0].invoke()
-rb5[0].invoke()
+rb5[1].invoke()
 b1.invoke()
 b2.invoke()
 b3.state(["disabled"])

@@ -396,19 +396,16 @@ def plotHoldings():
     values = getCurrentHoldings()
     total = sum(values["Percent"])
     
-    # Combine currencies with small holdings into "other" category
-    minor = values[values["Percent"] < 3]
-    minorTotal = DataFrame(["OTHER", sum(minor["Amount"]), sum(minor["Amount"])/sum(values["Amount"])],
-                           ["Currency", "Amount", "Percent"]).transpose()
-    valuesC = values[values["Percent"] >= 3].append(minorTotal)
+    # Set labels as blank for curriencies with small holdings
+    labs = ["" if values["Percent"][x] < 3 else values["Currency"][x] for x in range(0, len(values))]
     
     # Set colour palette
-    colours = seaborn.color_palette("tab10", len(valuesC))
+    colours = seaborn.color_palette("tab10", len(labs))
     
     # Generate donut plot
     fig = pyplot.figure(7, facecolor = "#33393b")
     pyplot.clf()
-    pyplot.pie(valuesC["Amount"], labels = valuesC["Currency"], colors = colours,
+    pyplot.pie(values["Amount"], labels = labs, colors = colours,
                textprops = {"color" : "w"}, radius = 1.2, startangle = 60)
     pyplot.gcf().gca().add_artist(pyplot.Circle((0, 0), 0.7, color = "#33393b"))
     pyplot.gcf().text(0.5, 0.5, "$" + "{:.2f}".format(sum(values["Amount"])), color = "white",
@@ -424,8 +421,8 @@ def plotHoldings():
     pcts = [ftNum(x, "percent", 2) for x in list(values["Percent"])]
     
     # Reverse holdings data for plotting compatibility
-    currencyList.reverse();
-    amounts.reverse();
+    currencyList.reverse()
+    amounts.reverse()
     pcts.reverse()
     colours.reverse()
     
@@ -433,8 +430,7 @@ def plotHoldings():
     fig2 = pyplot.figure(8)
     pyplot.clf()
     pyplot.scatter([0.03]*len(values), [x/(len(values) + 1) + 0.029 for x in list(range(0, len(values)))],
-                   color = [colours[0]]*(len(values) - len(valuesC)) + colours,
-                   s = 80, marker = "s")
+                   color = colours, s = 80, marker = "s")
     pyplot.axis("off")
     pyplot.tight_layout()
     ax2 = pyplot.gca()
@@ -767,6 +763,7 @@ for h in range(0, 7):
         d1["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
                                         ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"][i])
         d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
+    for i in range(0, len(cData)):
         d3["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h], cData[i])
         d4["key%s" %i] = d3["key%s" %i]["mean"]/(d3["key%s" %i]["mean"][0])
     sData1.append(d1)

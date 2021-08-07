@@ -225,7 +225,7 @@ def getCurrentHoldings():
                            ["ID", "Currency", "Crypto", "Amount", "Percent"]).transpose() 
     
     # Return dataframe of held currencies, sorted by value
-    return dfCurrency.sort_values("Amount", ascending = False)
+    return dfCurrency.sort_values("Amount", ascending = False).reset_index(drop = True)
 
 # Function to list current holdings for only a single cryptocurrency (or trading pair)
 def getSpecificCurrency(currency1, currency2 = None):

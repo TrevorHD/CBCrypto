@@ -107,11 +107,11 @@ def plotSeries(dType = "overview", currencies = None, *args):
         h = bState1.get() - 1
         tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h]
     elif dType == "portfolio":
-        h = bState3.get() - 1
+        h = bState2.get() - 1
         tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h]
     else:
         h = 0
-        tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][bState2.get() - 1]
+        tFrame = ["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][bState3.get() - 1]
     
     # Compile dicts of prices and price versus opening price
     # If price data does not exist, record problematic currencies
@@ -290,7 +290,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
         # Plot price data as text
         fig2 = pyplot.figure(2)
         pyplot.clf()
-        pyplot.scatter([0.03]*7, [x/8 + 0.029 for x in list(range(0, 7))], s = 80, marker = "s",
+        pyplot.scatter([0.04]*7, [x/8 + 0.029 for x in list(range(0, 7))], s = 80, marker = "s",
                        color = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"])
         pyplot.axis("off")
         pyplot.tight_layout()
@@ -816,7 +816,7 @@ canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3 + [t2])
 
 # Place all plots
 for i in range(0, len(figX)):
-    canvasX[i].get_tk_widget().place(x = [35, 35, 777, 777, 341, 1068, 923, 40, 748, 614, 51, 90, 19][i], 
+    canvasX[i].get_tk_widget().place(x = [29, 30, 776, 776, 431, 1068, 923, 40, 748, 614, 51, 90, 19][i], 
                                      y = [50, 500, 35, 400, 750, 750, 65, 500, 43, 67, 50, 500, 50][i])
     
 # Set up trade confirmation plot for pop-up window
@@ -844,24 +844,24 @@ rb1 = [ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
 # Place plot timeframe radiobuttons side-by-side (Overview)
 for i in range(0, len(rb1)):
     rb1[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
-    
-# Control currnecy time series plot timeframe with radiobuttons (Trade)
-rb2 = [ttk.Radiobutton(t3, command = lambda:[plotSeries(dType = "trade")],
+
+# Control currnecy time series plot timeframe with radiobuttons (Portfolio)
+rb2 = [ttk.Radiobutton(t2, command = lambda:[plotSeries(dType = "portfolio", currencies = cData)],
                        text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
                        variable = bState2, value = x + 1) for x in range(0, 7)]
 
-# Place plot timeframe radiobuttons side-by-side (Trade)
+# Place plot timeframe radiobuttons side-by-side (Portfolio)
 for i in range(0, len(rb2)):
     rb2[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
     
-# Control currnecy time series plot timeframe with radiobuttons (Portfolio)
-rb5 = [ttk.Radiobutton(t2, command = lambda:[plotSeries(dType = "portfolio", currencies = cData)],
+# Control currnecy time series plot timeframe with radiobuttons (Trade)
+rb3 = [ttk.Radiobutton(t3, command = lambda:[plotSeries(dType = "trade")],
                        text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
                        variable = bState3, value = x + 1) for x in range(0, 7)]
 
-# Place plot timeframe radiobuttons side-by-side (Portfolio)
-for i in range(0, len(rb5)):
-    rb5[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
+# Place plot timeframe radiobuttons side-by-side (Trade)
+for i in range(0, len(rb3)):
+    rb3[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
 
 # Create dropdown menu to select currency to buy/sell
 # Create a second dropdown menu for currency conversion
@@ -967,23 +967,23 @@ def disableTrades():
         window.update()
     
 # Control trade type with radiobuttons
-rb3 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotTrade(),
+rb4 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotTrade(),
                                              plotSeries(dType = "trade")],
                        text = ["Buy", "Sell", "Convert"][x], 
                        variable = tState1, value = x + 1) for x in range(0, 3)]
 
 # Place trade type radiobuttons side-by-side
-for i in range(0, len(rb3)):
-    rb3[i].place(x = 100, y = [526, 546, 566][i])
+for i in range(0, len(rb4)):
+    rb4[i].place(x = 100, y = [526, 546, 566][i])
 
 # Control trade dollar/crypto with radiobuttons
-rb4 = [ttk.Radiobutton(t3, command = lambda:[clearBox(), plotTrade()],
+rb5 = [ttk.Radiobutton(t3, command = lambda:[clearBox(), plotTrade()],
                        text = ["Dollars", "Crypto"][x], 
                        variable = tState2, value = x + 1) for x in range(0, 2)]
 
 # Place trade dollar/crypto radiobuttons side-by-side
-for i in range(0, len(rb4)):
-    rb4[i].place(x = 186, y = [526, 546][i])
+for i in range(0, len(rb5)):
+    rb5[i].place(x = 186, y = [526, 546][i])
 
 # Add refresh button for top movers
 b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefresh(6)])
@@ -1017,9 +1017,9 @@ p1.update_idletasks()
 # Set default button states
 rb1[1].invoke()
 rb2[1].invoke()
-rb3[0].invoke()
+rb3[1].invoke()
 rb4[0].invoke()
-rb5[1].invoke()
+rb5[0].invoke()
 b1.invoke()
 b2.invoke()
 b3.state(["disabled"])

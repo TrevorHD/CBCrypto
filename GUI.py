@@ -277,39 +277,52 @@ def plotSeries(dType = "overview", currencies = None, *args):
     if dType == "overview":
     
         # Get price data for currencies in previous plot; format and convert to lists
-        #pData = getPriceSummary(tFrame, currencyList)
         names = list(D1[h]["Currency"])
         highs = [ftNum(x, "value", 2) for x in list(D1[h]["High"])]
         lows = [ftNum(x, "value", 2) for x in list(D1[h]["Low"])]
         returns = [(x - 1)*100 for x in list(D1[h]["Return"])]
-    
+        
+        # Get current price as fraction of maximum for each currency
+        current = []
+        for i in range(0, 7):
+            current.append(list(L1[h]["key%s" %i]["mean"])[-1]/list(D1[h]["High"])[i])
+        
         # Format text colour and sign depending on value
         colours = ["red" if x < 0 else "green" for x in returns]
         returns = [ftNum(x, "percentC", 2) for x in returns]
+        
+        # Get hyphenated timeframe text
+        tfText = "-".join([x for x in re.split("([a-z]{0,2})", tFrame) if x != ""]) + " Range"
 
         # Plot price data as text
         fig2 = pyplot.figure(2)
         pyplot.clf()
         pyplot.scatter([0.04]*7, [x/8 + 0.029 for x in list(range(0, 7))], s = 80, marker = "s",
                        color = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"])
+        pyplot.scatter([0.79 + 0.17*x for x in current], [x/8 + 0.059 for x in range(0, 7)],
+                       s = 40, marker = "s", color = "white")
         pyplot.axis("off")
         pyplot.tight_layout()
         ax2 = pyplot.gca()
         ax2.set_xlim(0, 1)
         ax2.set_ylim(0, 1)
         for i in range(0, 7):
+            ax2.axhline(xmin = 0.79, xmax = 0.962, y = i/8 + 0.059, color = "white", linewidth = 0.8)
             for j in range(0, 4):
-                ax2.text([0.084, 0.437, 0.687, 0.968][j], 7/8, ["Currency", "Max", "Min", "Return"][j],
-                         horizontalalignment = ["left", "right", "right", "right"][j],
-                         color = "white", fontsize = 20)
+                ax2.text([0.348, 0.558, 0.738, 0.963][j], 7/8, ["Minimum", "Maximum", "Return", tfText][j],
+                         horizontalalignment = "right", color = "white", fontsize = 20)
             ax2.text(0.084, 1/8*i, names[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "left")
-            ax2.text(0.437, 1/8*i, highs[i], color = colours[i],
+            ax2.text(0.348, 1/8*i, lows[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.687, 1/8*i, lows[i], color = colours[i],
+            ax2.text(0.558, 1/8*i, highs[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.968, 1/8*i, returns[i], color = colours[i],
+            ax2.text(0.738, 1/8*i, returns[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
+            ax2.text(0.790, 1/8*i, lows[i], color = "white",
+                     fontsize = 8, horizontalalignment = "left")
+            ax2.text(0.962, 1/8*i, highs[i], color = "white",
+                     fontsize = 8, horizontalalignment = "right")
         
         # Create TkInter canvas with Matplotlib figure
         pyplot.gcf().canvas.draw()
@@ -366,14 +379,14 @@ def plotMovers():
         ax.set_ylim(0, 1)
         for j in range(0, 10):
             for k in range(0, 4):
-                ax.text([0.084, 0.437, 0.687, 0.968][k], 10/14, ["Currency", "Open", "Close", "Return"][k],
+                ax.text([0.084, 0.397, 0.647, 0.968][k], 10/14, ["Currency", "Open", "Close", "Return"][k],
                         horizontalalignment = ["left", "right", "right", "right"][k],
                         color = "white", fontsize = 20)
             ax.text(0.084, 1/14*j, currencyList[j], color = colours[j],
                     fontsize = 20, horizontalalignment = "left")
-            ax.text(0.437, 1/14*j, openV[j], color = colours[j],
+            ax.text(0.397, 1/14*j, openV[j], color = colours[j],
                     fontsize = 20, horizontalalignment = "right")
-            ax.text(0.687, 1/14*j, closeV[j], color = colours[j],
+            ax.text(0.647, 1/14*j, closeV[j], color = colours[j],
                     fontsize = 20, horizontalalignment = "right")
             ax.text(0.968, 1/14*j, changes[j], color = colours[j],
                     fontsize = 20, horizontalalignment = "right")

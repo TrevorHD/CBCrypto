@@ -309,13 +309,13 @@ def plotSeries(dType = "overview", currencies = None, *args):
         for i in range(0, 7):
             ax2.axhline(xmin = 0.79, xmax = 0.962, y = i/8 + 0.059, color = "white", linewidth = 0.8)
             for j in range(0, 4):
-                ax2.text([0.348, 0.558, 0.738, 0.963][j], 7/8, ["Minimum", "Maximum", "Return", tfText][j],
+                ax2.text([0.338, 0.548, 0.738, 0.963][j], 7/8, ["Minimum", "Maximum", "Return", tfText][j],
                          horizontalalignment = "right", color = "white", fontsize = 20)
             ax2.text(0.084, 1/8*i, names[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "left")
-            ax2.text(0.348, 1/8*i, lows[i], color = colours[i],
+            ax2.text(0.338, 1/8*i, lows[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.558, 1/8*i, highs[i], color = colours[i],
+            ax2.text(0.548, 1/8*i, highs[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
             ax2.text(0.738, 1/8*i, returns[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
@@ -378,15 +378,14 @@ def plotMovers():
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
         for j in range(0, 10):
-            for k in range(0, 4):
-                ax.text([0.084, 0.397, 0.647, 0.968][k], 10/14, ["Currency", "Open", "Close", "Return"][k],
-                        horizontalalignment = ["left", "right", "right", "right"][k],
-                        color = "white", fontsize = 20)
+            for k in range(0, 3):
+                ax.text([0.447, 0.707, 0.968][k], 10/14, ["Open", "Close", "Return"][k],
+                        horizontalalignment = "right", color = "white", fontsize = 20)
             ax.text(0.084, 1/14*j, currencyList[j], color = colours[j],
                     fontsize = 20, horizontalalignment = "left")
-            ax.text(0.397, 1/14*j, openV[j], color = colours[j],
+            ax.text(0.447, 1/14*j, openV[j], color = colours[j],
                     fontsize = 20, horizontalalignment = "right")
-            ax.text(0.647, 1/14*j, closeV[j], color = colours[j],
+            ax.text(0.707, 1/14*j, closeV[j], color = colours[j],
                     fontsize = 20, horizontalalignment = "right")
             ax.text(0.968, 1/14*j, changes[j], color = colours[j],
                     fontsize = 20, horizontalalignment = "right")
@@ -820,7 +819,7 @@ tHist = getTransactionHistory()
 thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Set up plots, each as its own canvas
-figX = [pyplot.figure(figsize = [(10.6, 6), (10.6, 3.5), (9, 4.9), (9, 4.9), (5, 0.3), (5, 0.3), (6.5, 5.45),
+figX = [pyplot.figure(figsize = [(11.4, 6), (11.4, 3.5), (8.2, 4.9), (8.2, 4.9), (5, 0.3), (5, 0.3), (6.5, 5.45),
                                  (9, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
                       edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 14)][x],
                       facecolor = "#33393b",
@@ -829,7 +828,7 @@ canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3 + [t2])
 
 # Place all plots
 for i in range(0, len(figX)):
-    canvasX[i].get_tk_widget().place(x = [29, 30, 776, 776, 431, 1068, 923, 40, 748, 614, 51, 90, 19][i], 
+    canvasX[i].get_tk_widget().place(x = [23, 24, 830, 830, 479, 1066, 923, 40, 748, 614, 51, 90, 19][i], 
                                      y = [50, 500, 35, 400, 750, 750, 65, 500, 43, 67, 50, 500, 50][i])
     
 # Set up trade confirmation plot for pop-up window

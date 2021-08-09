@@ -474,23 +474,23 @@ def plotHoldings():
     ax2.set_ylim(0, 1)
     for i in range(0, len(values)):
         for j in range(0, 8):
-            ax2.text([0.050, 0.237, 0.367, 0.497, 0.700, 0.807, 0.900, 0.999][j], len(values)/(len(values) + 1), 
+            ax2.text([0.050, 0.217, 0.327, 0.437, 0.590, 0.747, 0.880, 0.999][j], len(values)/(len(values) + 1), 
                      ["", "Amount", "Value", "Percent", "Current Price", "Cost Basis", "24-hr Return", "Total Return"][j],
                      color = "white", fontsize = 20,
                      horizontalalignment = ["left", "right", "right", "right", "right", "right", "right", "right"][j])
         ax2.text(0.050, 1/(len(values) + 1)*i, currencyList[i], color = "white",
                  fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.237, 1/(len(values) + 1)*i, cryptos[i], color = "white",
+        ax2.text(0.217, 1/(len(values) + 1)*i, cryptos[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.367, 1/(len(values) + 1)*i, amounts[i], color = "white",
+        ax2.text(0.327, 1/(len(values) + 1)*i, amounts[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.497, 1/(len(values) + 1)*i, pcts[i], color = "white",
+        ax2.text(0.437, 1/(len(values) + 1)*i, pcts[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.700, 1/(len(values) + 1)*i, prices[i], color = "white",
+        ax2.text(0.590, 1/(len(values) + 1)*i, prices[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.807, 1/(len(values) + 1)*i, basis[i], color = "white",
+        ax2.text(0.747, 1/(len(values) + 1)*i, basis[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.900, 1/(len(values) + 1)*i, returns24h[i], color = "white",
+        ax2.text(0.880, 1/(len(values) + 1)*i, returns24h[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
         ax2.text(0.999, 1/(len(values) + 1)*i, returns[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")

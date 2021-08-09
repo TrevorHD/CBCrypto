@@ -155,7 +155,7 @@ def getPriceSummary(tFrame, currencyList):
     # Return dataframe
     return df
 
-# Function that returns top movers over 24h
+# Function that returns all currency movement over 24 hours
 def getCurrentMovers():
 
     # Activate public client and get currency info
@@ -193,14 +193,18 @@ def getCurrentMovers():
     df = DataFrame([currencyList2, openV, closeV, delta],
                    ["Currency", "Open", "Close", "Change"]).transpose()
     
+    # Return data frame
+    return df
+
+# Addition to the previous function, getting only top and bottom movers
+def getTopMovers(movers):
+    
     # Get top and bottom performers
-    dfTop = df.sort_values("Change", ascending = False).iloc[0:10]
-    dfBottom = df.sort_values("Change").iloc[0:10]
+    dfTop = movers.sort_values("Change", ascending = False).iloc[0:10]
+    dfBottom = movers.sort_values("Change").iloc[0:10]
     
     # Return new data frame
     return dfTop.append(dfBottom)
-
-
 
 
 

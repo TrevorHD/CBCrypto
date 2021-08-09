@@ -338,9 +338,6 @@ def plotSeries(dType = "overview", currencies = None, *args):
 # Function to plot top and bottom movers  
 def plotMovers():
     
-    # Retrieve info on top and bottom movers
-    pData = getCurrentMovers()
-    
     # Plot top and bottom sets as text
     for i in range(0, 2):
         
@@ -432,6 +429,12 @@ def plotHoldings():
     # Get currency list
     currencyList = list(values["Currency"])
     
+    # Get current prices and 24-hour returns for each currency
+    prices, returns24h = [], []
+    for i in range(0, len(currencyList)):
+        prices.append(float(oData.loc[oData["Currency"] == currencyList[i]]["Close"]))
+        returns24h.append(float(oData.loc[oData["Currency"] == currencyList[i]]["Change"]))
+    
     # Calculate cost basis and return for each currency
     basis, returns = [], []
     for i in range(0, len(currencyList)):
@@ -445,6 +448,8 @@ def plotHoldings():
     pcts = [ftNum(x, "percent", 2) for x in list(values["Percent"])]
     basis = [ftNum(x, "value", 2) + "/unit" for x in basis]
     returns = [ftNum(x, "percentC", 2) for x in returns]
+    prices = [ftNum(x, "value", 2) + "/unit" for x in prices]
+    returns24h = [ftNum(x, "percentC", 2) for x in returns24h]
     
     # Reverse holdings data for plotting compatibility
     currencyList.reverse()
@@ -454,11 +459,13 @@ def plotHoldings():
     colours.reverse()
     basis.reverse()
     returns.reverse()
+    prices.reverse()
+    returns24h.reverse()
     
     # Plot current holdings as text
     fig2 = pyplot.figure(8)
     pyplot.clf()
-    pyplot.scatter([0.04]*len(values), [x/(len(values) + 1) + 0.029 for x in list(range(0, len(values)))],
+    pyplot.scatter([0.025]*len(values), [x/(len(values) + 1) + 0.029 for x in list(range(0, len(values)))],
                    color = colours, s = 80, marker = "s")
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -466,20 +473,24 @@ def plotHoldings():
     ax2.set_xlim(0, 1)
     ax2.set_ylim(0, 1)
     for i in range(0, len(values)):
-        for j in range(0, 6):
-            ax2.text([0.084, 0.337, 0.467, 0.597, 0.807, 0.999][j], len(values)/(len(values) + 1), 
-                     ["", "Amount", "Value", "Percent", "Cost Basis", "Return"][j],
+        for j in range(0, 8):
+            ax2.text([0.050, 0.237, 0.367, 0.497, 0.700, 0.807, 0.900, 0.999][j], len(values)/(len(values) + 1), 
+                     ["", "Amount", "Value", "Percent", "Current Price", "Cost Basis", "24-hr Return", "Total Return"][j],
                      color = "white", fontsize = 20,
-                     horizontalalignment = ["left", "right", "right", "right", "right", "right"][j])
-        ax2.text(0.084, 1/(len(values) + 1)*i, currencyList[i], color = "white",
+                     horizontalalignment = ["left", "right", "right", "right", "right", "right", "right", "right"][j])
+        ax2.text(0.050, 1/(len(values) + 1)*i, currencyList[i], color = "white",
                  fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.337, 1/(len(values) + 1)*i, cryptos[i], color = "white",
+        ax2.text(0.237, 1/(len(values) + 1)*i, cryptos[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.467, 1/(len(values) + 1)*i, amounts[i], color = "white",
+        ax2.text(0.367, 1/(len(values) + 1)*i, amounts[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.597, 1/(len(values) + 1)*i, pcts[i], color = "white",
+        ax2.text(0.497, 1/(len(values) + 1)*i, pcts[i], color = "white",
+                 fontsize = 20, horizontalalignment = "right")
+        ax2.text(0.700, 1/(len(values) + 1)*i, prices[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
         ax2.text(0.807, 1/(len(values) + 1)*i, basis[i], color = "white",
+                 fontsize = 20, horizontalalignment = "right")
+        ax2.text(0.900, 1/(len(values) + 1)*i, returns24h[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
         ax2.text(0.999, 1/(len(values) + 1)*i, returns[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
@@ -808,9 +819,17 @@ for h in range(0, 7):
     hData2.append(d4)
     mData.append(getPriceSummary(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
                                  ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]))
+    
+# Retrieve info on top and bottom movers
+oData = getCurrentMovers()
+pData = getTopMovers(oData)
 
 # Get list of currencies available for trading
 cbList = getTradeList()
+
+# Initialise transaction history and set maximum number of pages
+tHist = getTransactionHistory()
+thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Create main TkInter window
 window = Tk()
@@ -838,13 +857,9 @@ tC.add(t2, text = "My Portfolio")
 tC.add(t3, text = "Trade")
 tC.pack(expand = 1, fill = "both")
 
-# Initialise transaction history and set maximum number of pages
-tHist = getTransactionHistory()
-thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
-
 # Set up plots, each as its own canvas
 figX = [pyplot.figure(figsize = [(11.4, 6), (11.4, 3.5), (8.2, 4.9), (8.2, 4.9), (5, 0.3), (5, 0.3), (6.5, 5.45),
-                                 (14, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
+                                 (19.14, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
                       edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 14)][x],
                       facecolor = "#33393b",
                       linewidth = 2) for x in range(0, 13)]

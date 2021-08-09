@@ -278,9 +278,11 @@ def plotSeries(dType = "overview", currencies = None, *args):
     
         # Get price data for currencies in previous plot; format and convert to lists
         names = list(D1[h]["Currency"])
-        highs = [ftNum(x, "value", 2) for x in list(D1[h]["High"])]
         lows = [ftNum(x, "value", 2) for x in list(D1[h]["Low"])]
-        returns = [(x - 1)*100 for x in list(D1[h]["Return"])]
+        highs = [ftNum(x, "value", 2) for x in list(D1[h]["High"])]
+        opens = [ftNum(x, "value", 2) for x in list(D1[h]["Open"])]
+        closes = [ftNum(x, "value", 2) for x in list(D1[h]["Close"])]
+        returns = [x for x in list(D1[h]["Return"])]
         
         # Get current price as fraction of maximum for each currency
         current = []
@@ -309,13 +311,13 @@ def plotSeries(dType = "overview", currencies = None, *args):
         for i in range(0, 7):
             ax2.axhline(xmin = 0.79, xmax = 0.962, y = i/8 + 0.059, color = "white", linewidth = 0.8)
             for j in range(0, 4):
-                ax2.text([0.338, 0.548, 0.728, 0.963][j], 7/8, ["Minimum", "Maximum", "Return", tfText][j],
+                ax2.text([0.338, 0.548, 0.728, 0.963][j], 7/8, ["Open", "Close", "Change", tfText][j],
                          horizontalalignment = "right", color = "white", fontsize = 20)
             ax2.text(0.084, 1/8*i, names[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "left")
-            ax2.text(0.338, 1/8*i, lows[i], color = colours[i],
+            ax2.text(0.338, 1/8*i, opens[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.548, 1/8*i, highs[i], color = colours[i],
+            ax2.text(0.548, 1/8*i, closes[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
             ax2.text(0.728, 1/8*i, returns[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
@@ -379,7 +381,7 @@ def plotMovers():
         ax.set_ylim(0, 1)
         for j in range(0, 10):
             for k in range(0, 3):
-                ax.text([0.447, 0.707, 0.968][k], 10/14, ["Open", "Close", "Return"][k],
+                ax.text([0.447, 0.707, 0.968][k], 10/14, ["Open", "Close", "Change"][k],
                         horizontalalignment = "right", color = "white", fontsize = 20)
             ax.text(0.084, 1/14*j, currencyList[j], color = colours[j],
                     fontsize = 20, horizontalalignment = "left")

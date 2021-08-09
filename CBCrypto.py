@@ -131,6 +131,30 @@ def getPriceSeries(tFrame, currency):
 
 ##### Get top 24-hour movers or change over timeframe -----------------------------------------------------
 
+# Function to get current prices and return over timeframe
+def getPriceSummary(tFrame, currencyList):
+    
+    # Activate public client and get currency info
+    p_client = cbpro.PublicClient()
+    
+    # Compile current prices and price versus opening price
+    d1 = {}
+    low, high, opens, closes, returns = [], [], [], [], []
+    for i in range(0, len(currencyList)):
+        d1["key%s" %i] = getPriceSeries(tFrame, currencyList[i])
+        low.append(min(d1["key%s" %i]["low"]))
+        high.append(max(d1["key%s" %i]["high"]))
+        opens.append(d1["key%s" %i]["open"].iloc[0])
+        closes.append(d1["key%s" %i]["close"].iloc[-1])
+        returns.append((closes[i] - opens[i])/opens[i]*100)
+    
+    # Put data into dataframe    
+    df = pandas.DataFrame([[tFrame]*len(currencyList), currencyList, low, high, opens, closes, returns],
+                          ["Timeframe", "Currency", "Low", "High", "Open", "Close", "Return"]).transpose()
+    
+    # Return dataframe
+    return df
+
 # Function that returns top movers over 24h
 def getCurrentMovers():
 
@@ -147,11 +171,17 @@ def getCurrentMovers():
     for i in range(0, len(currencyInfo)):
         currencyList1.append(currencyInfo[i]["id"])
         currencyList2.append(currencyInfo[i]["id"])
-        vals = p_client.get_product_24hr_stats(currencyList1[i] + "-USD")
         try:
-            delta.append((float(vals["last"]) - float(vals["open"]))/float(vals["open"])*100)
-            openV.append(float(vals["open"]))
-            closeV.append(float(vals["last"]))
+            if currencyList1[i] in ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]:
+                vals = mData[1].loc[mData[1]["Currency"] == currencyList1[i]]
+                delta.append(float(vals["Return"]))
+                openV.append(float(vals["Open"]))
+                closeV.append(float(vals["Close"]))
+            else:
+                vals = p_client.get_product_24hr_stats(currencyList1[i] + "-USD")
+                delta.append((float(vals["last"]) - float(vals["open"]))/float(vals["open"])*100)
+                openV.append(float(vals["open"]))
+                closeV.append(float(vals["last"]))
         except ZeroDivisionError:
             del currencyList2[-1]
             pass
@@ -169,27 +199,6 @@ def getCurrentMovers():
     
     # Return new data frame
     return dfTop.append(dfBottom)
-
-# Function to get current prices and return over timeframe
-def getPriceSummary(tFrame, currencyList):
-    
-    # Compile current prices and price versus opening price
-    d1, d2 = {}, {}
-    prices, high, low, returns = [], [], [], []
-    for i in range(0, len(currencyList)):
-        d1["key%s" %i] = getPriceSeries(tFrame, currencyList[i])
-        d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
-        prices.append(d1["key%s" %i]["mean"].iloc[-1])
-        high.append(max(d1["key%s" %i]["high"]))
-        low.append(min(d1["key%s" %i]["low"]))
-        returns.append(d2["key%s" %i].iloc[-1])
-    
-    # Put data into dataframe    
-    df = pandas.DataFrame([[tFrame]*len(currencyList), currencyList, high, low, prices, returns],
-                          ["Timeframe", "Currency", "High", "Low", "Price", "Return"]).transpose()
-    
-    # Return dataframe
-    return df
 
 
 

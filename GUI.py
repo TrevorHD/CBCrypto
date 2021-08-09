@@ -309,7 +309,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
         for i in range(0, 7):
             ax2.axhline(xmin = 0.79, xmax = 0.962, y = i/8 + 0.059, color = "white", linewidth = 0.8)
             for j in range(0, 4):
-                ax2.text([0.338, 0.548, 0.738, 0.963][j], 7/8, ["Minimum", "Maximum", "Return", tfText][j],
+                ax2.text([0.338, 0.548, 0.728, 0.963][j], 7/8, ["Minimum", "Maximum", "Return", tfText][j],
                          horizontalalignment = "right", color = "white", fontsize = 20)
             ax2.text(0.084, 1/8*i, names[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "left")
@@ -317,7 +317,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
                      fontsize = 20, horizontalalignment = "right")
             ax2.text(0.548, 1/8*i, highs[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.738, 1/8*i, returns[i], color = colours[i],
+            ax2.text(0.728, 1/8*i, returns[i], color = colours[i],
                      fontsize = 20, horizontalalignment = "right")
             ax2.text(0.790, 1/8*i, lows[i], color = "white",
                      fontsize = 8, horizontalalignment = "left")
@@ -429,11 +429,13 @@ def plotHoldings():
     
     # Format current holdings
     currencyList = list(values["Currency"])
+    cryptos = [ftNum(x, "amount", 5) for x in list(values["Crypto"])]
     amounts = [ftNum(x, "value", 2) for x in list(values["Amount"])]
     pcts = [ftNum(x, "percent", 2) for x in list(values["Percent"])]
     
     # Reverse holdings data for plotting compatibility
     currencyList.reverse()
+    cryptos.reverse()
     amounts.reverse()
     pcts.reverse()
     colours.reverse()
@@ -441,7 +443,7 @@ def plotHoldings():
     # Plot current holdings as text
     fig2 = pyplot.figure(8)
     pyplot.clf()
-    pyplot.scatter([0.03]*len(values), [x/(len(values) + 1) + 0.029 for x in list(range(0, len(values)))],
+    pyplot.scatter([0.04]*len(values), [x/(len(values) + 1) + 0.029 for x in list(range(0, len(values)))],
                    color = colours, s = 80, marker = "s")
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -449,15 +451,17 @@ def plotHoldings():
     ax2.set_xlim(0, 1)
     ax2.set_ylim(0, 1)
     for i in range(0, len(values)):
-        for j in range(0, 3):
-            ax2.text([0.084, 0.487, 0.687][j], len(values)/(len(values) + 1), 
-                     ["Currency", "Value (USD)", "Percent"][j], color = "white", fontsize = 20,
+        for j in range(0, 4):
+            ax2.text([0.084, 0.387, 0.587, 0.787][j], len(values)/(len(values) + 1), 
+                     ["", "Amount", "Value", "Percent"][j], color = "white", fontsize = 20,
                      horizontalalignment = ["left", "right", "right", "right"][j])
         ax2.text(0.084, 1/(len(values) + 1)*i, currencyList[i], color = "white",
                  fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.487, 1/(len(values) + 1)*i, amounts[i], color = "white",
+        ax2.text(0.387, 1/(len(values) + 1)*i, cryptos[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.687, 1/(len(values) + 1)*i, pcts[i], color = "white",
+        ax2.text(0.587, 1/(len(values) + 1)*i, amounts[i], color = "white",
+                 fontsize = 20, horizontalalignment = "right")
+        ax2.text(0.787, 1/(len(values) + 1)*i, pcts[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
         
     # Create TkInter canvas with Matplotlib figure
@@ -710,7 +714,7 @@ def plotTradeConfirmation():
             amount = "$" + amount
     
     # Plot trade order information as text
-    fig13 = pyplot.figure(13)
+    fig13 = pyplot.figure(14)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -820,7 +824,7 @@ thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Set up plots, each as its own canvas
 figX = [pyplot.figure(figsize = [(11.4, 6), (11.4, 3.5), (8.2, 4.9), (8.2, 4.9), (5, 0.3), (5, 0.3), (6.5, 5.45),
-                                 (9, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
+                                 (11, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
                       edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 14)][x],
                       facecolor = "#33393b",
                       linewidth = 2) for x in range(0, 13)]
@@ -828,7 +832,7 @@ canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3 + [t2])
 
 # Place all plots
 for i in range(0, len(figX)):
-    canvasX[i].get_tk_widget().place(x = [23, 24, 830, 830, 479, 1066, 923, 40, 748, 614, 51, 90, 19][i], 
+    canvasX[i].get_tk_widget().place(x = [23, 24, 830, 830, 479, 1066, 923, 26, 748, 614, 51, 90, 19][i], 
                                      y = [50, 500, 35, 400, 750, 750, 65, 500, 43, 67, 50, 500, 50][i])
     
 # Set up trade confirmation plot for pop-up window

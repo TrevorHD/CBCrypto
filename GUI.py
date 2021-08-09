@@ -427,11 +427,22 @@ def plotHoldings():
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
     
-    # Format current holdings
+    # Get currency list
     currencyList = list(values["Currency"])
+    
+    # Calculate cost basis and return for each currency
+    basis, returns = [], []
+    for i in range(0, len(currencyList)):
+        ftHist = tHist.loc[(tHist["Currency"] == currencyList[i]) & (tHist["Type"].isin(["buy", "trade"])) & (tHist["Amount"] > 0)]
+        basis.append(sum(ftHist["USD"])/sum(ftHist["Amount"]))
+        returns.append((list(values["Amount"])[i]/(basis[i]*list(values["Crypto"])[i]) - 1)*100)
+        
+    # Format holdings data
     cryptos = [ftNum(x, "amount", 5) for x in list(values["Crypto"])]
     amounts = [ftNum(x, "value", 2) for x in list(values["Amount"])]
     pcts = [ftNum(x, "percent", 2) for x in list(values["Percent"])]
+    basis = [ftNum(x, "value", 2) + "/unit" for x in basis]
+    returns = [ftNum(x, "percentC", 2) for x in returns]
     
     # Reverse holdings data for plotting compatibility
     currencyList.reverse()
@@ -439,6 +450,8 @@ def plotHoldings():
     amounts.reverse()
     pcts.reverse()
     colours.reverse()
+    basis.reverse()
+    returns.reverse()
     
     # Plot current holdings as text
     fig2 = pyplot.figure(8)
@@ -451,17 +464,22 @@ def plotHoldings():
     ax2.set_xlim(0, 1)
     ax2.set_ylim(0, 1)
     for i in range(0, len(values)):
-        for j in range(0, 4):
-            ax2.text([0.084, 0.387, 0.587, 0.787][j], len(values)/(len(values) + 1), 
-                     ["", "Amount", "Value", "Percent"][j], color = "white", fontsize = 20,
-                     horizontalalignment = ["left", "right", "right", "right"][j])
+        for j in range(0, 6):
+            ax2.text([0.084, 0.337, 0.467, 0.597, 0.807, 0.999][j], len(values)/(len(values) + 1), 
+                     ["", "Amount", "Value", "Percent", "Cost Basis", "Return"][j],
+                     color = "white", fontsize = 20,
+                     horizontalalignment = ["left", "right", "right", "right", "right", "right"][j])
         ax2.text(0.084, 1/(len(values) + 1)*i, currencyList[i], color = "white",
                  fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.387, 1/(len(values) + 1)*i, cryptos[i], color = "white",
+        ax2.text(0.337, 1/(len(values) + 1)*i, cryptos[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.587, 1/(len(values) + 1)*i, amounts[i], color = "white",
+        ax2.text(0.467, 1/(len(values) + 1)*i, amounts[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.787, 1/(len(values) + 1)*i, pcts[i], color = "white",
+        ax2.text(0.597, 1/(len(values) + 1)*i, pcts[i], color = "white",
+                 fontsize = 20, horizontalalignment = "right")
+        ax2.text(0.807, 1/(len(values) + 1)*i, basis[i], color = "white",
+                 fontsize = 20, horizontalalignment = "right")
+        ax2.text(0.999, 1/(len(values) + 1)*i, returns[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
         
     # Create TkInter canvas with Matplotlib figure
@@ -824,7 +842,7 @@ thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Set up plots, each as its own canvas
 figX = [pyplot.figure(figsize = [(11.4, 6), (11.4, 3.5), (8.2, 4.9), (8.2, 4.9), (5, 0.3), (5, 0.3), (6.5, 5.45),
-                                 (11, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
+                                 (14, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
                       edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 14)][x],
                       facecolor = "#33393b",
                       linewidth = 2) for x in range(0, 13)]

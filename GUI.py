@@ -782,17 +782,20 @@ def plotTradeConfirmation():
 ##### Plot information on last refresh time ---------------------------------------------------------------
     
 # Function to display time at which a widget was last refreshed
-def plotRefresh(instance):
+def plotRefresh(refreshing = False):
     
     # Update loading bar
     pbUpdate()
     
     # Get current time
     cTime = datetime.datetime.now().strftime("%H:%M")
-    if instance == 5:
-        fig5 = pyplot.figure(5)
+    fig5 = pyplot.figure(5)
+    
+    # Get text
+    if refreshing == True:
+        rText = "Refreshing... Please Wait."
     else:
-        fig6 = pyplot.figure(6)
+        rText = "Last updated at " + cTime
         
     # Plot text
     pyplot.clf()
@@ -801,7 +804,7 @@ def plotRefresh(instance):
     ax = pyplot.gca()
     ax.set_xlim(0, 0.1)
     ax.set_ylim(0, 0.1)
-    ax.text(0.1, 0.05, "Last updated at " + cTime, color = "white", style = "italic",
+    ax.text(0.1, 0.01, rText, color = "white", style = "italic",
             fontsize = 14, horizontalalignment = "right")
     
     # Create TkInter canvas with Matplotlib figure
@@ -816,13 +819,26 @@ def plotRefresh(instance):
 # Function to update loading bars
 def pbUpdate():
     try:
-        pb2.step(0.792)
+        pb2.step(0.468)
         splash.update_idletasks()
-        window.update_idletasks()
     except NameError:
-        pass
+        try:
+            pb1.step(0.250)
+            window.update_idletasks()
+            window.update()
+        except NameError:
+            pass
+        except TclError:
+            pass
     except TclError:
-        pass
+        try:
+            pb1.step(3)
+            window.update_idletasks()
+            window.update()
+        except NameError:
+            pass
+        except TclError:
+            pass
 
 # Create main TkInter window
 window = Tk()
@@ -936,7 +952,7 @@ tC.add(t3, text = "Trade")
 tC.pack(expand = 1, fill = "both")
 
 # Set up plots, each as its own canvas
-figX = [pyplot.figure(figsize = [(11.4, 6), (11.4, 3.5), (8.2, 4.9), (8.2, 4.9), (5, 0.3), (5, 0.3), (6.5, 5.45),
+figX = [pyplot.figure(figsize = [(11.4, 6), (11.4, 3.5), (8.2, 4.9), (8.2, 4.9), (5, 0.25), (5, 0.3), (6.5, 5.45),
                                  (19.14, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
                       edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 14)][x],
                       facecolor = "#33393b",
@@ -947,7 +963,7 @@ canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*4 + [window] + [t2]*4 + [t3
 # Note: fig 6 is not used
 for i in range(0, len(figX)):
     canvasX[i].get_tk_widget().place(x = [23, 24, 830, 830, 980, 1066, 923, 26, 748, 614, 51, 90, 19][i], 
-                                     y = [50, 500, 35, 400, 12, 750, 65, 500, 43, 67, 50, 500, 50][i])
+                                     y = [50, 500, 35, 400, 7, 750, 65, 500, 43, 67, 50, 500, 50][i])
     
 # Set up trade confirmation plot for pop-up window
 figP = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
@@ -967,8 +983,8 @@ eState2 = StringVar()
 
 # Add master reset button
 b5 = ttk.Button(window, text = "Refresh", style = "small.TButton",
-                command = lambda:[refreshData(), plotSeries(), plotSeries(dType = "portfolio", currencies = cData),
-                                  plotMovers(), plotHoldings(), plotTransactions(tHist = tHist), plotRefresh(5)])
+                command = lambda:[plotRefresh(refreshing = True), refreshData(), plotSeries(), plotSeries(dType = "portfolio", currencies = cData),
+                                  plotMovers(), plotHoldings(), plotTransactions(tHist = tHist), plotRefresh()])
 #b5.place(x = 1390, y = 1, width = 30, height = 20)
 b5.place(x = 1420, y = 6)
 b5.invoke()

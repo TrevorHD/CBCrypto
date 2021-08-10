@@ -272,6 +272,7 @@ def getTransactionHistory():
     # Get transactions for each wallet
     for i in list(initIDs["ID"].values):
         events = client.get_transactions(i)
+        pbUpdate()
         for j in events.data:
             currency.append(j["amount"]["currency"])
             amountC.append(j["amount"]["amount"])

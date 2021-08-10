@@ -5,7 +5,6 @@
     # Allow refresh button to refresh everything at once
 # Create login screen using API key and secret
 # Fully implement trade functionality
-# Add content to portfolio page
 # Redo radiobutton and figure numbering to make code more clear
 
 
@@ -87,6 +86,9 @@ def ftNum(x, xType, dec = 2):
 
 # Function to plot price data over time
 def plotSeries(dType = "overview", currencies = None, *args):
+    
+    # Update loading bar
+    pbUpdate()
     
     # Create list of tracked currencies
     if dType == "overview":
@@ -335,6 +337,9 @@ def plotSeries(dType = "overview", currencies = None, *args):
 # Function to plot top and bottom movers  
 def plotMovers():
     
+    # Update loading bar
+    pbUpdate()
+    
     # Plot top and bottom sets as text
     for i in range(0, 2):
         
@@ -399,6 +404,9 @@ def plotMovers():
 
 # Function to plot user's current holdings   
 def plotHoldings():
+    
+    # Update loading bar
+    pbUpdate()
     
     # Get current holdings for each cryptocurrency
     values = getCurrentHoldings()
@@ -553,6 +561,9 @@ def plotHoldings():
 # Function to plot user's transaction history
 def plotTransactions(tHist, ref = False):
     
+    # Update loading bar
+    pbUpdate()
+    
     # Get transaction history again if refeshing
     if ref == True:
         tHist = getTransactionHistory()
@@ -631,6 +642,9 @@ def plotTransactions(tHist, ref = False):
 
 # Function to plot trade orders
 def plotTrade(push = False):
+    
+    # Update loading bar
+    pbUpdate()
     
     # Convert state indicators to acceptable arguments for getQuote
     currency1 = cState1.get()
@@ -720,6 +734,9 @@ def plotTrade(push = False):
 # Function to plot trade confirmation text
 def plotTradeConfirmation():
     
+    # Update loading bar
+    pbUpdate()
+    
     # Convert state indicators to text
     currency1 = cState1.get()
     currency2 = cState2.get()
@@ -767,6 +784,9 @@ def plotTradeConfirmation():
 # Function to display time at which a widget was last refreshed
 def plotRefresh(instance):
     
+    # Update loading bar
+    pbUpdate()
+    
     # Get current time
     cTime = datetime.datetime.now().strftime("%H:%M")
     if instance == 5:
@@ -793,40 +813,16 @@ def plotRefresh(instance):
 
 ##### Run GUI ---------------------------------------------------------------------------------------------
 
-# Initialise account data
-initAccount = client.get_accounts(limit = 100)
-initIDs = getIDs()
-initPmt = getPmt()
-
-# Initialise time series data for featured currencies
-sData1, sData2, mData, cData, hData1, hData2 = [], [], [], [], [], []
-cData = list(getCurrentHoldings()["Currency"])
-for h in range(0, 7):
-    d1, d2, d3, d4 = {}, {}, {}, {}
-    for i in range(0, 7):
-        d1["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
-                                        ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"][i])
-        d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
-    for i in range(0, len(cData)):
-        d3["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h], cData[i])
-        d4["key%s" %i] = d3["key%s" %i]["mean"]/(d3["key%s" %i]["mean"][0])
-    sData1.append(d1)
-    sData2.append(d2)
-    hData1.append(d3)
-    hData2.append(d4)
-    mData.append(getPriceSummary(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
-                                 ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]))
-    
-# Retrieve info on top and bottom movers
-oData = getCurrentMovers()
-pData = getTopMovers(oData)
-
-# Get list of currencies available for trading
-cbList = getTradeList()
-
-# Initialise transaction history and set maximum number of pages
-tHist = getTransactionHistory()
-thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
+# Function to update loading bars
+def pbUpdate():
+    try:
+        pb2.step(0.792)
+        splash.update_idletasks()
+        window.update_idletasks()
+    except NameError:
+        pass
+    except TclError:
+        pass
 
 # Create main TkInter window
 window = Tk()
@@ -866,11 +862,50 @@ label1.place(x = 537, y = 550)
 label2 = Label(splash, text = "Loading...", justify = CENTER,
                bg = "#33393b", bd = 0, font = ("Arial", 10), fg = "white")
 label2.place(x = 700, y = 726)
-pb2 = ttk.Progressbar(splash, orient = HORIZONTAL, length = 300, mode = "indeterminate")
+pb2 = ttk.Progressbar(splash, orient = HORIZONTAL, length = 300, mode = "determinate")
 pb2.place(x = 580, y = 700)
-pb2.start()
-pb2.update_idletasks()
 splash.update()
+
+# Initialise account data
+pbUpdate()
+initAccount = client.get_accounts(limit = 100)
+initIDs = getIDs()
+initPmt = getPmt()
+
+# Initialise time series data for featured currencies
+sData1, sData2, mData, cData, hData1, hData2 = [], [], [], [], [], []
+cData = list(getCurrentHoldings()["Currency"])
+for h in range(0, 7):
+    d1, d2, d3, d4 = {}, {}, {}, {}
+    for i in range(0, 7):
+        pbUpdate()
+        d1["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
+                                        ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"][i])
+        d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
+    for i in range(0, len(cData)):
+        pbUpdate()
+        d3["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h], cData[i])
+        d4["key%s" %i] = d3["key%s" %i]["mean"]/(d3["key%s" %i]["mean"][0])
+    sData1.append(d1)
+    sData2.append(d2)
+    hData1.append(d3)
+    hData2.append(d4)
+    mData.append(getPriceSummary(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
+                                 ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]))
+    
+# Retrieve info on top and bottom movers
+pbUpdate()
+oData = getCurrentMovers()
+pData = getTopMovers(oData)
+
+# Get list of currencies available for trading
+pbUpdate()
+cbList = getTradeList()
+
+# Initialise transaction history and set maximum number of pages
+pbUpdate()
+tHist = getTransactionHistory()
+thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
 
 # Set window tabs
 tC = ttk.Notebook(window)
@@ -1066,7 +1101,8 @@ b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefres
 b1.place(x = 1327, y = 70)
 
 # Add refresh button for transaction history
-b2 = ttk.Button(t3, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(tHist = tHist, ref = True)])
+# Note: does not refresh anything at the moment
+b2 = ttk.Button(t3, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(tHist = tHist)])
 b2.place(x = 1327, y = 35)
 
 # Add trade button to buy/sell/convert currency

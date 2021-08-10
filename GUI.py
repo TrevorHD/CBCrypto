@@ -802,7 +802,7 @@ def plotRefresh(instance):
     ax.set_xlim(0, 0.1)
     ax.set_ylim(0, 0.1)
     ax.text(0.1, 0.05, "Last updated at " + cTime, color = "white", style = "italic",
-            fontsize = 10, horizontalalignment = "right")
+            fontsize = 14, horizontalalignment = "right")
     
     # Create TkInter canvas with Matplotlib figure
     pyplot.gcf().canvas.draw()
@@ -832,6 +832,7 @@ window.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes
 window.tk.call("package", "require", "awdark") 
 ttk.Style().theme_use("awdark") 
 ttk.Style().configure("My.TSpinbox", arrowsize = 11)
+ttk.Style().configure("small.TButton", font = (None, 5))
  
 # Set window title
 window.title("CBCrypto: Cryptocurrency Dashboard")
@@ -872,40 +873,57 @@ initAccount = client.get_accounts(limit = 100)
 initIDs = getIDs()
 initPmt = getPmt()
 
-# Initialise time series data for featured currencies
-sData1, sData2, mData, cData, hData1, hData2 = [], [], [], [], [], []
-cData = list(getCurrentHoldings()["Currency"])
-for h in range(0, 7):
-    d1, d2, d3, d4 = {}, {}, {}, {}
-    for i in range(0, 7):
-        pbUpdate()
-        d1["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
-                                        ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"][i])
-        d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
-    for i in range(0, len(cData)):
-        pbUpdate()
-        d3["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h], cData[i])
-        d4["key%s" %i] = d3["key%s" %i]["mean"]/(d3["key%s" %i]["mean"][0])
-    sData1.append(d1)
-    sData2.append(d2)
-    hData1.append(d3)
-    hData2.append(d4)
-    mData.append(getPriceSummary(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
-                                 ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]))
+# Function to pull from the API and refresh all app data
+def refreshData():
     
-# Retrieve info on top and bottom movers
-pbUpdate()
-oData = getCurrentMovers()
-pData = getTopMovers(oData)
+    # Push all variables outside of function enclosure
+    global sData1
+    global sData2
+    global mData
+    global cData
+    global hData1
+    global hData2
+    global oData
+    global pData
+    global cbList
+    global tHist
+    global thMaxPage
 
-# Get list of currencies available for trading
-pbUpdate()
-cbList = getTradeList()
+    # Initialise time series data for featured currencies
+    sData1, sData2, mData, cData, hData1, hData2 = [], [], [], [], [], []
+    cData = list(getCurrentHoldings()["Currency"])
+    for h in range(0, 7):
+        d1, d2, d3, d4 = {}, {}, {}, {}
+        for i in range(0, 7):
+            pbUpdate()
+            d1["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
+                                            ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"][i])
+            d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
+        for i in range(0, len(cData)):
+            pbUpdate()
+            d3["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h], cData[i])
+            d4["key%s" %i] = d3["key%s" %i]["mean"]/(d3["key%s" %i]["mean"][0])
+        sData1.append(d1)
+        sData2.append(d2)
+        hData1.append(d3)
+        hData2.append(d4)
+        mData.append(getPriceSummary(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
+                                     ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]))
+    
+    # Retrieve info on top and bottom movers
+    pbUpdate()
+    oData = getCurrentMovers()
+    pData = getTopMovers(oData)
 
-# Initialise transaction history and set maximum number of pages
-pbUpdate()
-tHist = getTransactionHistory()
-thMaxPage = 999 if math.ceil(len(tHist)/25) > 999 else math.ceil(len(tHist)/25)
+    # Get list of currencies available for trading
+    pbUpdate()
+    cbList = getTradeList()
+
+    # Initialise transaction history and set maximum number of pages
+    pbUpdate()
+    tHist = getTransactionHistory()
+    thMaxPage = 99 if math.ceil(len(tHist)/25) > 99 else math.ceil(len(tHist)/25)
+    sState.set(thMaxPage)
 
 # Set window tabs
 tC = ttk.Notebook(window)
@@ -923,12 +941,13 @@ figX = [pyplot.figure(figsize = [(11.4, 6), (11.4, 3.5), (8.2, 4.9), (8.2, 4.9),
                       edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 14)][x],
                       facecolor = "#33393b",
                       linewidth = 2) for x in range(0, 13)]
-canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*6 + [t2]*3 + [t3]*3 + [t2])[x]) for x in range(0, len(figX))]
+canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*4 + [window] + [t2]*4 + [t3]*3 + [t2])[x]) for x in range(0, len(figX))]
 
 # Place all plots
+# Note: fig 6 is not used
 for i in range(0, len(figX)):
-    canvasX[i].get_tk_widget().place(x = [23, 24, 830, 830, 479, 1066, 923, 26, 748, 614, 51, 90, 19][i], 
-                                     y = [50, 500, 35, 400, 750, 750, 65, 500, 43, 67, 50, 500, 50][i])
+    canvasX[i].get_tk_widget().place(x = [23, 24, 830, 830, 980, 1066, 923, 26, 748, 614, 51, 90, 19][i], 
+                                     y = [50, 500, 35, 400, 12, 750, 65, 500, 43, 67, 50, 500, 50][i])
     
 # Set up trade confirmation plot for pop-up window
 figP = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
@@ -938,7 +957,6 @@ bState1 = IntVar()
 bState2 = IntVar()
 bState3 = IntVar()
 sState = IntVar()
-sState.set(thMaxPage)
 tState1 = IntVar()
 tState2 = IntVar()
 cState1 = StringVar()
@@ -947,8 +965,16 @@ cState2 = StringVar()
 eState1 = StringVar()
 eState2 = StringVar()
 
+# Add master reset button
+b5 = ttk.Button(window, text = "Refresh", style = "small.TButton",
+                command = lambda:[refreshData(), plotSeries(), plotSeries(dType = "portfolio", currencies = cData),
+                                  plotMovers(), plotHoldings(), plotTransactions(tHist = tHist), plotRefresh(5)])
+#b5.place(x = 1390, y = 1, width = 30, height = 20)
+b5.place(x = 1420, y = 6)
+b5.invoke()
+
 # Control currnecy time series plot timeframe with radiobuttons (Overview)
-rb1 = [ttk.Radiobutton(t1, command = lambda:[plotSeries(), plotRefresh(5)],
+rb1 = [ttk.Radiobutton(t1, command = lambda:[plotSeries()],
                        text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
                        variable = bState1, value = x + 1) for x in range(0, 7)]
 
@@ -1061,7 +1087,8 @@ def tradeWindow():
 
     # Confirmation button with actual trade functionality
     # Temporarily disabled to avoid accidental purchases while testing
-    #b1_p1 = ttk.Button(p1, text = "Yes", command = lambda:[plotTrade(push = True), plotTransactions(tHist = tHist, ref = True), p1.destroy()], width = 9)    
+    # Fix this to ensure that pop-up is destroyed before refreshing
+    #b1_p1 = ttk.Button(p1, text = "Yes", command = lambda:[plotTrade(push = True), refreshData(), p1.destroy()], width = 9)    
 
 # Function to reset radiobuttons and text fields
 def resetTrades():
@@ -1096,15 +1123,6 @@ rb5 = [ttk.Radiobutton(t3, command = lambda:[clearBox(), plotTrade()],
 for i in range(0, len(rb5)):
     rb5[i].place(x = 186, y = [526, 546][i])
 
-# Add refresh button for top movers
-b1 = ttk.Button(t1, text = "Refresh", command = lambda:[plotMovers(), plotRefresh(6)])
-b1.place(x = 1327, y = 70)
-
-# Add refresh button for transaction history
-# Note: does not refresh anything at the moment
-b2 = ttk.Button(t3, text = "Refresh", command = lambda:[plotHoldings(), plotTransactions(tHist = tHist)])
-b2.place(x = 1327, y = 35)
-
 # Add trade button to buy/sell/convert currency
 b3 = ttk.Button(t3, text = "Confirm", command = tradeWindow, width = 9)
 b3.place(x = 101, y = 675)
@@ -1116,14 +1134,14 @@ b4 = ttk.Button(t3, text = "Reset", width = 9,
 b4.place(x = 180, y = 675)
 
 # Add spinbox to select transaction history page
-s1 = ttk.Spinbox(t3, from_ = 1, to = thMaxPage, textvariable = sState, width = 4,
+s1 = ttk.Spinbox(t3, from_ = 1, to = thMaxPage, textvariable = sState, width = 2,
                  font = Font(size = 10), style = "My.TSpinbox", command = lambda:[plotTransactions(tHist = tHist)])
 s1.state(["readonly"])
-s1.place(x = 1268, y = 36)
+s1.place(x = 620, y = 74)
 
 # Add progress bar indicating when application is loading
 pb1 = ttk.Progressbar(window, orient = HORIZONTAL, length = 100, mode = "indeterminate")
-pb1.place(x = 1360, y = 7)
+pb1.place(x = 1315, y = 7)
 
 # Set default button states
 rb1[1].invoke()
@@ -1131,8 +1149,6 @@ rb2[1].invoke()
 rb3[1].invoke()
 rb4[0].invoke()
 rb5[0].invoke()
-b1.invoke()
-b2.invoke()
 b3.state(["disabled"])
 
 # Set system for updating trade information when entry typing stops

@@ -88,9 +88,6 @@ def ftNum(x, xType, dec = 2):
 # Function to plot price data over time
 def plotSeries(dType = "overview", currencies = None, *args):
     
-    # Start progress bar
-    #p1.update_idletasks()
-    
     # Create list of tracked currencies
     if dType == "overview":
         currencyList = ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]
@@ -847,6 +844,34 @@ window.title("CBCrypto: Cryptocurrency Dashboard")
 window.geometry("1920x1080")
 window.configure(bg = "#33393b")
 
+# Set window icon
+icon = ImageTk.PhotoImage(Image.open("Logo.png"))
+icon2 = ImageTk.PhotoImage(Image.open("Logo.png").resize((500, 500), Image.ANTIALIAS))
+window.wm_iconphoto(False, icon)
+
+# Run splash screen while app is loading
+window.withdraw()
+splash = Toplevel()
+splash.state("zoomed")
+splash.title("CBCrypto: Cryptocurrency Dashboard")
+splash.geometry("1920x1080")
+splash.configure(bg = "#33393b")
+splash.wm_iconphoto(False, icon)
+splashCanvas = Canvas(splash, width = 460, height = 460, bg = "#33393b", highlightthickness = 1)
+splashCanvas.place(x = 500, y = 75)
+splashCanvas.create_image((230, 230), anchor = CENTER, image = icon2)
+label1 = Label(splash, text = "CBCrypto: Cryptocurrency Dashboard", justify = CENTER,
+               bg = "#33393b", bd = 0, font = ("Arial", 17), fg = "white")
+label1.place(x = 537, y = 550)
+label2 = Label(splash, text = "Loading...", justify = CENTER,
+               bg = "#33393b", bd = 0, font = ("Arial", 10), fg = "white")
+label2.place(x = 700, y = 726)
+pb2 = ttk.Progressbar(splash, orient = HORIZONTAL, length = 300, mode = "indeterminate")
+pb2.place(x = 580, y = 700)
+pb2.start()
+pb2.update_idletasks()
+splash.update()
+
 # Set window tabs
 tC = ttk.Notebook(window)
 t1 = ttk.Frame(tC)
@@ -1061,9 +1086,8 @@ s1.state(["readonly"])
 s1.place(x = 1268, y = 36)
 
 # Add progress bar indicating when application is loading
-p1 = ttk.Progressbar(window, orient = HORIZONTAL, length = 100, mode = "indeterminate")
-p1.place(x = 1360, y = 7)
-p1.update_idletasks()
+pb1 = ttk.Progressbar(window, orient = HORIZONTAL, length = 100, mode = "indeterminate")
+pb1.place(x = 1360, y = 7)
 
 # Set default button states
 rb1[1].invoke()
@@ -1084,9 +1108,10 @@ def entryWait(*args, aN = afterNum):
 e1.bind("<Key>", lambda e:[entryWait(), clearBox(2), disableTrades()])
 e2.bind("<Key>", lambda e:[entryWait(), clearBox(1), disableTrades()])
 
-# Set window icon
-icon = ImageTk.PhotoImage(Image.open("Logo.png"))
-window.wm_iconphoto(False, icon)
+# End splash screen once app has loaded
+splash.destroy()
+window.deiconify()
+window.state("zoomed")
 
 # Run TkInter window over loop
 window.mainloop()

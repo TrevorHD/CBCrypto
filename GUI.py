@@ -32,7 +32,7 @@ def ftStr(x):
 # Function to format currency numbers and percents
 def ftNum(x, xType, dec = 2):
     
-    # Set decimal place formatter
+    # Set decimal place tFormat
     dFormatter = "{:." + str(dec) + "f}"
     
     # Format currency amounts
@@ -129,45 +129,45 @@ def plotSeries(dType = "overview", currencies = None, *args):
     
     # Get min and max price versus opening price
     # Force axis values when no data is plotted
-    pmin, pmax = [], []
+    pMin, pMax = [], []
     for i in range(0, len(currencyList)):
         try:
-            pmin.append(min(L2[h]["key%s" %i]))
-            pmax.append(max(L2[h]["key%s" %i]))
+            pMin.append(min(L2[h]["key%s" %i]))
+            pMax.append(max(L2[h]["key%s" %i]))
         except KeyError:
             pass
         except ValueError:
             pass
-    if pmin == pmax == []:
-        pmin, pmax = [0.98], [1.03]
+    if pMin == pMax == []:
+        pMin, pMax = [0.98], [1.03]
     
     # Get earliest and latest available datetimes
-    dmin, dmax = [], []
+    dMin, dMax = [], []
     for i in range(0, len(currencyList)):
         try:
-            dmin.append(min(L1[h]["key%s" %i]["datetime"]))
-            dmax.append(max(L1[h]["key%s" %i]["datetime"]))
+            dMin.append(min(L1[h]["key%s" %i]["datetime"]))
+            dMax.append(max(L1[h]["key%s" %i]["datetime"]))
         except KeyError:
             pass
         except ValueError:
             pass
                 
     # Get difference between min and max price versus opening price, for scaling purposes
-    mmDiff = math.ceil((max(pmax) - min(pmin))*100/5)*5/100
+    mmDiff = math.ceil((max(pMax) - min(pMin))*100/5)*5/100
     
     # Set scaling based on difference between max and min price versus opening price
     if mmDiff > 0.5:
-        lPrice = math.floor(min(pmin)*100/5)*5/100
+        lPrice = math.floor(min(pMin)*100/5)*5/100
     else:
-        lPrice = math.floor(min(pmin)*100)/100
+        lPrice = math.floor(min(pMin)*100)/100
     
     # Generate colour palette
     if dType == "overview":
-        colours = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"]
+        colourList = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"]
     elif dType == "portfolio":
-        colours = seaborn.color_palette("tab10", len(currencies))
+        colourList = seaborn.color_palette("tab10", len(currencies))
     elif dType == "trade":
-        colours = ["#b809ed", "#09e5ed"]
+        colourList = ["#b809ed", "#09e5ed"]
     
     # Get current time zone
     tz = datetime.datetime.now().astimezone().tzinfo
@@ -176,46 +176,46 @@ def plotSeries(dType = "overview", currencies = None, *args):
     # Force axis values and timescale when no data is plotted
     if tFrame == "1hr":
         tDelta = timedelta(hours = 1)
-        formatter = matplotlib.dates.DateFormatter("%H:%M", tz)
+        tFormat = matplotlib.dates.DateFormatter("%H:%M", tz)
         intvMj = matplotlib.dates.MinuteLocator(interval = 10)
         intvMi = matplotlib.dates.MinuteLocator(interval = 1)
     elif tFrame == "1d":
         tDelta = timedelta(hours = 24)
-        formatter = matplotlib.dates.DateFormatter("%H:%M", tz)
+        tFormat = matplotlib.dates.DateFormatter("%H:%M", tz)
         intvMj = matplotlib.dates.HourLocator(interval = 4)
         intvMi = matplotlib.dates.HourLocator(interval = 1)
     elif tFrame == "1wk":
         tDelta = timedelta(days = 7)
-        formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
+        tFormat = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.DayLocator(interval = 1)
         intvMi = matplotlib.dates.HourLocator(interval = 4)
     elif tFrame == "1m":
         tDelta = timedelta(days = 30)
-        formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
+        tFormat = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.DayLocator(interval = 7)
         intvMi = matplotlib.dates.DayLocator(interval = 1)
     elif tFrame == "3m":
         tDelta = timedelta(days = 90)
-        formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
+        tFormat = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.DayLocator(interval = 14)
         intvMi = matplotlib.dates.DayLocator(interval = 1)
     elif tFrame == "6m":
         tDelta = timedelta(days = 180)
-        formatter = matplotlib.dates.DateFormatter("%m/%d", tz)
+        tFormat = matplotlib.dates.DateFormatter("%m/%d", tz)
         intvMj = matplotlib.dates.MonthLocator(interval = 1)
         intvMi = matplotlib.dates.DayLocator(interval = 7)
     elif tFrame == "1yr":
         tDelta = timedelta(days = 365)
-        formatter = matplotlib.dates.DateFormatter("%m/%Y", tz)
+        tFormat = matplotlib.dates.DateFormatter("%m/%Y", tz)
         intvMj = matplotlib.dates.MonthLocator(interval = 2)
         intvMi = matplotlib.dates.DayLocator(interval = 7)
     elif tFrame == "max":
-        formatter = matplotlib.dates.DateFormatter("%m/%Y", tz)
+        tFormat = matplotlib.dates.DateFormatter("%m/%Y", tz)
         intvMj = matplotlib.dates.YearLocator()
         intvMi = matplotlib.dates.MonthLocator(interval = 1)
-    if dmax == dmin == []:
-        dmax = [datetime.datetime.now(tz)]
-        dmin = [datetime.datetime.now(tz) - tDelta]
+    if dMax == dMin == []:
+        dMax = [datetime.datetime.now(tz)]
+        dMin = [datetime.datetime.now(tz) - tDelta]
     
     # Initialise plot
     if dType == "overview":
@@ -234,7 +234,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
     for i in range(0, len(currencyList)):
         try:
             ax1.plot(L1[h]["key%s" %i]["datetime"], L2[h]["key%s" %i], linestyle = "-",
-                     linewidth = 1.2, label = currencyList[i], color = colours[i])
+                     linewidth = 1.2, label = currencyList[i], color = colourList[i])
         except KeyError:
             pass
     if len(errList) > 0 and dType == "trade":
@@ -242,7 +242,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
         ax1.text(0.01, 0.96, errText, color = "white", fontsize = 12, transform = ax1.transAxes)
         
     # Format plot axes
-    ax1.xaxis.set_major_formatter(formatter)
+    ax1.xaxis.set_major_formatter(tFormat)
     ax1.xaxis.set_major_locator(intvMj)
     ax1.xaxis.set_minor_locator(intvMi)
     ax1.yaxis.set_major_formatter(StrMethodFormatter("{x:,.2f}"))
@@ -252,7 +252,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
     else:
         ax1.yaxis.set_ticks(linspace(lPrice, lPrice + mmDiff, 6))
         ax1.set_ylim([lPrice - mmDiff*0.1, (lPrice + mmDiff + mmDiff*0.1)])
-    ax1.set_xlim(min(dmin), max(dmax))
+    ax1.set_xlim(min(dMin), max(dMax))
     ax1.tick_params(length = 5, width = 1.5, axis = "both", which = "major", labelsize = 15)
     ax1.axhline(y = 1, color = "white", linestyle = "--", linewidth = 0.8)
     ax1.set_facecolor("#33393b")
@@ -272,31 +272,31 @@ def plotSeries(dType = "overview", currencies = None, *args):
     if dType == "overview":
     
         # Get price data for currencies in previous plot; format and convert to lists
-        names = list(D1[h]["Currency"])
-        lows = [ftNum(x, "value", 2) for x in list(D1[h]["Low"])]
-        highs = [ftNum(x, "value", 2) for x in list(D1[h]["High"])]
-        opens = [ftNum(x, "value", 2) for x in list(D1[h]["Open"])]
-        closes = [ftNum(x, "value", 2) for x in list(D1[h]["Close"])]
-        returns = [x for x in list(D1[h]["Return"])]
+        currencyList = list(D1[h]["Currency"])
+        cLow = [ftNum(x, "value", 2) for x in list(D1[h]["Low"])]
+        cHighs = [ftNum(x, "value", 2) for x in list(D1[h]["High"])]
+        cOpen = [ftNum(x, "value", 2) for x in list(D1[h]["Open"])]
+        cClose = [ftNum(x, "value", 2) for x in list(D1[h]["Close"])]
+        cChange = [x for x in list(D1[h]["Return"])]
         
         # Get current price as fraction of maximum for each currency
-        current = []
+        cRange = []
         for i in range(0, 7):
-            current.append(list(L1[h]["key%s" %i]["mean"])[-1]/list(D1[h]["High"])[i])
+            cRange.append(list(L1[h]["key%s" %i]["mean"])[-1]/list(D1[h]["High"])[i])
         
         # Format text colour and sign depending on value
-        colours = ["red" if x < 0 else "green" for x in returns]
-        returns = [ftNum(x, "percentC", 2) for x in returns]
+        colourList = ["red" if x < 0 else "green" for x in cChange]
+        cChange = [ftNum(x, "percentC", 2) for x in cChange]
         
         # Get hyphenated timeframe text
-        tfText = "-".join([x for x in re.split("([a-z]{0,2})", tFrame) if x != ""]) + " Range"
+        fText = "-".join([x for x in re.split("([a-z]{0,2})", tFrame) if x != ""]) + " Range"
 
         # Plot price data as text
         fig2 = pyplot.figure(2)
         pyplot.clf()
         pyplot.scatter([0.04]*7, [x/8 + 0.029 for x in list(range(0, 7))], s = 80, marker = "s",
                        color = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"])
-        pyplot.scatter([0.79 + 0.17*x for x in current], [x/8 + 0.059 for x in range(0, 7)],
+        pyplot.scatter([0.79 + 0.17*x for x in cRange], [x/8 + 0.059 for x in range(0, 7)],
                        s = 40, marker = "s", color = "white")
         pyplot.axis("off")
         pyplot.tight_layout()
@@ -306,19 +306,19 @@ def plotSeries(dType = "overview", currencies = None, *args):
         for i in range(0, 7):
             ax2.axhline(xmin = 0.79, xmax = 0.962, y = i/8 + 0.059, color = "white", linewidth = 0.8)
             for j in range(0, 4):
-                ax2.text([0.338, 0.548, 0.728, 0.963][j], 7/8, ["Open", "Close", "Change", tfText][j],
+                ax2.text([0.338, 0.548, 0.728, 0.963][j], 7/8, ["Open", "Close", "Change", fText][j],
                          horizontalalignment = "right", color = "white", fontsize = 20)
-            ax2.text(0.084, 1/8*i, names[i], color = colours[i],
+            ax2.text(0.084, 1/8*i, currencyList[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "left")
-            ax2.text(0.338, 1/8*i, opens[i], color = colours[i],
+            ax2.text(0.338, 1/8*i, cOpen[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.548, 1/8*i, closes[i], color = colours[i],
+            ax2.text(0.548, 1/8*i, cClose[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.728, 1/8*i, returns[i], color = colours[i],
+            ax2.text(0.728, 1/8*i, cChange[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.790, 1/8*i, lows[i], color = "white",
+            ax2.text(0.790, 1/8*i, cLow[i], color = "white",
                      fontsize = 8, horizontalalignment = "left")
-            ax2.text(0.962, 1/8*i, highs[i], color = "white",
+            ax2.text(0.962, 1/8*i, cHighs[i], color = "white",
                      fontsize = 8, horizontalalignment = "right")
         
         # Create TkInter canvas with Matplotlib figure
@@ -341,27 +341,27 @@ def plotMovers():
         
         # Determine whether set is top or bottom
         if i == 0:
-            s1, s2 = 0, 10
+            iStart, iEnd = 0, 10
             prefix = "Top"
         else:
-            s1, s2 = 10, 21
+            iStart, iEnd = 10, 21
             prefix = "Bottom"
         
         # Convert movement data to lists, then format
-        currencyList = list(pData["Currency"])[s1:s2]
-        changes = list(pData["Change"])[s1:s2]
-        openV = [ftNum(x, "value", 3) for x in list(pData["Open"])][s1:s2]
-        closeV = [ftNum(x, "value", 3) for x in list(pData["Close"])][s1:s2]
+        currencyList = list(pData["Currency"])[iStart:iEnd]
+        cChange = list(pData["Change"])[iStart:iEnd]
+        cOpen = [ftNum(x, "value", 3) for x in list(pData["Open"])][iStart:iEnd]
+        cClose = [ftNum(x, "value", 3) for x in list(pData["Close"])][iStart:iEnd]
         
         # Reverse data so that most extreme movement is listed first
         currencyList.reverse();
-        changes.reverse();
-        openV.reverse()
-        closeV.reverse()
+        cChange.reverse();
+        cOpen.reverse()
+        cClose.reverse()
     
         # Format text colour and sign depending on value
-        colours = ["red" if x < 0 else "green" for x in changes]
-        changes = [ftNum(x, "percentC", 2) for x in changes]
+        colourList = ["red" if x < 0 else "green" for x in cChange]
+        cChange = [ftNum(x, "percentC", 2) for x in cChange]
     
         # Plot movement data as text
         if i == 0:
@@ -378,13 +378,13 @@ def plotMovers():
             for k in range(0, 3):
                 ax.text([0.447, 0.707, 0.968][k], 10/14, ["Open", "Close", "Change"][k],
                         horizontalalignment = "right", color = "white", fontsize = 20)
-            ax.text(0.084, 1/14*j, currencyList[j], color = colours[j],
+            ax.text(0.084, 1/14*j, currencyList[j], color = colourList[j],
                     fontsize = 20, horizontalalignment = "left")
-            ax.text(0.447, 1/14*j, openV[j], color = colours[j],
+            ax.text(0.447, 1/14*j, cOpen[j], color = colourList[j],
                     fontsize = 20, horizontalalignment = "right")
-            ax.text(0.707, 1/14*j, closeV[j], color = colours[j],
+            ax.text(0.707, 1/14*j, cClose[j], color = colourList[j],
                     fontsize = 20, horizontalalignment = "right")
-            ax.text(0.968, 1/14*j, changes[j], color = colours[j],
+            ax.text(0.968, 1/14*j, cChange[j], color = colourList[j],
                     fontsize = 20, horizontalalignment = "right")
         ax.text(0.084, 12/14, prefix + " 24-Hour Movers", color = "white", fontsize = 35,
                 horizontalalignment = "left")
@@ -405,22 +405,22 @@ def plotHoldings():
     pbUpdate()
     
     # Get current holdings for each cryptocurrency
-    values = getCurrentHoldings()
-    total = sum(values["Percent"])
+    hVals = getCurrentHoldings()
+    hLength = len(hVals)
     
     # Set labels as blank for curriencies with small holdings
-    labs = ["" if values["Percent"][x] < 3 else values["Currency"][x] for x in range(0, len(values))]
+    hLabs = ["" if hVals["Percent"][x] < 3 else hVals["Currency"][x] for x in range(0, hLength)]
     
     # Set colour palette
-    colours = seaborn.color_palette("tab10", len(labs))
+    colourList = seaborn.color_palette("tab10", len(hLabs))
     
     # Generate donut plot
     fig1 = pyplot.figure(6, facecolor = "#33393b")
     pyplot.clf()
-    pyplot.pie(values["Amount"], labels = labs, colors = colours,
+    pyplot.pie(hVals["Amount"], labels = hLabs, colors = colourList,
                textprops = {"color" : "w"}, radius = 1.2, startangle = 60)
     pyplot.gcf().gca().add_artist(pyplot.Circle((0, 0), 0.7, color = "#33393b"))
-    pyplot.gcf().text(0.5, 0.5, "$" + "{:.2f}".format(sum(values["Amount"])), color = "white",
+    pyplot.gcf().text(0.5, 0.5, "$" + "{:.2f}".format(sum(hVals["Amount"])), color = "white",
                       fontsize = 24, horizontalalignment = "center")
     pyplot.subplots_adjust(left = 0.1, right = 0.9, top = 0.9, bottom = 0.1)
     
@@ -428,72 +428,72 @@ def plotHoldings():
     pyplot.gcf().canvas.draw()
     
     # Get currency list
-    currencyList = list(values["Currency"])
+    currencyList = list(hVals["Currency"])
     
-    # Get current prices and 24-hour returns for each currency
-    prices, returns24h = [], []
-    for i in range(0, len(currencyList)):
-        prices.append(float(oData.loc[oData["Currency"] == currencyList[i]]["Close"]))
-        returns24h.append(float(oData.loc[oData["Currency"] == currencyList[i]]["Change"]))
-    
-    # Calculate cost basis and return for each currency
-    basis, returns = [], []
+    # Calculate cost basis and total return for each currency
+    cBasis, cReturn = [], []
     for i in range(0, len(currencyList)):
         ftHist = tHist.loc[(tHist["Currency"] == currencyList[i]) & (tHist["Type"].isin(["buy", "trade"])) & (tHist["Amount"] > 0)]
-        basis.append(sum(ftHist["USD"])/sum(ftHist["Amount"]))
-        returns.append((list(values["Amount"])[i]/(basis[i]*list(values["Crypto"])[i]) - 1)*100)
+        cBasis.append(sum(ftHist["USD"])/sum(ftHist["Amount"]))
+        cReturn.append((list(hVals["Amount"])[i]/(cBasis[i]*list(hVals["Crypto"])[i]) - 1)*100)
+    
+    # Get current prices and 24-hour returns for each currency
+    cPrice, cReturn1D = [], []
+    for i in range(0, len(currencyList)):
+        cPrice.append(float(oData.loc[oData["Currency"] == currencyList[i]]["Close"]))
+        cReturn1D.append(float(oData.loc[oData["Currency"] == currencyList[i]]["Change"]))
         
     # Format holdings data
-    cryptos = [ftNum(x, "amount", 5) for x in list(values["Crypto"])]
-    amounts = [ftNum(x, "value", 2) for x in list(values["Amount"])]
-    pcts = [ftNum(x, "percent", 2) for x in list(values["Percent"])]
-    basis = [ftNum(x, "value", 2) + "/unit" for x in basis]
-    returns = [ftNum(x, "percentC", 2) for x in returns]
-    prices = [ftNum(x, "value", 2) + "/unit" for x in prices]
-    returns24h = [ftNum(x, "percentC", 2) for x in returns24h]
+    cCrypto = [ftNum(x, "amount", 5) for x in list(hVals["Crypto"])]
+    cDollar = [ftNum(x, "value", 2) for x in list(hVals["Amount"])]
+    cPercent = [ftNum(x, "percent", 2) for x in list(hVals["Percent"])]
+    cBasis = [ftNum(x, "value", 2) + "/unit" for x in cBasis]
+    cPrice = [ftNum(x, "value", 2) + "/unit" for x in cPrice]
+    cReturn = [ftNum(x, "percentC", 2) for x in cReturn]
+    cReturn1D = [ftNum(x, "percentC", 2) for x in cReturn1D]
     
     # Reverse holdings data for plotting compatibility
     currencyList.reverse()
-    cryptos.reverse()
-    amounts.reverse()
-    pcts.reverse()
-    colours.reverse()
-    basis.reverse()
-    returns.reverse()
-    prices.reverse()
-    returns24h.reverse()
+    colourList.reverse()
+    cCrypto.reverse()
+    cDollar.reverse()
+    cPercent.reverse()
+    cBasis.reverse()
+    cPrice.reverse()
+    cReturn.reverse()
+    cReturn1D.reverse()
     
     # Plot current holdings as text
     fig2 = pyplot.figure(8)
     pyplot.clf()
-    pyplot.scatter([0.025]*len(values), [x/(len(values) + 1) + 0.029 for x in list(range(0, len(values)))],
-                   color = colours, s = 80, marker = "s")
+    pyplot.scatter([0.025]*hLength, [x/(hLength + 1) + 0.029 for x in list(range(0, hLength))],
+                   color = colourList, s = 80, marker = "s")
     pyplot.axis("off")
     pyplot.tight_layout()
     ax2 = pyplot.gca()
     ax2.set_xlim(0, 1)
     ax2.set_ylim(0, 1)
-    for i in range(0, len(values)):
+    for i in range(0, hLength):
         for j in range(0, 8):
-            ax2.text([0.050, 0.217, 0.327, 0.437, 0.590, 0.747, 0.880, 0.999][j], len(values)/(len(values) + 1), 
+            ax2.text([0.050, 0.217, 0.327, 0.437, 0.590, 0.747, 0.880, 0.999][j], hLength/(hLength + 1), 
                      ["", "Amount", "Value", "Percent", "Current Price", "Cost Basis", "24-hr Return", "Total Return"][j],
                      color = "white", fontsize = 20,
                      horizontalalignment = ["left", "right", "right", "right", "right", "right", "right", "right"][j])
-        ax2.text(0.050, 1/(len(values) + 1)*i, currencyList[i], color = "white",
+        ax2.text(0.050, 1/(hLength + 1)*i, currencyList[i], color = "white",
                  fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.217, 1/(len(values) + 1)*i, cryptos[i], color = "white",
+        ax2.text(0.217, 1/(hLength + 1)*i, cCrypto[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.327, 1/(len(values) + 1)*i, amounts[i], color = "white",
+        ax2.text(0.327, 1/(hLength + 1)*i, cDollar[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.437, 1/(len(values) + 1)*i, pcts[i], color = "white",
+        ax2.text(0.437, 1/(hLength + 1)*i, cPercent[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.590, 1/(len(values) + 1)*i, prices[i], color = "white",
+        ax2.text(0.590, 1/(hLength + 1)*i, cPrice[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.747, 1/(len(values) + 1)*i, basis[i], color = "white",
+        ax2.text(0.747, 1/(hLength + 1)*i, cBasis[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.880, 1/(len(values) + 1)*i, returns24h[i], color = "white",
+        ax2.text(0.880, 1/(hLength + 1)*i, cReturn1D[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.999, 1/(len(values) + 1)*i, returns[i], color = "white",
+        ax2.text(0.999, 1/(hLength + 1)*i, cReturn[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
         
     # Create TkInter canvas with Matplotlib figure
@@ -501,38 +501,38 @@ def plotHoldings():
     
     # Define internal functions to read and write user data from file
     def getBalTime():
-        return ["{:.2f}".format(sum(values["Amount"])),
+        return ["{:.2f}".format(sum(hVals["Amount"])),
                 datetime.datetime.now().strftime("%m/%d/%Y %H:%M")]
     def datRead():
         temp = open("UserData.txt", "r+")
-        pList = temp.read().splitlines()
+        dPrevious = temp.read().splitlines()
         temp.close()
-        return pList
+        return dPrevious
     def datWrite():
-        cList = getBalTime()
+        dCurrent = getBalTime()
         temp = open("UserData.txt", "w")
-        temp.writelines([cList[0] + "\n", cList[1] + "\n"])
+        temp.writelines([dCurrent[0] + "\n", dCurrent[1] + "\n"])
         temp.close()
     
     # Get portfolio balance and time from last refresh
     # If first time running, create file and perform this operation
     try:
-        pList = datRead()
+        dPrevious = datRead()
     except FileNotFoundError:
         datWrite()
-        pList = datRead()
-    cList = getBalTime()
+        dPrevious = datRead()
+    dCurrent = getBalTime()
     datWrite()
-    pBal, pTime = float(pList[0]), pList[1]
-    cBal, cTime = float(cList[0]), cList[1]
+    bPrevious, tPrevious = float(dPrevious[0]), dPrevious[1]
+    bCurrent, tCurrent = float(dCurrent[0]), dCurrent[1]
     
     # Get change and percent change in portfolio value since last update
-    change1 = cBal - pBal
-    change2 = change1/pBal*100
+    bChange1 = bCurrent - bPrevious
+    bChange2 = bChange1/bPrevious*100
     
     # Format change and percent change for text
-    change1 = ftNum(change1, "valueC", 2)
-    change2 = ftNum(change2, "percentC", 2)
+    bChange1 = ftNum(bChange1, "valueC", 2)
+    bChange2 = ftNum(bChange2, "percentC", 2)
     
     # Plot portfolio balance
     fig3 = pyplot.figure(7)
@@ -542,7 +542,7 @@ def plotHoldings():
     ax3 = pyplot.gca()
     ax3.set_xlim(0, 1)
     ax3.set_ylim(0, 1)
-    ax3.text(0.99, 0.5, change1 + " (" + change2 + ") since last update on " + pList[1],
+    ax3.text(0.99, 0.5, bChange1 + " (" + bChange2 + ") since last update on " + dPrevious[1],
              color = "white", fontsize = 14, horizontalalignment = "right")
     
     # Create TkInter canvas with Matplotlib figure
@@ -565,13 +565,13 @@ def plotTransactions(tHist, ref = False):
         tHist = getTransactionHistory()
     
     # Get page number
-    page = thMaxPage - w3_sState.get() + 1
+    pNum = thMaxPage - w3_sState.get() + 1
     
     # Number transactions by chronological order
     # Subset depending on page number
     tNum = list(range(1, len(tHist) + 1))
     tNum.reverse()
-    tNum = tNum[((page - 1)*25):(page*25)]
+    tNum = tNum[((pNum - 1)*25):(pNum*25)]
     
     # Change time string to datetime, convert from UTC to local, then format appropriately
     tHist["Time"] = [dp.parse(x) for x in list(tHist["Time"])]
@@ -585,15 +585,15 @@ def plotTransactions(tHist, ref = False):
     # Sort transactions by date and time
     # Subset depending on page number
     tHist = tHist.sort_values(by = "Time", ascending = False)
-    tHist = tHist.iloc[((page - 1)*25):(page*25)]
+    tHist = tHist.iloc[((pNum - 1)*25):(pNum*25)]
     
     # Limit data to 25 entries per page
     pageLength = len(tHist)
 
     # Create lists of transaction stats
-    currency = list(tHist["Currency"])
-    amounts = [ftNum(x, "amount", 4) for x in list(tHist["Amount"])]
-    usd = [ftNum(x, "valueC", 2) for x in list(tHist["USD"])]
+    currencyList = list(tHist["Currency"])
+    tCrypto = [ftNum(x, "amount", 4) for x in list(tHist["Amount"])]
+    tDollar = [ftNum(x, "valueC", 2) for x in list(tHist["USD"])]
     tType = list(tHist["Type"])
     tTime = list(tHist["Time"])
     tStat = list(tHist["Status"])
@@ -620,11 +620,11 @@ def plotTransactions(tHist, ref = False):
                 fontsize = 12, horizontalalignment = "left")
         ax.text(0.422, 24/26 - j/26, tType[j], color = "white",
                 fontsize = 12, horizontalalignment = "left")
-        ax.text(0.620, 24/26 - j/26, currency[j], color = "white",
+        ax.text(0.620, 24/26 - j/26, currencyList[j], color = "white",
                 fontsize = 12, horizontalalignment = "left")
-        ax.text(0.820, 24/26 - j/26, amounts[j], color = "white",
+        ax.text(0.820, 24/26 - j/26, tCrypto[j], color = "white",
                 fontsize = 12, horizontalalignment = "right")
-        ax.text(0.983, 24/26 - j/26, usd[j], color = "white",
+        ax.text(0.983, 24/26 - j/26, tDollar[j], color = "white",
                 fontsize = 12, horizontalalignment = "right")
         
     # Create TkInter canvas with Matplotlib figure
@@ -646,11 +646,11 @@ def plotTrade(push = False):
     currency1 = w3_cState1.get()
     currency2 = w3_cState2.get()
     if w3_eState1.get() == "":
-        cT1, cT2 = currency2, currency1
-        amount = w3_eState2.get()
+        cText1, cText2 = currency2, currency1
+        aText = w3_eState2.get()
     elif w3_eState2.get() == "":
-        cT1, cT2 = currency1, currency2
-        amount = w3_eState1.get()
+        cText1, cText2 = currency1, currency2
+        aText = w3_eState1.get()
     if w3_tState1.get() == 1:
         tType1 = "buy"
     elif w3_tState1.get() == 2:
@@ -661,7 +661,7 @@ def plotTrade(push = False):
         tType2 = "dollar"
     elif w3_tState2.get() == 2:
         tType2 = "crypto"
-    if amount == "":
+    if aText == "":
         blank = True
     else:
         blank = False
@@ -671,33 +671,33 @@ def plotTrade(push = False):
     
         # Get trade order information
         if blank == False:
-            tInfo = getQuote(tType1, tType2, float(amount), cT1, cT2)
+            tInfo = getQuote(tType1, tType2, float(aText), cText1, cText2)
         
         # Get currency owned information
         cInfo = getSpecificCurrency(currency1, currency2)
     
         # Get currency owned text
-        oT1 = currency1 + " owned: " + ftNum(float(cInfo[0]), "amount", 4) + " ($" + cInfo[1] + ")"
+        oText1 = currency1 + " owned: " + ftNum(float(cInfo[0]), "amount", 4) + " ($" + cInfo[1] + ")"
         if tType1 == "convert":
-            oT2 = currency2 + " owned: " + ftNum(float(cInfo[2]), "amount", 4) + " ($" + cInfo[3] + ")"
+            oText2 = currency2 + " owned: " + ftNum(float(cInfo[2]), "amount", 4) + " ($" + cInfo[3] + ")"
         else:
-            oT2 = ""
+            oText2 = ""
     
         # Get trade text
         if blank == False:
-            tT1 = "$" + ftNum(tInfo[0], "amount")
+            tText1 = "$" + ftNum(tInfo[0], "amount")
             if tType1 != "convert":
-                tT2 = ("-" if tType1 == "sell" else "") + "$" + ftNum(tInfo[1], "amount")
-                tT3 = "$" + ftNum(tInfo[2], "amount")
+                tText2 = ("-" if tType1 == "sell" else "") + "$" + ftNum(tInfo[1], "amount")
+                tText3 = "$" + ftNum(tInfo[2], "amount")
             else:
-                tT2 = "-$" + ftNum(tInfo[1] + tInfo[5], "amount")
-                tT3 = "$" + ftNum(tInfo[4], "amount")
+                tText2 = "-$" + ftNum(tInfo[1] + tInfo[5], "amount")
+                tText3 = "$" + ftNum(tInfo[4], "amount")
         else:
-            tT1, tT2, tT3 = "$---", "$---", "$---"
+            tText1, tText2, tText3 = "$---", "$---", "$---"
     
         # List disclaimer text
-        dT1 = "Rates may differ at the time of transaction completion due to changes in market conditions."
-        dT2 = "A detailed schedule of transaction fees can be found on Coinbase (www.coinbase.com)."
+        dText1 = "Rates may differ at the time of transaction completion due to changes in market conditions."
+        dText2 = "A detailed schedule of transaction fees can be found on Coinbase (www.coinbase.com)."
     
         # Plot trade order information as text
         fig = pyplot.figure(10)
@@ -707,25 +707,25 @@ def plotTrade(push = False):
         ax = pyplot.gca()
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
-        ax.text(0.430, 0.87, oT1, color = "white", fontsize = 14, horizontalalignment = "left")
-        ax.text(0.430, 0.78, oT2, color = "white", fontsize = 14, horizontalalignment = "left")
+        ax.text(0.430, 0.87, oText1, color = "white", fontsize = 14, horizontalalignment = "left")
+        ax.text(0.430, 0.78, oText2, color = "white", fontsize = 14, horizontalalignment = "left")
         ax.text(0.430, 0.87, currency1 + " ", color = "#b809ed", fontsize = 14, horizontalalignment = "left")
         ax.text(0.430, 0.78, currency2 + " ", color = "#09e5ed", fontsize = 14, horizontalalignment = "left")
         ax.text(0.430, 0.53, "Subtotal:", color = "white", fontsize = 20, horizontalalignment = "left")
         ax.text(0.430, 0.37, "Fees:", color = "white", fontsize = 20, horizontalalignment = "left")
         ax.text(0.430, 0.21, "Total:", color = "white", fontsize = 20, horizontalalignment = "left")
-        ax.text(0.000, 0.05, dT1, color = "white", fontsize = 10, horizontalalignment = "left")
-        ax.text(0.000, 0.00, dT2, color = "white", fontsize = 10, horizontalalignment = "left")
-        ax.text(0.986, 0.53, tT1, color = "white", fontsize = 20, horizontalalignment = "right")
-        ax.text(0.986, 0.37, tT2, color = "white", fontsize = 20, horizontalalignment = "right")
-        ax.text(0.986, 0.21, tT3, color = "white", fontsize = 20, horizontalalignment = "right")
+        ax.text(0.000, 0.05, dText1, color = "white", fontsize = 10, horizontalalignment = "left")
+        ax.text(0.000, 0.00, dText2, color = "white", fontsize = 10, horizontalalignment = "left")
+        ax.text(0.986, 0.53, tText1, color = "white", fontsize = 20, horizontalalignment = "right")
+        ax.text(0.986, 0.37, tText2, color = "white", fontsize = 20, horizontalalignment = "right")
+        ax.text(0.986, 0.21, tText3, color = "white", fontsize = 20, horizontalalignment = "right")
     
         # Create TkInter canvas with Matplotlib figure
         pyplot.gcf().canvas.draw()
     
     # If push is set to true, execute trade without plotting
     elif push == True:
-        tInfo = getQuote(tType1, tType2, float(amount), cT1, cT2, push = True)
+        tInfo = getQuote(tType1, tType2, float(amount), cText1, cText2, push = True)
 
 # Function to plot trade confirmation text
 def plotTradeConfirmation():
@@ -734,25 +734,23 @@ def plotTradeConfirmation():
     pbUpdate()
     
     # Convert state indicators to text
-    currency1 = w3_cState1.get()
-    currency2 = w3_cState2.get()
     if w3_eState1.get() == "":
-        c1, c2 = currency2, currency1
-        amount = w3_eState2.get()
+        currency1, currency2 = w3_cState2.get(), w3_cState1.get()
+        aText = w3_eState2.get()
     elif w3_eState2.get() == "":
-        c1, c2 = currency1, currency2
-        amount = w3_eState1.get()
+        currency1, currency2 = w3_cState1.get(), w3_cState2.get()
+        aText = w3_eState1.get()
     if w3_tState1.get() == 1:
         tType1 = "Buy"
-        cT1, cT2 = "USD ($)", c1
+        cText1, cText2 = "USD ($)", currency1
     elif w3_tState1.get() == 2:
         tType1 = "Sell"
-        cT1, cT2 = c1, "USD ($)"
+        cText1, cText2 = currency1, "USD ($)"
     elif w3_tState1.get() == 3:
         tType1 = "Convert"
-        cT1, cT2 = c1, c2
+        cText1, cText2 = currency1, currency2
         if w3_tState2.get() == 1:
-            amount = "$" + amount
+            aText = "$" + aText
     
     # Plot trade order information as text
     fig = pyplot.figure(13)
@@ -763,8 +761,8 @@ def plotTradeConfirmation():
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     for i in range(0, 4):
-        ax.text(0.38, 0.85 - i*0.2, ["Type: " +  tType1, "Amount: " + amount,
-                                    "From: " + cT1, "To: " + cT2][i],
+        ax.text(0.38, 0.85 - i*0.2, ["Type: " +  tType1, "Amount: " + aText,
+                                     "From: " + cText1, "To: " + cText2][i],
                 horizontalalignment = "left", color = "white", fontsize = 13)
     ax.text(0.045, 0.85, "Confirm?", horizontalalignment = "left", color = "white", fontsize = 13)
 
@@ -778,19 +776,19 @@ def plotTradeConfirmation():
 ##### Plot information on last refresh time ---------------------------------------------------------------
     
 # Function to display time at which a widget was last refreshed
-def plotRefresh(refreshing = False):
+def plotRefresh(rActive = False):
     
     # Update progress bar
     pbUpdate()
     
     # Get current time
-    cTime = datetime.datetime.now().strftime("%H:%M")
+    tCurrent = datetime.datetime.now().strftime("%H:%M")
     
     # Get text
-    if refreshing == True:
+    if rActive == True:
         rText = "Refreshing... Please Wait."
     else:
-        rText = "Last updated at " + cTime
+        rText = "Last updated at " + tCurrent
         
     # Plot text
     fig = pyplot.figure(12)
@@ -1183,7 +1181,7 @@ w3_sState = IntVar()
 
 # Add master refresh button in top-right corner
 w3_b1 = ttk.Button(w3, text = "Refresh", style = "small.TButton",
-                   command = lambda:[toggleReset("disable"), plotRefresh(refreshing = True), refreshData(),
+                   command = lambda:[toggleReset("disable"), plotRefresh(rActive = True), refreshData(),
                                      plotSeries(), plotSeries(dType = "portfolio", currencies = cData),
                                      plotMovers(), plotHoldings(), plotTransactions(tHist = tHist),
                                      plotRefresh(), toggleReset("enable")])

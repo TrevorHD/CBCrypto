@@ -981,10 +981,19 @@ cState2 = StringVar()
 eState1 = StringVar()
 eState2 = StringVar()
 
+# Function to enable/disable master reset button
+def toggleReset(action):
+    if action == "disable":
+        b5.state(["disabled"])
+        window.update()
+    elif action == "enable":
+        b5.state(["!disabled"])
+        window.update()
+
 # Add master reset button
 b5 = ttk.Button(window, text = "Refresh", style = "small.TButton",
-                command = lambda:[plotRefresh(refreshing = True), refreshData(), plotSeries(), plotSeries(dType = "portfolio", currencies = cData),
-                                  plotMovers(), plotHoldings(), plotTransactions(tHist = tHist), plotRefresh()])
+                command = lambda:[toggleReset("disable"), plotRefresh(refreshing = True), refreshData(), plotSeries(), plotSeries(dType = "portfolio", currencies = cData),
+                                  plotMovers(), plotHoldings(), plotTransactions(tHist = tHist), plotRefresh(), toggleReset("enable")])
 #b5.place(x = 1390, y = 1, width = 30, height = 20)
 b5.place(x = 1420, y = 6)
 b5.invoke()

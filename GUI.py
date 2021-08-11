@@ -30,8 +30,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 # Function to format transaction types and status
 def ftStr(x):
-    xOutput = x.replace("_", " ").capitalize()
-    return xOutput
+    xOut = x.replace("_", " ").capitalize()
+    return xOut
 
 # Function to format currency numbers and percents
 def ftNum(x, xType, dec = 2):
@@ -41,42 +41,42 @@ def ftNum(x, xType, dec = 2):
     
     # Format currency amounts
     if xType == "amount":
-        xOutput = dFormatter.format(x)
+        xOut = dFormatter.format(x)
     
     # Format percents
     elif xType == "percent":
         if x >= 0.01:
-            xOutput = dFormatter.format(x) + "%"
+            xOut = dFormatter.format(x) + "%"
         else:
-            xOutput = "<0.01%"
+            xOut = "<0.01%"
     
     # Format percent changes
     elif xType == "percentC":
         if x >= 0.01:
-            xOutput = "+" + dFormatter.format(x) + "%"
+            xOut = "+" + dFormatter.format(x) + "%"
         elif -0.01 < x < 0.01:
-            xOutput = "<0.01%"
+            xOut = "<0.01%"
         elif x <= -0.01:
-            xOutput = "-" + dFormatter.format(abs(x)) + "%"
+            xOut = "-" + dFormatter.format(abs(x)) + "%"
     
     # Format currency values        
     elif xType == "value":
         if x >= 0.01:
-            xOutput = "$" + dFormatter.format(x)
+            xOut = "$" + dFormatter.format(x)
         else:
-            xOutput = "<$0.01"
+            xOut = "<$0.01"
     
     # Format currency value changes
     elif xType == "valueC":
         if x >= 0.01:
-            xOutput = "+$" + dFormatter.format(x)
+            xOut = "+$" + dFormatter.format(x)
         elif -0.01 < x < 0.01:
-            xOutput = "<$0.01"
+            xOut = "<$0.01"
         elif x <= -0.01:
-            xOutput = "-$" + dFormatter.format(abs(x))
+            xOut = "-$" + dFormatter.format(abs(x))
             
     # Return formatted number as string
-    return xOutput
+    return xOut
 
         
 
@@ -223,50 +223,50 @@ def plotSeries(dType = "overview", currencies = None, *args):
     
     # Initialise plot
     if dType == "overview":
-        fig = pyplot.figure(1, facecolor = "#33393b")
+        fig1 = pyplot.figure(1, facecolor = "#33393b")
     elif dType == "portfolio":
-        fig = pyplot.figure(5, facecolor = "#33393b")
+        fig1 = pyplot.figure(5, facecolor = "#33393b")
     elif dType == "trade":
-        fig = pyplot.figure(9, facecolor = "#33393b")
+        fig1 = pyplot.figure(9, facecolor = "#33393b")
     pyplot.clf()
-    whitespace = fig.add_axes([0, 0, 1, 1])
+    whitespace = fig1.add_axes([0, 0, 1, 1])
     whitespace.axis("off")
-    ax = fig.add_axes([0.10, 0.06, 0.85, 0.90])
+    ax1 = fig1.add_axes([0.10, 0.06, 0.85, 0.90])
     
     # Plot value relative to opening value for each currency
     # Do not plot if no data exists
     for i in range(0, len(currencyList)):
         try:
-            ax.plot(L1[h]["key%s" %i]["datetime"], L2[h]["key%s" %i], linestyle = "-",
-                    linewidth = 1.2, label = currencyList[i], color = colours[i])
+            ax1.plot(L1[h]["key%s" %i]["datetime"], L2[h]["key%s" %i], linestyle = "-",
+                     linewidth = 1.2, label = currencyList[i], color = colours[i])
         except KeyError:
             pass
     if len(errList) > 0 and dType == "trade":
         errText = "*" + " and ".join(errList) + " missing price data"
-        ax.text(0.01, 0.96, errText, color = "white", fontsize = 12, transform = ax.transAxes)
+        ax1.text(0.01, 0.96, errText, color = "white", fontsize = 12, transform = ax1.transAxes)
         
     # Format plot axes
-    ax.xaxis.set_major_formatter(formatter)
-    ax.xaxis.set_major_locator(intvMj)
-    ax.xaxis.set_minor_locator(intvMi)
-    ax.yaxis.set_major_formatter(StrMethodFormatter("{x:,.2f}"))
+    ax1.xaxis.set_major_formatter(formatter)
+    ax1.xaxis.set_major_locator(intvMj)
+    ax1.xaxis.set_minor_locator(intvMi)
+    ax1.yaxis.set_major_formatter(StrMethodFormatter("{x:,.2f}"))
     if mmDiff > 0.5:
-        ax.yaxis.set_ticks(linspace(lPrice, lPrice + mmDiff, 6))
-        ax.set_ylim([lPrice - mmDiff*0.1, (lPrice + mmDiff + mmDiff*0.1)])
+        ax1.yaxis.set_ticks(linspace(lPrice, lPrice + mmDiff, 6))
+        ax1.set_ylim([lPrice - mmDiff*0.1, (lPrice + mmDiff + mmDiff*0.1)])
     else:
-        ax.yaxis.set_ticks(linspace(lPrice, lPrice + mmDiff, 6))
-        ax.set_ylim([lPrice - mmDiff*0.1, (lPrice + mmDiff + mmDiff*0.1)])
-    ax.set_xlim(min(dmin), max(dmax))
-    ax.tick_params(length = 5, width = 1.5, axis = "both", which = "major", labelsize = 15)
-    ax.axhline(y = 1, color = "white", linestyle = "--", linewidth = 0.8)
-    ax.set_facecolor("#33393b")
-    for i in ax.spines:
-        ax.spines[i].set_color("white")
+        ax1.yaxis.set_ticks(linspace(lPrice, lPrice + mmDiff, 6))
+        ax1.set_ylim([lPrice - mmDiff*0.1, (lPrice + mmDiff + mmDiff*0.1)])
+    ax1.set_xlim(min(dmin), max(dmax))
+    ax1.tick_params(length = 5, width = 1.5, axis = "both", which = "major", labelsize = 15)
+    ax1.axhline(y = 1, color = "white", linestyle = "--", linewidth = 0.8)
+    ax1.set_facecolor("#33393b")
+    for i in ax1.spines:
+        ax1.spines[i].set_color("white")
     for i in ("x", "y"):
-        ax.tick_params(axis = i, color = "white")
-    for i in ax.get_yticklabels():
+        ax1.tick_params(axis = i, color = "white")
+    for i in ax1.get_yticklabels():
         i.set_color("white")
-    for i in ax.get_xticklabels():
+    for i in ax1.get_xticklabels():
         i.set_color("white")
     
     # Create TkInter canvas with Matplotlib figure
@@ -369,9 +369,9 @@ def plotMovers():
     
         # Plot movement data as text
         if i == 0:
-            fig3 = pyplot.figure(3)
+            fig = pyplot.figure(3)
         else:
-            fig4 = pyplot.figure(4)
+            fig = pyplot.figure(4)
         pyplot.clf()
         pyplot.axis("off")
         pyplot.tight_layout()
@@ -419,7 +419,7 @@ def plotHoldings():
     colours = seaborn.color_palette("tab10", len(labs))
     
     # Generate donut plot
-    fig = pyplot.figure(6, facecolor = "#33393b")
+    fig1 = pyplot.figure(6, facecolor = "#33393b")
     pyplot.clf()
     pyplot.pie(values["Amount"], labels = labs, colors = colours,
                textprops = {"color" : "w"}, radius = 1.2, startangle = 60)
@@ -603,7 +603,7 @@ def plotTransactions(tHist, ref = False):
     tStat = list(tHist["Status"])
     
     # Plot transaction stats as text
-    fig10 = pyplot.figure(11)
+    fig = pyplot.figure(11)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -704,7 +704,7 @@ def plotTrade(push = False):
         dT2 = "A detailed schedule of transaction fees can be found on Coinbase (www.coinbase.com)."
     
         # Plot trade order information as text
-        fig12 = pyplot.figure(10)
+        fig = pyplot.figure(10)
         pyplot.clf()
         pyplot.axis("off")
         pyplot.tight_layout()
@@ -759,7 +759,7 @@ def plotTradeConfirmation():
             amount = "$" + amount
     
     # Plot trade order information as text
-    fig13 = pyplot.figure(13)
+    fig = pyplot.figure(13)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -789,7 +789,6 @@ def plotRefresh(refreshing = False):
     
     # Get current time
     cTime = datetime.datetime.now().strftime("%H:%M")
-    fig5 = pyplot.figure(12)
     
     # Get text
     if refreshing == True:
@@ -798,6 +797,7 @@ def plotRefresh(refreshing = False):
         rText = "Last updated at " + cTime
         
     # Plot text
+    fig = pyplot.figure(12)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()

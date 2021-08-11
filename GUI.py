@@ -1,11 +1,7 @@
 ##### GUI To-do list --------------------------------------------------------------------------------------
 
-# Fix progress bar
-# Move refresh button and text to top-right
-    # Allow refresh button to refresh everything at once
 # Create login screen using API key and secret
 # Fully implement trade functionality
-# Redo radiobutton and figure numbering to make code more clear
 
 
 
@@ -988,6 +984,101 @@ def tradeWindow():
 def resetTrades():
     tState1.set(1)
     tState2.set(1)
+
+
+
+
+
+
+
+
+
+# LOGIN SCREEN
+
+# Create main TkInter window
+window1 = Tk()
+
+# Function to mask information when login boxes are activated
+def loginFocus(eBox, *args):
+    if eBox == 1:
+        if eState1.get() == "API Key":
+            e1.delete(0, "end")
+            e1.insert(0, "")
+            e1.configure(show = "*")
+            e1.configure(foreground = "white")
+    elif eBox == 2:
+        if eState2.get() == "API Secret":
+            e2.delete(0, "end")
+            e2.insert(0, "")
+            e2.configure(show = "*")
+            e2.configure(foreground = "white")
+
+# Function to unmask default text when login boxes are deactivated            
+def loginUnfocus(eBox, *args):
+    if eBox == 1:
+        if eState1.get() == "":
+            e1.configure(show = None)
+            e1.insert(0, "API Key")
+            e1.configure(foreground = "grey")
+    elif eBox == 2:
+        if eState2.get() == "":
+            e2.configure(show = None)
+            e2.insert(0, "API Secret")
+            e2.configure(foreground = "grey")
+
+# Set main window theme
+window1.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes-10.4.0")
+window1.tk.call("package", "require", "awdark") 
+ttk.Style().theme_use("awdark") 
+
+# Set main window title, dimensions, and colour
+window1.title("CBCrypto: Cryptocurrency Dashboard")
+window1.geometry("1920x1080")
+window1.configure(bg = "#33393b")
+
+# Set main window icon
+icon = ImageTk.PhotoImage(Image.open("Logo.png"))
+icon2 = ImageTk.PhotoImage(Image.open("Logo.png").resize((500, 500), Image.ANTIALIAS))
+window1.wm_iconphoto(False, icon)
+splashCanvas = Canvas(window1, width = 460, height = 460, bg = "#33393b", highlightthickness = 1)
+splashCanvas.place(x = 500, y = 75)
+splashCanvas.create_image((230, 230), anchor = CENTER, image = icon2)
+label1 = Label(window1, text = "CBCrypto: Cryptocurrency Dashboard", justify = CENTER,
+               bg = "#33393b", bd = 0, font = ("Arial", 17), fg = "white")
+label1.place(x = 537, y = 550)
+
+eState1, eState2 = StringVar(), StringVar()
+e1 = ttk.Entry(window1, textvariable = eState1, width = 50, foreground = "grey")
+e1.place(x = 575, y = 628)
+e2 = ttk.Entry(window1, textvariable = eState2, width = 50, foreground = "grey")
+e2.place(x = 575, y = 660)
+
+e1.insert(0, "API Key")
+e1.bind("<FocusIn>", lambda e:[loginFocus(eBox = 1)])
+e1.bind("<FocusOut>", lambda e:[loginUnfocus(eBox = 1)])
+#e1.config(fg = 'grey')
+
+e2.insert(0, "API Secret")
+e2.bind("<FocusIn>", lambda e:[loginFocus(eBox = 2)])
+e2.bind("<FocusOut>", lambda e:[loginUnfocus(eBox = 2)])
+#e1.config(fg = 'grey')
+
+# Add trade button to buy/sell/convert currency
+b5 = ttk.Button(window1, text = "Continue", command = window1.destroy, width = 9)
+b5.place(x = 650, y = 720)
+
+# Add trade button to buy/sell/convert currency
+b6 = ttk.Button(window1, text = "Reset", command = window1.destroy, width = 9)
+b6.place(x = 740, y = 720)
+
+# Run TkInter window over loop
+window1.mainloop()
+
+
+
+
+
+
 
 # Create main TkInter window
 window = Tk()

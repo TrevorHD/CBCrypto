@@ -87,7 +87,7 @@ def ftNum(x, xType, dec = 2):
 # Function to plot price data over time
 def plotSeries(dType = "overview", currencies = None, *args):
     
-    # Update loading bar
+    # Update progress bar
     pbUpdate()
     
     # Create list of tracked currencies
@@ -170,7 +170,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
         colours = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"]
     elif dType == "portfolio":
         colours = seaborn.color_palette("tab10", len(currencies))
-    else:
+    elif dType == "trade":
         colours = ["#b809ed", "#09e5ed"]
     
     # Get current time zone
@@ -224,10 +224,10 @@ def plotSeries(dType = "overview", currencies = None, *args):
     # Initialise plot
     if dType == "overview":
         fig = pyplot.figure(1, facecolor = "#33393b")
-    elif dType == "trade":
-        fig = pyplot.figure(11, facecolor = "#33393b")
     elif dType == "portfolio":
-        fig = pyplot.figure(13, facecolor = "#33393b")
+        fig = pyplot.figure(5, facecolor = "#33393b")
+    elif dType == "trade":
+        fig = pyplot.figure(9, facecolor = "#33393b")
     pyplot.clf()
     whitespace = fig.add_axes([0, 0, 1, 1])
     whitespace.axis("off")
@@ -337,7 +337,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
 # Function to plot top and bottom movers  
 def plotMovers():
     
-    # Update loading bar
+    # Update progress bar
     pbUpdate()
     
     # Plot top and bottom sets as text
@@ -405,7 +405,7 @@ def plotMovers():
 # Function to plot user's current holdings   
 def plotHoldings():
     
-    # Update loading bar
+    # Update progress bar
     pbUpdate()
     
     # Get current holdings for each cryptocurrency
@@ -419,7 +419,7 @@ def plotHoldings():
     colours = seaborn.color_palette("tab10", len(labs))
     
     # Generate donut plot
-    fig = pyplot.figure(7, facecolor = "#33393b")
+    fig = pyplot.figure(6, facecolor = "#33393b")
     pyplot.clf()
     pyplot.pie(values["Amount"], labels = labs, colors = colours,
                textprops = {"color" : "w"}, radius = 1.2, startangle = 60)
@@ -539,7 +539,7 @@ def plotHoldings():
     change2 = ftNum(change2, "percentC", 2)
     
     # Plot portfolio balance
-    fig3 = pyplot.figure(9)
+    fig3 = pyplot.figure(7)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -561,7 +561,7 @@ def plotHoldings():
 # Function to plot user's transaction history
 def plotTransactions(tHist, ref = False):
     
-    # Update loading bar
+    # Update progress bar
     pbUpdate()
     
     # Get transaction history again if refeshing
@@ -603,7 +603,7 @@ def plotTransactions(tHist, ref = False):
     tStat = list(tHist["Status"])
     
     # Plot transaction stats as text
-    fig10 = pyplot.figure(10)
+    fig10 = pyplot.figure(11)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -643,7 +643,7 @@ def plotTransactions(tHist, ref = False):
 # Function to plot trade orders
 def plotTrade(push = False):
     
-    # Update loading bar
+    # Update progress bar
     pbUpdate()
     
     # Convert state indicators to acceptable arguments for getQuote
@@ -704,7 +704,7 @@ def plotTrade(push = False):
         dT2 = "A detailed schedule of transaction fees can be found on Coinbase (www.coinbase.com)."
     
         # Plot trade order information as text
-        fig12 = pyplot.figure(12)
+        fig12 = pyplot.figure(10)
         pyplot.clf()
         pyplot.axis("off")
         pyplot.tight_layout()
@@ -734,7 +734,7 @@ def plotTrade(push = False):
 # Function to plot trade confirmation text
 def plotTradeConfirmation():
     
-    # Update loading bar
+    # Update progress bar
     pbUpdate()
     
     # Convert state indicators to text
@@ -759,7 +759,7 @@ def plotTradeConfirmation():
             amount = "$" + amount
     
     # Plot trade order information as text
-    fig13 = pyplot.figure(14)
+    fig13 = pyplot.figure(13)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -784,12 +784,12 @@ def plotTradeConfirmation():
 # Function to display time at which a widget was last refreshed
 def plotRefresh(refreshing = False):
     
-    # Update loading bar
+    # Update progress bar
     pbUpdate()
     
     # Get current time
     cTime = datetime.datetime.now().strftime("%H:%M")
-    fig5 = pyplot.figure(5)
+    fig5 = pyplot.figure(12)
     
     # Get text
     if refreshing == True:
@@ -816,83 +816,10 @@ def plotRefresh(refreshing = False):
 
 ##### Run GUI ---------------------------------------------------------------------------------------------
 
-# Function to update loading bars
-def pbUpdate():
-    try:
-        pb2.step(0.468)
-        splash.update_idletasks()
-    except NameError:
-        try:
-            pb1.step(0.250)
-            window.update_idletasks()
-            window.update()
-        except NameError:
-            pass
-        except TclError:
-            pass
-    except TclError:
-        try:
-            pb1.step(3)
-            window.update_idletasks()
-            window.update()
-        except NameError:
-            pass
-        except TclError:
-            pass
-
-# Create main TkInter window
-window = Tk()
-
-# Set window theme
-window.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes-10.4.0")
-window.tk.call("package", "require", "awdark") 
-ttk.Style().theme_use("awdark") 
-ttk.Style().configure("My.TSpinbox", arrowsize = 11)
-ttk.Style().configure("small.TButton", font = (None, 5))
- 
-# Set window title
-window.title("CBCrypto: Cryptocurrency Dashboard")
-  
-# Set window dimensions and colour
-window.geometry("1920x1080")
-window.configure(bg = "#33393b")
-
-# Set window icon
-icon = ImageTk.PhotoImage(Image.open("Logo.png"))
-icon2 = ImageTk.PhotoImage(Image.open("Logo.png").resize((500, 500), Image.ANTIALIAS))
-window.wm_iconphoto(False, icon)
-
-# Run splash screen while app is loading
-window.withdraw()
-splash = Toplevel()
-splash.state("zoomed")
-splash.title("CBCrypto: Cryptocurrency Dashboard")
-splash.geometry("1920x1080")
-splash.configure(bg = "#33393b")
-splash.wm_iconphoto(False, icon)
-splashCanvas = Canvas(splash, width = 460, height = 460, bg = "#33393b", highlightthickness = 1)
-splashCanvas.place(x = 500, y = 75)
-splashCanvas.create_image((230, 230), anchor = CENTER, image = icon2)
-label1 = Label(splash, text = "CBCrypto: Cryptocurrency Dashboard", justify = CENTER,
-               bg = "#33393b", bd = 0, font = ("Arial", 17), fg = "white")
-label1.place(x = 537, y = 550)
-label2 = Label(splash, text = "Loading...", justify = CENTER,
-               bg = "#33393b", bd = 0, font = ("Arial", 10), fg = "white")
-label2.place(x = 700, y = 726)
-pb2 = ttk.Progressbar(splash, orient = HORIZONTAL, length = 300, mode = "determinate")
-pb2.place(x = 580, y = 700)
-splash.update()
-
-# Initialise account data
-pbUpdate()
-initAccount = client.get_accounts(limit = 100)
-initIDs = getIDs()
-initPmt = getPmt()
-
-# Function to pull from the API and refresh all app data
+# Function to pull all necessary data from the API
 def refreshData():
     
-    # Push all variables outside of function enclosure
+    # Declare variables for external use
     global sData1
     global sData2
     global mData
@@ -905,7 +832,7 @@ def refreshData():
     global tHist
     global thMaxPage
 
-    # Initialise time series data for featured currencies
+    # Retrieve time series data for featured and/or held currencies
     sData1, sData2, mData, cData, hData1, hData2 = [], [], [], [], [], []
     cData = list(getCurrentHoldings()["Currency"])
     for h in range(0, 7):
@@ -931,127 +858,74 @@ def refreshData():
     oData = getCurrentMovers()
     pData = getTopMovers(oData)
 
-    # Get list of currencies available for trading
+    # Retrieve list of currencies available for trading
     pbUpdate()
     cbList = getTradeList()
 
-    # Initialise transaction history and set maximum number of pages
+    # Retrieve transaction history and set maximum number of pages
     pbUpdate()
     tHist = getTransactionHistory()
     thMaxPage = 99 if math.ceil(len(tHist)/25) > 99 else math.ceil(len(tHist)/25)
     sState.set(thMaxPage)
 
-# Set window tabs
-tC = ttk.Notebook(window)
-t1 = ttk.Frame(tC)
-t2 = ttk.Frame(tC)
-t3 = ttk.Frame(tC)
-tC.add(t1, text = "Overview")
-tC.add(t2, text = "My Portfolio")
-tC.add(t3, text = "Trade")
-tC.pack(expand = 1, fill = "both")
-
-# Set up plots, each as its own canvas
-figX = [pyplot.figure(figsize = [(11.4, 6), (11.4, 3.5), (8.2, 4.9), (8.2, 4.9), (5, 0.25), (5, 0.3), (6.5, 5.45),
-                                 (19.14, 3.5), (10, 0.3), (10.8, 9.5), (7.5, 6), (6.8, 3.6), (12, 6)][x],
-                      edgecolor = ["white" if w in [7, 10] else "#33393b" for w in range(1, 14)][x],
-                      facecolor = "#33393b",
-                      linewidth = 2) for x in range(0, 13)]
-canvasX = [FigureCanvasTkAgg(figX[x], master = ([t1]*4 + [window] + [t2]*4 + [t3]*3 + [t2])[x]) for x in range(0, len(figX))]
-
-# Place all plots
-# Note: fig 6 is not used
-for i in range(0, len(figX)):
-    canvasX[i].get_tk_widget().place(x = [23, 24, 830, 830, 980, 1066, 923, 26, 748, 614, 51, 90, 19][i], 
-                                     y = [50, 500, 35, 400, 7, 750, 65, 500, 43, 67, 50, 500, 50][i])
-    
-# Set up trade confirmation plot for pop-up window
-figP = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
-
-# Set state variables
-bState1 = IntVar()
-bState2 = IntVar()
-bState3 = IntVar()
-sState = IntVar()
-tState1 = IntVar()
-tState2 = IntVar()
-cState1 = StringVar()
-cState1.set("BTC")
-cState2 = StringVar()
-eState1 = StringVar()
-eState2 = StringVar()
-
-# Function to enable/disable master reset button
+# Function to update progress bars
+def pbUpdate():
+    try:
+        pb1.step(0.468)
+        splash.update_idletasks()
+    except NameError:
+        try:
+            pb2.step(0.250)
+            window.update_idletasks()
+            window.update()
+        except NameError:
+            pass
+        except TclError:
+            pass
+    except TclError:
+        try:
+            pb2.step(3)
+            window.update_idletasks()
+            window.update()
+        except NameError:
+            pass
+        except TclError:
+            pass
+        
+# Function to enable/disable master refresh while refreshing data
 def toggleReset(action):
     if action == "disable":
-        b5.state(["disabled"])
+        b1.state(["disabled"])
         window.update()
     elif action == "enable":
-        b5.state(["!disabled"])
+        b1.state(["!disabled"])
         window.update()
-
-# Add master reset button
-b5 = ttk.Button(window, text = "Refresh", style = "small.TButton",
-                command = lambda:[toggleReset("disable"), plotRefresh(refreshing = True), refreshData(), plotSeries(), plotSeries(dType = "portfolio", currencies = cData),
-                                  plotMovers(), plotHoldings(), plotTransactions(tHist = tHist), plotRefresh(), toggleReset("enable")])
-#b5.place(x = 1390, y = 1, width = 30, height = 20)
-b5.place(x = 1420, y = 6)
-b5.invoke()
-
-# Control currnecy time series plot timeframe with radiobuttons (Overview)
-rb1 = [ttk.Radiobutton(t1, command = lambda:[plotSeries()],
-                       text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
-                       variable = bState1, value = x + 1) for x in range(0, 7)]
-
-# Place plot timeframe radiobuttons side-by-side (Overview)
-for i in range(0, len(rb1)):
-    rb1[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
-
-# Control currnecy time series plot timeframe with radiobuttons (Portfolio)
-rb2 = [ttk.Radiobutton(t2, command = lambda:[plotSeries(dType = "portfolio", currencies = cData)],
-                       text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
-                       variable = bState2, value = x + 1) for x in range(0, 7)]
-
-# Place plot timeframe radiobuttons side-by-side (Portfolio)
-for i in range(0, len(rb2)):
-    rb2[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
-    
-# Control currnecy time series plot timeframe with radiobuttons (Trade)
-rb3 = [ttk.Radiobutton(t3, command = lambda:[plotSeries(dType = "trade")],
-                       text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
-                       variable = bState3, value = x + 1) for x in range(0, 7)]
-
-# Place plot timeframe radiobuttons side-by-side (Trade)
-for i in range(0, len(rb3)):
-    rb3[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
-
-# Create dropdown menu to select currency to buy/sell
-# Create a second dropdown menu for currency conversion
-c1 = ttk.Combobox(t3, textvariable = cState1, width = 8, state = "readonly",
-                  values = [x for x in cbList if x != cState2.get()])
-c1.place(x = 101, y = 608)
-c2 = ttk.Combobox(t3, textvariable = cState2, width = 8, state = "readonly",
-                  values = [x for x in cbList if x != cState1.get()])
-c2.place(x = 101, y = 628)
-
-# Define function to validate entry in trade entry boxes
+        
+# Function to validate numerics in trade entry boxes
 def checkKey(keyVal):
     if tState2.get() == 1:
         return re.match("^(\d)*(\.)?([0-9]{0,2})?$", keyVal) is not None
     elif tState2.get() == 2:
         return re.match("^(\d)*(\.)?([0-9])*$", keyVal) is not None
-checkKeyWrapper = (window.register(checkKey), "%P")
-
-# Create entry box to specify currency/dollar amounts
-# Create a second entry box for currency conversion
-e1 = ttk.Entry(t3, textvariable = eState1, width = 9, validate = "key",
-               validatecommand = checkKeyWrapper)
-e1.place(x = 181, y = 608)
-e2 = ttk.Entry(t3, textvariable = eState2, width = 9, validate = "key",
-               validatecommand = checkKeyWrapper)
-e2.place(x = 181, y = 628)
     
-# Define internal function to place or remove second dropdown menu
+# Function to clear trade entry box when switching between dollars and crypto
+def clearBox(target = None, *args):
+    if target == None:
+        e1.delete(0, "end")
+        e2.delete(0, "end")
+    elif target == 1:
+        e1.delete(0, "end")
+    elif target == 2:
+        e2.delete(0, "end")
+
+# Function to update trade info after the user stops typing  
+afterNum = None      
+def entryWait(*args, aN = afterNum):
+    if aN is not None:
+        e1.after_cancel(aN)
+    global afterNum; afterNum = e1.after(2000, plotTrade)
+    
+# Function to place or remove second dropdown menu for currency conversion
 def placeMenu():
     if tState1.get() == 3:
         c2.configure(state = "readonly")
@@ -1068,25 +942,20 @@ def placeMenu():
             eState2.set("")
         except NameError:
             pass
-    
-# Ensure that selection from first menu is absent from second
+
+# Function to exclude selection in one dropdown menu from the other
 def changeList(*args):
     c1.configure(values = [x for x in cbList if x != cState2.get()])
     c2.configure(values = [x for x in cbList if x != cState1.get()])
-c1.bind("<<ComboboxSelected>>", lambda e:[c1.selection_clear(), changeList(), plotTrade(),
-                                          plotSeries(dType = "trade")])
-c2.bind("<<ComboboxSelected>>", lambda e:[c2.selection_clear(), changeList(), plotTrade(),
-                                          plotSeries(dType = "trade")])
 
-# Ensure that entry box is cleared when switching from dollars to crypto or vice-versa
-def clearBox(target = None, *args):
-    if target == None:
-        e1.delete(0, "end")
-        e2.delete(0, "end")
-    elif target == 1:
-        e1.delete(0, "end")
-    elif target == 2:
-        e2.delete(0, "end")
+# Function to disable trade confirmation button when no input is provided
+def disableTrades():
+    if eState1.get() == "" and eState2.get() == "":
+        b2.state(["disabled"])
+        window.update()
+    else:
+        b2.state(["!disabled"])
+        window.update()
 
 # Function to create pop-up window for trade confirmation
 def tradeWindow():
@@ -1115,58 +984,206 @@ def tradeWindow():
     # Fix this to ensure that pop-up is destroyed before refreshing
     #b1_p1 = ttk.Button(p1, text = "Yes", command = lambda:[plotTrade(push = True), refreshData(), p1.destroy()], width = 9)    
 
-# Function to reset radiobuttons and text fields
+# Function to reset all trade radiobuttons and text fields
 def resetTrades():
     tState1.set(1)
     tState2.set(1)
+
+# Create main TkInter window
+window = Tk()
+
+# Set main window theme
+window.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes-10.4.0")
+window.tk.call("package", "require", "awdark") 
+ttk.Style().theme_use("awdark") 
+ttk.Style().configure("My.TSpinbox", arrowsize = 11)
+ttk.Style().configure("small.TButton", font = (None, 5))
+ 
+# Set main window title, dimensions, and colour
+window.title("CBCrypto: Cryptocurrency Dashboard")
+window.geometry("1920x1080")
+window.configure(bg = "#33393b")
+
+# Set main window icon
+icon = ImageTk.PhotoImage(Image.open("Logo.png"))
+icon2 = ImageTk.PhotoImage(Image.open("Logo.png").resize((500, 500), Image.ANTIALIAS))
+window.wm_iconphoto(False, icon)
+
+# Minimise main window and run splash screen while app is loading
+# Add logo, text, and progress bar to splash screen
+window.withdraw()
+splash = Toplevel()
+splash.state("zoomed")
+splash.title("CBCrypto: Cryptocurrency Dashboard")
+splash.geometry("1920x1080")
+splash.configure(bg = "#33393b")
+splash.wm_iconphoto(False, icon)
+splashCanvas = Canvas(splash, width = 460, height = 460, bg = "#33393b", highlightthickness = 1)
+splashCanvas.place(x = 500, y = 75)
+splashCanvas.create_image((230, 230), anchor = CENTER, image = icon2)
+label1 = Label(splash, text = "CBCrypto: Cryptocurrency Dashboard", justify = CENTER,
+               bg = "#33393b", bd = 0, font = ("Arial", 17), fg = "white")
+label1.place(x = 537, y = 550)
+label2 = Label(splash, text = "Loading...", justify = CENTER,
+               bg = "#33393b", bd = 0, font = ("Arial", 10), fg = "white")
+label2.place(x = 700, y = 726)
+pb1 = ttk.Progressbar(splash, orient = HORIZONTAL, length = 300, mode = "determinate")
+pb1.place(x = 580, y = 700)
+splash.update()
+
+# Initialise account data
+pbUpdate()
+initAccount = client.get_accounts(limit = 100)
+initIDs = getIDs()
+initPmt = getPmt()
+
+# Set application screen tabs
+tC = ttk.Notebook(window)
+t1 = ttk.Frame(tC)
+t2 = ttk.Frame(tC)
+t3 = ttk.Frame(tC)
+tC.add(t1, text = "Overview")
+tC.add(t2, text = "My Portfolio")
+tC.add(t3, text = "Trade")
+tC.pack(expand = 1, fill = "both")
+
+# Set up main window graphics, each plotted on their own canvas
+figX = [pyplot.figure(figsize = [(11.40, 6.00), (11.40, 3.50), (8.20, 4.90), (8.20, 4.90),
+                                 (12.00, 6.00), (6.50, 5.45), (10.00, 0.30), (19.14, 3.50),
+                                 (7.50, 6.00), (6.80, 3.60), (10.80, 9.50), (5.00, 0.25)][x],
+                      edgecolor = ["white" if w in [6, 11] else "#33393b" for w in range(1, 14)][x],
+                      facecolor = "#33393b", linewidth = 2) for x in range(0, 12)]
+figL = [t1]*4 + [t2]*4 + [t3]*3 + [window]
+canvasX = [FigureCanvasTkAgg(figX[x], master = figL[x]) for x in range(0, len(figX))]
+
+# Place all graphics
+for i in range(0, len(figX)):
+    canvasX[i].get_tk_widget().place(x = [23, 24, 830, 830, 19, 923, 748, 26, 51, 90, 614, 980][i], 
+                                     y = [50, 500, 35, 400, 50, 65, 43, 500, 50, 500, 67, 7][i])
     
-# Function to disable trade confirmation button when no input is provided
-def disableTrades():
-    if eState1.get() == "" and eState2.get() == "":
-        b3.state(["disabled"])
-        window.update()
-    else:
-        b3.state(["!disabled"])
-        window.update()
+# Set up pop-up window trade confirmation graphic
+figP = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
+
+# Graphic orders from above:
+# 1: time series chart [t1]
+# 2: currency overview [t1]
+# 3: top movers [t1]
+# 4: bottom movers [t1]
+# 5: time series chart [t2]
+# 6: holdings chart [t2]
+# 7: portfolio change text [t2]
+# 8: portfolio overview [t2]
+# 9: time series chart [t3]
+# 10: trade text [t3]
+# 11: transaction history [t3]
+# 12: refresh text [window]
+# 13: trade confirmation [p1]
+
+# Set state variables for buttons, text, and menus
+bState1, bState2, bState3 = IntVar(), IntVar(), IntVar()
+tState1, tState2 = IntVar(), IntVar()
+eState1, eState2 = StringVar(), StringVar()
+cState1, cState2 = StringVar(), StringVar()
+cState1.set("BTC")
+sState = IntVar()
+
+# Add master refresh button in top-right corner
+b1 = ttk.Button(window, text = "Refresh", style = "small.TButton",
+                command = lambda:[toggleReset("disable"), plotRefresh(refreshing = True), refreshData(),
+                                  plotSeries(), plotSeries(dType = "portfolio", currencies = cData),
+                                  plotMovers(), plotHoldings(), plotTransactions(tHist = tHist),
+                                  plotRefresh(), toggleReset("enable")])
+#b1.place(x = 1390, y = 1, width = 30, height = 20)
+b1.place(x = 1420, y = 6)
+b1.invoke()
+
+# Add trade button to buy/sell/convert currency
+b2 = ttk.Button(t3, text = "Confirm", command = tradeWindow, width = 9)
+b2.place(x = 101, y = 675)
+
+# Add button to reset trade settings
+b3 = ttk.Button(t3, text = "Reset", width = 9,
+                command = lambda:[resetTrades(), clearBox(), placeMenu(), changeList(), 
+                                  disableTrades(), plotTrade(), plotSeries(dType = "trade")])
+b3.place(x = 180, y = 675)
+
+# Add radiobuttons for time series plotting control (Overview)
+rb1 = [ttk.Radiobutton(t1, command = lambda:[plotSeries()],
+                       text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
+                       variable = bState1, value = x + 1) for x in range(0, 7)]
+for i in range(0, len(rb1)):
+    rb1[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
+
+# Add radiobuttons for time series plotting control (Portfolio)
+rb2 = [ttk.Radiobutton(t2, command = lambda:[plotSeries(dType = "portfolio", currencies = cData)],
+                       text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
+                       variable = bState2, value = x + 1) for x in range(0, 7)]
+for i in range(0, len(rb2)):
+    rb2[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
     
-# Control trade type with radiobuttons
+# Add radiobuttons for time series plotting control (Trade)
+rb3 = [ttk.Radiobutton(t3, command = lambda:[plotSeries(dType = "trade")],
+                       text = ["1h", "1d", "1wk", "1m", "3m", "6m", "1yr"][x], 
+                       variable = bState3, value = x + 1) for x in range(0, 7)]
+for i in range(0, len(rb3)):
+    rb3[i].place(x = [103, 163, 223, 283, 343, 403, 463][i], y = 40)
+
+# Add radiobuttons for controlling trade type
 rb4 = [ttk.Radiobutton(t3, command = lambda:[placeMenu(), changeList(), plotTrade(),
                                              plotSeries(dType = "trade")],
                        text = ["Buy", "Sell", "Convert"][x], 
                        variable = tState1, value = x + 1) for x in range(0, 3)]
-
-# Place trade type radiobuttons side-by-side
 for i in range(0, len(rb4)):
     rb4[i].place(x = 100, y = [526, 546, 566][i])
-
-# Control trade dollar/crypto with radiobuttons
+    
+# Add radiobuttons for controlling trade dollar/crypto input
 rb5 = [ttk.Radiobutton(t3, command = lambda:[clearBox(), plotTrade()],
                        text = ["Dollars", "Crypto"][x], 
                        variable = tState2, value = x + 1) for x in range(0, 2)]
-
-# Place trade dollar/crypto radiobuttons side-by-side
 for i in range(0, len(rb5)):
     rb5[i].place(x = 186, y = [526, 546][i])
 
-# Add trade button to buy/sell/convert currency
-b3 = ttk.Button(t3, text = "Confirm", command = tradeWindow, width = 9)
-b3.place(x = 101, y = 675)
+# Add a first dropdown menu to select currency to buy/sell
+# Add a second dropdown menu for currency conversion
+c1 = ttk.Combobox(t3, textvariable = cState1, width = 8, state = "readonly",
+                  values = [x for x in cbList if x != cState2.get()])
+c2 = ttk.Combobox(t3, textvariable = cState2, width = 8, state = "readonly",
+                  values = [x for x in cbList if x != cState1.get()])
+c1.place(x = 101, y = 608)
+c2.place(x = 101, y = 628)
 
-# Add button to reset trade settings
-b4 = ttk.Button(t3, text = "Reset", width = 9,
-                command = lambda:[resetTrades(), clearBox(), placeMenu(), changeList(), 
-                                  disableTrades(), plotTrade(), plotSeries(dType = "trade")])
-b4.place(x = 180, y = 675)
+# Add bindings for when a menu entry is selected
+c1.bind("<<ComboboxSelected>>", lambda e:[c1.selection_clear(), changeList(), plotTrade(),
+                                          plotSeries(dType = "trade")])
+c2.bind("<<ComboboxSelected>>", lambda e:[c2.selection_clear(), changeList(), plotTrade(),
+                                          plotSeries(dType = "trade")])
+
+# Define key wrapper for text validation
+checkKeyWrapper = (window.register(checkKey), "%P")
+
+# Add a first entry box to specify currency/dollar amounts
+# Add a second entry box for currency conversion
+e1 = ttk.Entry(t3, textvariable = eState1, width = 9, validate = "key",
+               validatecommand = checkKeyWrapper)
+e1.place(x = 181, y = 608)
+e2 = ttk.Entry(t3, textvariable = eState2, width = 9, validate = "key",
+               validatecommand = checkKeyWrapper)
+e2.place(x = 181, y = 628)
+
+# Add bindings for updating trade information when entry typing stops
+e1.bind("<Key>", lambda e:[entryWait(), clearBox(2), disableTrades()])
+e2.bind("<Key>", lambda e:[entryWait(), clearBox(1), disableTrades()])
 
 # Add spinbox to select transaction history page
 s1 = ttk.Spinbox(t3, from_ = 1, to = thMaxPage, textvariable = sState, width = 2,
-                 font = Font(size = 10), style = "My.TSpinbox", command = lambda:[plotTransactions(tHist = tHist)])
+                 font = Font(size = 10), style = "My.TSpinbox",
+                 command = lambda:[plotTransactions(tHist = tHist)])
 s1.state(["readonly"])
 s1.place(x = 620, y = 74)
 
 # Add progress bar indicating when application is loading
-pb1 = ttk.Progressbar(window, orient = HORIZONTAL, length = 100, mode = "indeterminate")
-pb1.place(x = 1315, y = 7)
+pb2 = ttk.Progressbar(window, orient = HORIZONTAL, length = 100, mode = "indeterminate")
+pb2.place(x = 1315, y = 7)
 
 # Set default button states
 rb1[1].invoke()
@@ -1174,16 +1191,7 @@ rb2[1].invoke()
 rb3[1].invoke()
 rb4[0].invoke()
 rb5[0].invoke()
-b3.state(["disabled"])
-
-# Set system for updating trade information when entry typing stops
-afterNum = None
-def entryWait(*args, aN = afterNum):
-    if aN is not None:
-        e1.after_cancel(aN)
-    global afterNum; afterNum = e1.after(2000, plotTrade)
-e1.bind("<Key>", lambda e:[entryWait(), clearBox(2), disableTrades()])
-e2.bind("<Key>", lambda e:[entryWait(), clearBox(1), disableTrades()])
+b2.state(["disabled"])
 
 # End splash screen once app has loaded
 splash.destroy()

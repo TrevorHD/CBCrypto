@@ -43,37 +43,37 @@ def getPriceSeries(tFrame, currency):
     # Set beginning of timeframe and data granularity
     if tFrame == "1hr":
         tStart = tEnd - 3600
-        gran = 60
+        tGran = 60
     elif tFrame == "1d":
         tStart = tEnd - 86400
-        gran = 300
+        tGran = 300
     elif tFrame == "1wk":
         tStart = tEnd - 86400*7 
-        gran = 3600
+        tGran = 3600
     elif tFrame == "1m":
         tStart = tEnd - 86400*30
-        gran = 21600
+        tGran = 21600
     elif tFrame == "3m":
         tStart = tEnd - 86400*30*3
-        gran = 21600
+        tGran = 21600
     elif tFrame == "6m":
         tStart = tEnd - 86400*30*6
-        gran = 21600
+        tGran = 21600
     elif tFrame == "1yr":
         tStart = tEnd - 86400*365
-        gran = 21600
+        tGran = 21600
     elif tFrame == "max":
         tStart = 1375660800
-        gran = 86400
+        tGran = 86400
 
     # Activate public client
-    p_client = cbpro.PublicClient()
+    pClient = cbpro.PublicClient()
     
     # Set number of blocks since there is a 300-point limit per block
-    nBlocks = ((tEnd - tStart)/gran + 2)/300
+    nBlocks = ((tEnd - tStart)/tGran + 2)/300
     
     # Set currency conversion string
-    ccs = currency + "-USD"
+    cText = currency + "-USD"
     
     # Define internal function to convert timestamp to ISO format
     def tsToISO(ts):
@@ -84,31 +84,31 @@ def getPriceSeries(tFrame, currency):
     if nBlocks <= 1:    
         isodate0 = tsToISO(tStart)
         isodate1 = tsToISO(tEnd)
-        data = p_client.get_product_historic_rates(ccs, granularity = gran,
-                                                   start = isodate0, end = isodate1)
+        data = pClient.get_product_historic_rates(cText, granularity = tGran,
+                                                  start = isodate0, end = isodate1)
         data = DataFrame(data, columns = ["timestamp", "open", "high", "low", "close", "volume"])
         data = data.sort_values(by = "timestamp")
     else:
         for i in range(1, math.ceil(nBlocks) + 1):
             if i == 1:
                 isodate0 = tsToISO(tStart)
-                isodate1 = tsToISO(tStart + gran*300)
-                data = p_client.get_product_historic_rates(ccs, granularity = gran,
-                                                           start = isodate0, end = isodate1)
+                isodate1 = tsToISO(tStart + tGran*300)
+                data = pClient.get_product_historic_rates(cText, granularity = tGran,
+                                                          start = isodate0, end = isodate1)
                 data = DataFrame(data, columns = ["timestamp", "open", "high", "low", "close", "volume"])
                 data = data.sort_values(by = "timestamp")
             else:
                 if i > 1 and i < nBlocks:
-                    isodate0 = tsToISO(tStart + (i - 1)*gran*300)
-                    isodate1 = tsToISO(tStart + i*gran*300)
+                    isodate0 = tsToISO(tStart + (i - 1)*tGran*300)
+                    isodate1 = tsToISO(tStart + i*tGran*300)
                 elif i > nBlocks:
-                    isodate0 = tsToISO(tStart + (i - 1)*gran*300)
+                    isodate0 = tsToISO(tStart + (i - 1)*tGran*300)
                     isodate1 = tsToISO(tEnd)
-                newdat = p_client.get_product_historic_rates(ccs, granularity = gran,
+                newdata = pClient.get_product_historic_rates(cText, granularity = tGran,
                                                              start = isodate0, end = isodate1)
-                newdat = DataFrame(newdat, columns = ["timestamp", "open", "high", "low", "close", "volume"])
-                newdat = newdat.sort_values(by = "timestamp")
-                data = data.append(newdat, ignore_index = True)
+                newdata = DataFrame(newdata, columns = ["timestamp", "open", "high", "low", "close", "volume"])
+                newdata = newdata.sort_values(by = "timestamp")
+                data = data.append(newdata, ignore_index = True)
 
     # Get mean price (average of open and close)
     data["mean"] = data[["open", "close"]].mean(axis = 1)   
@@ -135,53 +135,53 @@ def getPriceSeries(tFrame, currency):
 def getPriceSummary(tFrame, currencyList):
     
     # Activate public client and get currency info
-    p_client = cbpro.PublicClient()
+    pClient = cbpro.PublicClient()
     
     # Compile current prices and price versus opening price
     d1 = {}
-    low, high, opens, closes, returns = [], [], [], [], []
+    cLow, cHigh, cOpen, cClose, cChange = [], [], [], [], []
     for i in range(0, len(currencyList)):
         d1["key%s" %i] = getPriceSeries(tFrame, currencyList[i])
-        low.append(min(d1["key%s" %i]["low"]))
-        high.append(max(d1["key%s" %i]["high"]))
-        opens.append(d1["key%s" %i]["open"].iloc[0])
-        closes.append(d1["key%s" %i]["close"].iloc[-1])
-        returns.append((closes[i] - opens[i])/opens[i]*100)
+        cLow.append(min(d1["key%s" %i]["low"]))
+        cHigh.append(max(d1["key%s" %i]["high"]))
+        cOpen.append(d1["key%s" %i]["open"].iloc[0])
+        cClose.append(d1["key%s" %i]["close"].iloc[-1])
+        cChange.append((cClose[i] - cOpen[i])/cOpen[i]*100)
     
     # Put data into dataframe    
-    df = pandas.DataFrame([[tFrame]*len(currencyList), currencyList, low, high, opens, closes, returns],
-                          ["Timeframe", "Currency", "Low", "High", "Open", "Close", "Return"]).transpose()
+    data = pandas.DataFrame([[tFrame]*len(currencyList), currencyList, cLow, cHigh, cOpen, cClose, cChange],
+                            ["Timeframe", "Currency", "Low", "High", "Open", "Close", "Return"]).transpose()
     
     # Return dataframe
-    return df
+    return data
 
 # Function that returns all currency movement over 24 hours
 def getCurrentMovers():
 
     # Activate public client and get currency info
-    p_client = cbpro.PublicClient()
-    currencyInfo = p_client.get_currencies()
+    pClient = cbpro.PublicClient()
+    cInfo = pClient.get_currencies()
     
     # Initialise lists
     currencyList1 = []
     currencyList2 = []
-    openV, closeV, delta = [], [], []
+    cOpen, cClose, cChange = [], [], []
     
     # Calculate 24h percent change for each currency
-    for i in range(0, len(currencyInfo)):
-        currencyList1.append(currencyInfo[i]["id"])
-        currencyList2.append(currencyInfo[i]["id"])
+    for i in range(0, len(cInfo)):
+        currencyList1.append(cInfo[i]["id"])
+        currencyList2.append(cInfo[i]["id"])
         try:
             if currencyList1[i] in ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]:
-                vals = mData[1].loc[mData[1]["Currency"] == currencyList1[i]]
-                delta.append(float(vals["Return"]))
-                openV.append(float(vals["Open"]))
-                closeV.append(float(vals["Close"]))
+                cVals = mData[1].loc[mData[1]["Currency"] == currencyList1[i]]
+                cChange.append(float(cVals["Return"]))
+                cOpen.append(float(cVals["Open"]))
+                cClose.append(float(cVals["Close"]))
             else:
-                vals = p_client.get_product_24hr_stats(currencyList1[i] + "-USD")
-                delta.append((float(vals["last"]) - float(vals["open"]))/float(vals["open"])*100)
-                openV.append(float(vals["open"]))
-                closeV.append(float(vals["last"]))
+                cVals = pClient.get_product_24hr_stats(currencyList1[i] + "-USD")
+                cChange.append((float(cVals["last"]) - float(cVals["open"]))/float(cVals["open"])*100)
+                cOpen.append(float(cVals["open"]))
+                cClose.append(float(cVals["last"]))
         except ZeroDivisionError:
             del currencyList2[-1]
             pass
@@ -190,21 +190,21 @@ def getCurrentMovers():
             pass
         
     # Create data frame of all currencies
-    df = DataFrame([currencyList2, openV, closeV, delta],
-                   ["Currency", "Open", "Close", "Change"]).transpose()
+    data = DataFrame([currencyList2, cOpen, cClose, cChange],
+                     ["Currency", "Open", "Close", "Change"]).transpose()
     
     # Return data frame
-    return df
+    return data
 
 # Addition to the previous function, getting only top and bottom movers
 def getTopMovers(movers):
     
     # Get top and bottom performers
-    dfTop = movers.sort_values("Change", ascending = False).iloc[0:10]
-    dfBottom = movers.sort_values("Change").iloc[0:10]
+    dataTop = movers.sort_values("Change", ascending = False).iloc[0:10]
+    dataBottom = movers.sort_values("Change").iloc[0:10]
     
     # Return new data frame
-    return dfTop.append(dfBottom)
+    return dataTop.append(dataBottom)
 
 
 
@@ -216,53 +216,56 @@ def getTopMovers(movers):
 def getCurrentHoldings():
     
     # Initialise lists
-    ids = []
-    currency = []
-    amount = []
-    crypto = []
+    currencyList = []
+    cIDs = []
+    cDollar = []
+    cCrypto = []
     
     # Populate lists with held currencies
     for wallet in initAccount.data:
-        idn = wallet["id"]
-        crncy = str(wallet["name"]).replace(" Wallet", "")
-        value = float(str(wallet["native_balance"]).replace("USD ", ""))
-        if value > 0:
-            ids.append(idn)
-            currency.append(crncy)
-            crypto.append(float(str(wallet["balance"]).replace(crncy + " ", "")))
-            amount.append(value)
-    pcts = [x/sum(amount)*100 for x in amount]
-    dfCurrency = DataFrame([ids, currency, crypto, amount, pcts],
-                           ["ID", "Currency", "Crypto", "Amount", "Percent"]).transpose() 
+        wIDs = wallet["id"]
+        wCurrency = str(wallet["name"]).replace(" Wallet", "")
+        wDollar = float(str(wallet["native_balance"]).replace("USD ", ""))
+        if wDollar > 0:
+            currencyList.append(wCurrency)
+            cIDs.append(wIDs)
+            cCrypto.append(float(str(wallet["balance"]).replace(wCurrency + " ", "")))
+            cDollar.append(wDollar)
+    cPercent = [x/sum(cDollar)*100 for x in cDollar]
+    data = DataFrame([cIDs, currencyList, cCrypto, cDollar, cPercent],
+                     ["ID", "Currency", "Crypto", "Amount", "Percent"]).transpose() 
     
-    # Return dataframe of held currencies, sorted by value
-    return dfCurrency.sort_values("Amount", ascending = False).reset_index(drop = True)
+    # Sort holdings by cash value
+    data = data.sort_values("Amount", ascending = False).reset_index(drop = True)
+    
+    # Return dataframe of currency holdings
+    return data
 
 # Function to list current holdings for only a single cryptocurrency (or trading pair)
 def getSpecificCurrency(currency1, currency2 = None):
     
     # Initialise lists
-    cAmnt = []
+    cHold = []
     
     # Get crypto and native balance for each specified currency
     cHold1 = client.get_account(initIDs.loc[initIDs["Currency"] == currency1]["ID"].values[0])
-    cAmnt.append(cHold1["balance"]["amount"])
-    cAmnt.append(cHold1["native_balance"]["amount"])
+    cHold.append(cHold1["balance"]["amount"])
+    cHold.append(cHold1["native_balance"]["amount"])
     if currency2 not in [None, ""]:
         cHold2 = client.get_account(initIDs.loc[initIDs["Currency"] == currency2]["ID"].values[0])
-        cAmnt.append(cHold2["balance"]["amount"])
-        cAmnt.append(cHold2["native_balance"]["amount"])
+        cHold.append(cHold2["balance"]["amount"])
+        cHold.append(cHold2["native_balance"]["amount"])
         
     # Return list of crypto and native balances
-    return cAmnt
+    return cHold
 
 # Function to list user's transaction history    
 def getTransactionHistory():
 
     # Initialise lists
-    currency = []
-    amountC = []
-    amountN = []
+    currencyList = []
+    tCrypto = []
+    tDollar = []
     tType = []
     tTime = []
     tStat = []
@@ -272,23 +275,23 @@ def getTransactionHistory():
         events = client.get_transactions(i)
         pbUpdate()
         for j in events.data:
-            currency.append(j["amount"]["currency"])
-            amountC.append(j["amount"]["amount"])
-            amountN.append(j["native_amount"]["amount"])
+            currencyList.append(j["amount"]["currency"])
+            tCrypto.append(j["amount"]["amount"])
+            tDollar.append(j["native_amount"]["amount"])
             tType.append(j["type"])
             tTime.append(j["created_at"])
             tStat.append(j["status"])
             
     # Convert amount and native amount to floats
-    amountC = [float(i) for i in amountC]
-    amountN = [float(i) for i in amountN]
+    tCrypto = [float(i) for i in tCrypto]
+    tDollar = [float(i) for i in tDollar]
     
     # Put all transaction info into a single data frame
-    dfTransactions = DataFrame([currency, amountC, amountN, tType, tTime, tStat],
-                               ["Currency", "Amount", "USD", "Type", "Time", "Status"]).transpose()
+    data = DataFrame([currencyList, tCrypto, tDollar, tType, tTime, tStat],
+                     ["Currency", "Amount", "USD", "Type", "Time", "Status"]).transpose()
     
     # Return data frame of transactions
-    return dfTransactions 
+    return data 
 
 
 
@@ -318,38 +321,38 @@ def getTradeList():
 def getIDs():
     
     # Initialise list
-    ids = []
-    currency = []
+    cIDs = []
+    currencyList = []
     
     # Get all wallet IDs
     for wallet in initAccount.data:
-        ids.append(wallet["id"])
-        currency.append(wallet["currency"])
+        cIDs.append(wallet["id"])
+        currencyList.append(wallet["currency"])
         
     # Put wallet ID and currency into a data frame
-    dfIDs = DataFrame([ids, currency], ["ID", "Currency"]).transpose()
+    data = DataFrame([cIDs, currencyList], ["ID", "Currency"]).transpose()
     
     # Return data frame of IDs  
-    return(dfIDs)
+    return(data)
 
 # Function to get all payment IDs available for trading
 def getPmt():
     
     # Initialise lists
-    accts = []
+    aIDs = []
     aType = []
     
     # Get payment method ID and types
     payments = client.get_payment_methods()
     for method in payments.data:
+        aIDs.append(method["id"])
         aType.append(method["type"])
-        accts.append(method["id"])
         
     # Put payment ID and type into a data frame
-    dfPmt = DataFrame([accts, aType], ["ID", "Type"]).transpose()
+    data = DataFrame([aIDs, aType], ["ID", "Type"]).transpose()
     
     # Return data frame of payment methods  
-    return(dfPmt)
+    return(data)
 
 # Function to get buy/sell prices for a given crypto
 def getQuote(tType1, tType2, amount, currency1, currency2 = None, push = False): 
@@ -360,8 +363,8 @@ def getQuote(tType1, tType2, amount, currency1, currency2 = None, push = False):
         id2 = initIDs.loc[initIDs["Currency"] == currency2]["ID"].values[0]
         
     # Get payment method IDs
-    bank = initPmt.loc[initPmt["Type"] == "ach_bank_account"]["ID"].values[0]
-    fiat = initPmt.loc[initPmt["Type"] == "fiat_account"]["ID"].values[0]
+    pBank = initPmt.loc[initPmt["Type"] == "ach_bank_account"]["ID"].values[0]
+    pFiat = initPmt.loc[initPmt["Type"] == "fiat_account"]["ID"].values[0]
     
     # Get quotes and store data if push is false
     if push == False:
@@ -370,30 +373,30 @@ def getQuote(tType1, tType2, amount, currency1, currency2 = None, push = False):
         if tType1 == "buy":
            if tType2 == "crypto":
                conf = client.buy(id1, amount = amount, quote = True,
-                                 currency = currency1, payment_method = bank)
+                                 currency = currency1, payment_method = pBank)
            elif tType2 == "dollar":
                conf = client.buy(id1, total = amount, quote = True,
-                                 currency = "USD", payment_method = bank)    
+                                 currency = "USD", payment_method = pBank)    
     
         # Get price quote for sell
         if tType1 == "sell":
             if tType2 == "crypto":
                 conf = client.sell(id1, amount = amount, quote = True,
-                                   currency = currency1, payment_method = fiat)
+                                   currency = currency1, payment_method = pFiat)
             elif tType2 == "dollar":
                 conf = client.sell(id1, total = amount, quote = True,
-                                   currency = "USD", payment_method = fiat)
+                                   currency = "USD", payment_method = pFiat)
             
         # Get price quote for conversion (sell then buy)
         if tType1 == "convert":
             if tType2 == "crypto":
                 conf1 = client.sell(id1, amount = amount, quote = True,
-                                     currency = currency1, payment_method = fiat)
+                                    currency = currency1, payment_method = pFiat)
             elif tType2 == "dollar":
                 conf1 = client.sell(id1, total = amount, quote = True,
-                                    currency = "USD", payment_method = fiat)
+                                    currency = "USD", payment_method = pFiat)
             conf2 = client.buy(id2, total = float(conf1["total"]["amount"]),
-                               quote = True, currency = "USD", payment_method = bank)
+                               quote = True, currency = "USD", payment_method = pBank)
     
         # Compile quote data
         if tType1 != "convert":
@@ -414,23 +417,23 @@ def getQuote(tType1, tType2, amount, currency1, currency2 = None, push = False):
         # Execute buy order
         if tType1 == "buy":
            if tType2 == "crypto":
-               client.buy(id1, amount = amount, currency = currency1, payment_method = bank)
+               client.buy(id1, amount = amount, currency = currency1, payment_method = pBank)
            elif tType2 == "dollar":
-               client.buy(id1, total = amount, currency = "USD", payment_method = bank)    
+               client.buy(id1, total = amount, currency = "USD", payment_method = pBank)    
     
         # Execute sell order
         if tType1 == "sell":
             if tType2 == "crypto":
-                client.sell(id1, amount = amount, currency = currency1, payment_method = fiat)
+                client.sell(id1, amount = amount, currency = currency1, payment_method = pFiat)
             elif tType2 == "dollar":
-                client.sell(id1, total = amount, currency = "USD", payment_method = fiat)
+                client.sell(id1, total = amount, currency = "USD", payment_method = pFiat)
             
         # Execute currency conversion
         if tType1 == "convert":
             if tType2 == "crypto":
-                 client.sell(id1, amount = amount, currency = currency1, payment_method = fiat)
+                 client.sell(id1, amount = amount, currency = currency1, payment_method = pFiat)
             elif tType2 == "dollar":
-                client.sell(id1, total = amount, currency = "USD", payment_method = fiat)
+                client.sell(id1, total = amount, currency = "USD", payment_method = pFiat)
             client.buy(id2, total = float(conf1["total"]["amount"]),
-                       currency = "USD", payment_method = bank)
+                       currency = "USD", payment_method = pBank)
 

@@ -273,7 +273,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
         # Get price data for currencies in previous plot; format and convert to lists
         currencyList = list(D1[h]["Currency"])
         cLow = [ftNum(x, "value", 2) for x in list(D1[h]["Low"])]
-        cHighs = [ftNum(x, "value", 2) for x in list(D1[h]["High"])]
+        cHigh = [ftNum(x, "value", 2) for x in list(D1[h]["High"])]
         cOpen = [ftNum(x, "value", 2) for x in list(D1[h]["Open"])]
         cClose = [ftNum(x, "value", 2) for x in list(D1[h]["Close"])]
         cChange = [x for x in list(D1[h]["Return"])]
@@ -317,7 +317,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
                      fontsize = 20, horizontalalignment = "right")
             ax2.text(0.790, 1/8*i, cLow[i], color = "white",
                      fontsize = 8, horizontalalignment = "left")
-            ax2.text(0.962, 1/8*i, cHighs[i], color = "white",
+            ax2.text(0.962, 1/8*i, cHigh[i], color = "white",
                      fontsize = 8, horizontalalignment = "right")
         
         # Create TkInter canvas with Matplotlib figure

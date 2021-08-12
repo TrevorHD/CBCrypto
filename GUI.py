@@ -1,6 +1,5 @@
 ##### GUI To-do list --------------------------------------------------------------------------------------
 
-# Create login screen using API key and secret
 # Fully implement trade functionality
 
 
@@ -902,19 +901,19 @@ def loginFocus(eBox, *args):
 def loginUnfocus(eBox, *args):
     if eBox == 1:
         if w1_eState1.get() == "":
-            w1_e1.configure(show = None)
+            w1_e1.configure(show = "", foreground = "grey")
             w1_e1.insert(0, "API Key")
-            w1_e1.configure(foreground = "grey")
     elif eBox == 2:
         if w1_eState2.get() == "":
-            w1_e2.configure(show = None)
+            w1_e2.configure(show = "", foreground = "grey")
             w1_e2.insert(0, "API Secret")
-            w1_e2.configure(foreground = "grey")
 
 # Function to reset login entry boxes
 def loginReset():
+    w1_e1.configure(show = "", foreground = "grey")
     w1_e1.delete(0, "end")
     w1_e1.insert(0, "API Key")
+    w1_e2.configure(show = "", foreground = "grey")
     w1_e2.delete(0, "end")
     w1_e2.insert(0, "API Secret")
     
@@ -1066,6 +1065,7 @@ ttk.Style().theme_use("awdark")
 w1.title("CBCrypto: Cryptocurrency Dashboard")
 w1.geometry("1920x1080")
 w1.configure(bg = "#33393b")
+w1.state("zoomed")
 
 # Set window icon
 icon = ImageTk.PhotoImage(Image.open("Logo.png"))

@@ -810,6 +810,18 @@ def plotRefresh(rActive = False):
 
 ##### Define GUI functions --------------------------------------------------------------------------------
 
+# Function to run user authentication
+def userAuth():
+    APIKey = w1_e1.get()
+    APISecret = w1_e2.get()
+    try:
+        global client
+        client = Client(APIKey, APISecret)
+        client.get_accounts()
+        w1.destroy()
+    except coinbase.wallet.error.AuthenticationError:
+        w1_l2.configure(text = "Authentication failed!")
+
 # Function to pull all necessary data from the API
 def refreshData():
     
@@ -898,6 +910,22 @@ def loginUnfocus(eBox, *args):
             w1_e2.configure(show = None)
             w1_e2.insert(0, "API Secret")
             w1_e2.configure(foreground = "grey")
+
+# Function to reset login entry boxes
+def loginReset():
+    w1_e1.delete(0, "end")
+    w1_e1.insert(0, "API Key")
+    w1_e2.delete(0, "end")
+    w1_e2.insert(0, "API Secret")
+    
+# Function to disable trade confirmation button when no input is provided
+def loginDisable():
+    if w1_eState1.get() == "API Key" or w1_eState2.get() == "API Secret":
+        w1_b1.state(["disabled"])
+        w1.update()
+    else:
+        w1_b1.state(["!disabled"])
+        w1.update()
 
 # Function to update progress bars
 def pbUpdate():
@@ -1070,13 +1098,23 @@ w1_e1.bind("<FocusOut>", lambda e:[loginUnfocus(eBox = 1)])
 w1_e2.bind("<FocusIn>", lambda e:[loginFocus(eBox = 2)])
 w1_e2.bind("<FocusOut>", lambda e:[loginUnfocus(eBox = 2)])
 
+# Add key bindings to enable/disable login
+w1_e1.bind("<Key>", lambda e:[loginDisable()])
+w1_e2.bind("<Key>", lambda e:[loginDisable()])
+
 # Add button to connect to Coinbase API
-w1_b1 = ttk.Button(w1, text = "Continue", command = w1.destroy, width = 9)
-w1_b1.place(x = 650, y = 720)
+w1_b1 = ttk.Button(w1, text = "Continue", command = userAuth, width = 9)
+w1_b1.place(x = 650, y = 700)
+w1_b1.state(["disabled"])
 
 # Add button to reset entry box text
-w1_b2 = ttk.Button(w1, text = "Reset", command = w1.destroy, width = 9)
-w1_b2.place(x = 740, y = 720)
+w1_b2 = ttk.Button(w1, text = "Reset", command = lambda:[loginReset(), loginDisable()], width = 9)
+w1_b2.place(x = 740, y = 700)
+
+# Add blank label; will activate when authentication fails
+w1_l2 = Label(w1, text = "", justify = CENTER, bg = "#33393b", bd = 0,
+              font = ("Arial", 14), fg = "red")
+w1_l2.place(x = 642, y = 750)
 
 # Run TkInter window over loop
 w1.mainloop()

@@ -208,11 +208,9 @@ def getTopMovers(movers):
 
 
 
-##### Generate user wallet summary ------------------------------------------------------------------------
 
-# Access client using secure keys
-# Substitute API key and secret key with the user's actual key codes
-client = Client("api_key", "api_secret")
+
+##### Generate user wallet summary ------------------------------------------------------------------------
 
 # Function to list current holdings for each cryptocurrency
 def getCurrentHoldings():

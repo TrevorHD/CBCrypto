@@ -929,7 +929,7 @@ def loginDisable():
 # Function to update progress bars
 def pbUpdate():
     try:
-        w2_p1.step(0.468)
+        w2_p1.step(0.459)
         w2.update_idletasks()
     except NameError:
         try:

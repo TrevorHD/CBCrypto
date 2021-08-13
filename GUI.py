@@ -373,13 +373,13 @@ def plotMovers():
             ax.text([0.433, 0.711, 0.968][j], [0.874, 0.354][i], ["Open", "Close", "Change"][j],
                     horizontalalignment = "right", color = "white", fontsize = 20)
     for i in range(0, 20):
-        ax.text(0.029, (yTop + yBottom)[i], currencyList[i], color = colourList[i],
+        ax.text(0.029, (yBottom + yTop)[i], currencyList[i], color = colourList[i],
                 fontsize = 18, horizontalalignment = "left")
-        ax.text(0.433, (yTop + yBottom)[i], cOpen[i], color = colourList[i],
+        ax.text(0.433, (yBottom + yTop)[i], cOpen[i], color = colourList[i],
                 fontsize = 18, horizontalalignment = "right")
-        ax.text(0.711, (yTop + yBottom)[i], cClose[i], color = colourList[i],
+        ax.text(0.711, (yBottom + yTop)[i], cClose[i], color = colourList[i],
                 fontsize = 18, horizontalalignment = "right")
-        ax.text(0.968, (yTop + yBottom)[i], cChange[i], color = colourList[i],
+        ax.text(0.968, (yBottom + yTop)[i], cChange[i], color = colourList[i],
                 fontsize = 18, horizontalalignment = "right")
         
     # Create Tkinter canvas with Matplotlib figure

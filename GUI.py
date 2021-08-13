@@ -925,31 +925,27 @@ def pbUpdate():
     try:
         w2_p1.step(0.432)
         w2.update_idletasks()
-    except NameError:
-        try:
-            w3_p1.step(0.250)
-            w3.update_idletasks()
-            w3.update()
-        except NameError:
-            pass
-        except TclError:
-            pass
     except TclError:
-        try:
-            w3_p1.step(3)
-            w3.update_idletasks()
-            w3.update()
-        except NameError:
-            pass
-        except TclError:
+        if w3_rState.get() == 1:
+            try:
+                w3_p1.step(3)
+                w3.update_idletasks()
+                w3.update()
+            except NameError:
+                pass
+            except TclError:
+                pass
+        else:
             pass
         
 # Function to enable/disable master refresh while refreshing data
 def toggleReset(action):
     if action == "disable":
+        w3_rState.set(1)
         w3_b1.state(["disabled"])
         w3.update()
     elif action == "enable":
+        w3_rState.set(0)
         w3_b1.state(["!disabled"])
         w3.update()
         
@@ -1209,6 +1205,8 @@ w3_eState1, w3_eState2 = StringVar(), StringVar()
 w3_cState1, w3_cState2 = StringVar(), StringVar()
 w3_cState1.set("BTC")
 w3_sState = IntVar()
+w3_rState = IntVar()
+w3_rState.set(0)
 
 # Add master refresh button in top-right corner
 w3_b1 = ttk.Button(w3, text = "Refresh", style = "small.TButton",

@@ -2,7 +2,6 @@
 
 # Fully implement trade functionality
 # Cap trade amount
-# Combine top and bottom movers into one figure
 # Fix trade amounts when selling/converting
 # Fix trade button lag
 
@@ -224,9 +223,9 @@ def plotSeries(dType = "overview", currencies = None, *args):
     if dType == "overview":
         fig1 = pyplot.figure(1, facecolor = "#33393b")
     elif dType == "portfolio":
-        fig1 = pyplot.figure(5, facecolor = "#33393b")
+        fig1 = pyplot.figure(4, facecolor = "#33393b")
     elif dType == "trade":
-        fig1 = pyplot.figure(9, facecolor = "#33393b")
+        fig1 = pyplot.figure(8, facecolor = "#33393b")
     pyplot.clf()
     whitespace = fig1.add_axes([0, 0, 1, 1])
     whitespace.axis("off")
@@ -360,7 +359,7 @@ def plotMovers():
     yBottom = [0.32/10*x + 0.02 for x in range(0, 10)]
     
     # Plot movement data as text
-    fig = pyplot.figure(4)
+    fig = pyplot.figure(3)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -409,7 +408,7 @@ def plotHoldings():
     colourList = seaborn.color_palette("tab10", len(hLabs))
     
     # Generate donut plot
-    fig1 = pyplot.figure(6, facecolor = "#33393b")
+    fig1 = pyplot.figure(5, facecolor = "#33393b")
     pyplot.clf()
     pyplot.pie(hVals["Amount"], labels = hLabs, colors = colourList,
                textprops = {"color" : "w"}, radius = 1.2, startangle = 60)
@@ -458,7 +457,7 @@ def plotHoldings():
     cReturn1D.reverse()
     
     # Plot current holdings as text
-    fig2 = pyplot.figure(8)
+    fig2 = pyplot.figure(7)
     pyplot.clf()
     pyplot.scatter([0.025]*hLength, [x/(hLength + 1) + 0.029 for x in list(range(0, hLength))],
                    color = colourList, s = 80, marker = "s")
@@ -529,7 +528,7 @@ def plotHoldings():
     bChange2 = ftNum(bChange2, "percentC", 2)
     
     # Plot portfolio balance
-    fig3 = pyplot.figure(7)
+    fig3 = pyplot.figure(6)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -593,7 +592,7 @@ def plotTransactions(tHist, ref = False):
     tStat = list(tHist["Status"])
     
     # Plot transaction stats as text
-    fig = pyplot.figure(11)
+    fig = pyplot.figure(10)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -694,7 +693,7 @@ def plotTrade(push = False):
         dText2 = "A detailed schedule of transaction fees can be found on Coinbase (www.coinbase.com)."
     
         # Plot trade order information as text
-        fig = pyplot.figure(10)
+        fig = pyplot.figure(9)
         pyplot.clf()
         pyplot.axis("off")
         pyplot.tight_layout()
@@ -747,7 +746,7 @@ def plotTradeConfirmation():
             aText = "$" + aText
     
     # Plot trade order information as text
-    fig = pyplot.figure(13)
+    fig = pyplot.figure(12)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -785,7 +784,7 @@ def plotRefresh(rActive = False):
         rText = "Last updated " + tCurrent
         
     # Plot text
-    fig = pyplot.figure(12)
+    fig = pyplot.figure(11)
     pyplot.clf()
     pyplot.axis("off")
     pyplot.tight_layout()
@@ -1173,18 +1172,18 @@ w3_tC.add(w3_t3, text = "Trade")
 w3_tC.pack(expand = 1, fill = "both")
 
 # Set up main window graphics, each plotted on their own canvas
-w3_figX = [pyplot.figure(figsize = [(12.00, 6.00), (11.89, 3.65), (6.97, 9.51), (6.97, 9.51),
-                                    (12.00, 6.00), (6.97, 5.43), (10.00, 0.30), (19.14, 3.65),
-                                    (7.50, 6.00), (6.80, 3.60), (10.80, 9.50), (5.00, 0.25)][x],
-                         edgecolor = ["white" if w in [3, 4, 6, 11] else "#33393b" for w in range(1, 14)][x],
-                         facecolor = "#33393b", linewidth = 2) for x in range(0, 12)]
-w3_figL = [w3_t1]*4 + [w3_t2]*4 + [w3_t3]*3 + [w3]
+w3_figX = [pyplot.figure(figsize = [(12.00, 6.00), (11.89, 3.65), (6.97, 9.51), (12.00, 6.00),
+                                    (6.97, 5.43), (10.00, 0.30), (19.14, 3.65), (7.50, 6.00),
+                                    (6.80, 3.60), (10.80, 9.50), (5.00, 0.25)][x],
+                         edgecolor = ["white" if w in [3, 5, 10] else "#33393b" for w in range(1, 12)][x],
+                         facecolor = "#33393b", linewidth = 2) for x in range(0, 11)]
+w3_figL = [w3_t1]*3 + [w3_t2]*4 + [w3_t3]*3 + [w3]
 w3_cvsX = [FigureCanvasTkAgg(w3_figX[x], master = w3_figL[x]) for x in range(0, len(w3_figX))]
 
 # Place all graphics
 for i in range(0, len(w3_figX)):
-    w3_cvsX[i].get_tk_widget().place(x = [19, 26, 890, 890, 19, 890, 749, 26, 51, 90, 614, 980][i], 
-                                     y = [50, 500, 67, 67, 50, 67, 44, 500, 50, 500, 67, 7][i])
+    w3_cvsX[i].get_tk_widget().place(x = [19, 26, 890, 19, 890, 749, 26, 51, 90, 614, 980][i], 
+                                     y = [50, 500, 67, 50, 67, 44, 500, 50, 500, 67, 7][i])
     
 # Set up pop-up window trade confirmation graphic
 w4_fig = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
@@ -1192,17 +1191,16 @@ w4_fig = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
 # Graphic orders from above:
 # 1: time series chart [w3_t1]
 # 2: currency overview [w3_t1]
-# 3: top movers [w3_t1]
-# 4: bottom movers [w3_t1]
-# 5: time series chart [w3_t2]
-# 6: holdings chart [w3_t2]
-# 7: portfolio change text [w3_t2]
-# 8: portfolio overview [w3_t2]
-# 9: time series chart [w3_t3]
-# 10: trade text [w3_t3]
-# 11: transaction history [w3_t3]
-# 12: refresh text [w3]
-# 13: trade confirmation [w4]
+# 3: top/bottom movers [w3_t1]
+# 4: time series chart [w3_t2]
+# 5: holdings chart [w3_t2]
+# 6: portfolio change text [w3_t2]
+# 7: portfolio overview [w3_t2]
+# 8: time series chart [w3_t3]
+# 9: trade text [w3_t3]
+# 10: transaction history [w3_t3]
+# 11: refresh text [w3]
+# 12: trade confirmation [w4]
 
 # Set state variables for buttons, text, and menus
 w3_bState1, w3_bState2, w3_bState3 = IntVar(), IntVar(), IntVar()

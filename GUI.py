@@ -87,7 +87,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
     
     # Create list of tracked currencies
     if dType == "overview":
-        currencyList = ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]
+        currencyList = ["DOGE", "ADA", "DOT", "LINK", "UNI", "LTC", "ETH", "BTC"]
     elif dType == "portfolio":
         currencyList = currencies
     else:
@@ -162,7 +162,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
     
     # Generate colour palette
     if dType == "overview":
-        colourList = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"]
+        colourList = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#f947ff", "#ed098a"]
     elif dType == "portfolio":
         colourList = seaborn.color_palette("tab10", len(currencies))
     elif dType == "trade":
@@ -280,7 +280,7 @@ def plotSeries(dType = "overview", currencies = None, *args):
         
         # Get current price as fraction of maximum for each currency
         cRange = []
-        for i in range(0, 7):
+        for i in range(0, 8):
             cRange.append(list(L1[h]["key%s" %i]["mean"])[-1]/list(D1[h]["High"])[i])
         
         # Format text colour and sign depending on value
@@ -293,31 +293,31 @@ def plotSeries(dType = "overview", currencies = None, *args):
         # Plot price data as text
         fig2 = pyplot.figure(2)
         pyplot.clf()
-        pyplot.scatter([0.04]*7, [x/8 + 0.029 for x in list(range(0, 7))], s = 80, marker = "s",
-                       color = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#ed098a"])
-        pyplot.scatter([0.79 + 0.17*x for x in cRange], [x/8 + 0.059 for x in range(0, 7)],
+        pyplot.scatter([0.04]*8, [0.913/8*x + 0.03 for x in list(range(0, 8))], s = 80, marker = "s",
+                       color = ["#ed9909", "#e2ed09", "#73ed09", "#09e5ed", "#096ced", "#b809ed", "#f947ff", "#ed098a"])
+        pyplot.scatter([0.79 + 0.17*x for x in cRange], [0.913/8*x + 0.06 for x in range(0, 8)],
                        s = 40, marker = "s", color = "white")
         pyplot.axis("off")
         pyplot.tight_layout()
         ax2 = pyplot.gca()
         ax2.set_xlim(0, 1)
         ax2.set_ylim(0, 1)
-        for i in range(0, 7):
-            ax2.axhline(xmin = 0.79, xmax = 0.962, y = i/8 + 0.059, color = "white", linewidth = 0.8)
+        for i in range(0, 8):
+            ax2.axhline(xmin = 0.79, xmax = 0.962, y = 0.913/8*i + 0.06, color = "white", linewidth = 0.8)
             for j in range(0, 4):
-                ax2.text([0.338, 0.548, 0.728, 0.963][j], 7/8, ["Open", "Close", "Change", fText][j],
+                ax2.text([0.352, 0.532, 0.709, 0.963][j], 0.95, ["Open", "Close", "Change", fText][j],
                          horizontalalignment = "right", color = "white", fontsize = 20)
-            ax2.text(0.084, 1/8*i, currencyList[i], color = colourList[i],
+            ax2.text(0.082, 0.913/8*i, currencyList[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "left")
-            ax2.text(0.338, 1/8*i, cOpen[i], color = colourList[i],
+            ax2.text(0.352, 0.913/8*i, cOpen[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.548, 1/8*i, cClose[i], color = colourList[i],
+            ax2.text(0.532, 0.913/8*i, cClose[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.728, 1/8*i, cChange[i], color = colourList[i],
+            ax2.text(0.709, 0.913/8*i, cChange[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "right")
-            ax2.text(0.790, 1/8*i, cLow[i], color = "white",
+            ax2.text(0.790, 0.913/8*i + 0.005, cLow[i], color = "white",
                      fontsize = 8, horizontalalignment = "left")
-            ax2.text(0.962, 1/8*i, cHigh[i], color = "white",
+            ax2.text(0.963, 0.913/8*i + 0.005, cHigh[i], color = "white",
                      fontsize = 8, horizontalalignment = "right")
         
         # Create TkInter canvas with Matplotlib figure
@@ -373,20 +373,20 @@ def plotMovers():
         ax = pyplot.gca()
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
+        ax.text(0.004, 12/14, prefix + " 24-Hour Movers", color = "white", fontsize = 35,
+                horizontalalignment = "left")
         for j in range(0, 10):
             for k in range(0, 3):
-                ax.text([0.447, 0.707, 0.968][k], 10/14, ["Open", "Close", "Change"][k],
+                ax.text([0.397, 0.677, 0.968][k], 10/14, ["Open", "Close", "Change"][k],
                         horizontalalignment = "right", color = "white", fontsize = 20)
-            ax.text(0.084, 1/14*j, currencyList[j], color = colourList[j],
+            ax.text(0.004, 1/14*j, currencyList[j], color = colourList[j],
                     fontsize = 20, horizontalalignment = "left")
-            ax.text(0.447, 1/14*j, cOpen[j], color = colourList[j],
+            ax.text(0.397, 1/14*j, cOpen[j], color = colourList[j],
                     fontsize = 20, horizontalalignment = "right")
-            ax.text(0.707, 1/14*j, cClose[j], color = colourList[j],
+            ax.text(0.677, 1/14*j, cClose[j], color = colourList[j],
                     fontsize = 20, horizontalalignment = "right")
             ax.text(0.968, 1/14*j, cChange[j], color = colourList[j],
                     fontsize = 20, horizontalalignment = "right")
-        ax.text(0.084, 12/14, prefix + " 24-Hour Movers", color = "white", fontsize = 35,
-                horizontalalignment = "left")
         
         # Create Tkinter canvas with Matplotlib figure
         pyplot.gcf().canvas.draw()
@@ -474,25 +474,25 @@ def plotHoldings():
     ax2.set_ylim(0, 1)
     for i in range(0, hLength):
         for j in range(0, 8):
-            ax2.text([0.050, 0.217, 0.327, 0.437, 0.590, 0.747, 0.880, 0.999][j], hLength/(hLength + 1), 
+            ax2.text([0.050, 0.217, 0.327, 0.437, 0.593, 0.747, 0.880, 0.999][j], 0.95, 
                      ["", "Amount", "Value", "Percent", "Current Price", "Cost Basis", "24-hr Return", "Total Return"][j],
                      color = "white", fontsize = 20,
                      horizontalalignment = ["left", "right", "right", "right", "right", "right", "right", "right"][j])
-        ax2.text(0.050, 1/(hLength + 1)*i, currencyList[i], color = "white",
+        ax2.text(0.050, 0.9/hLength*i, currencyList[i], color = "white",
                  fontsize = 20, horizontalalignment = "left")
-        ax2.text(0.217, 1/(hLength + 1)*i, cCrypto[i], color = "white",
+        ax2.text(0.217, 0.9/hLength*i, cCrypto[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.327, 1/(hLength + 1)*i, cDollar[i], color = "white",
+        ax2.text(0.327, 0.9/hLength*i, cDollar[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.437, 1/(hLength + 1)*i, cPercent[i], color = "white",
+        ax2.text(0.437, 0.9/hLength*i, cPercent[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.590, 1/(hLength + 1)*i, cPrice[i], color = "white",
+        ax2.text(0.593, 0.9/hLength*i, cPrice[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.747, 1/(hLength + 1)*i, cBasis[i], color = "white",
+        ax2.text(0.747, 0.9/hLength*i, cBasis[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.880, 1/(hLength + 1)*i, cReturn1D[i], color = "white",
+        ax2.text(0.880, 0.9/hLength*i, cReturn1D[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
-        ax2.text(0.999, 1/(hLength + 1)*i, cReturn[i], color = "white",
+        ax2.text(0.999, 0.9/hLength*i, cReturn[i], color = "white",
                  fontsize = 20, horizontalalignment = "right")
         
     # Create TkInter canvas with Matplotlib figure
@@ -541,7 +541,7 @@ def plotHoldings():
     ax3 = pyplot.gca()
     ax3.set_xlim(0, 1)
     ax3.set_ylim(0, 1)
-    ax3.text(0.99, 0.5, bChange1 + " (" + bChange2 + ") since last update on " + dPrevious[1],
+    ax3.text(0.99, 0.47, bChange1 + " (" + bChange2 + ") since last update on " + dPrevious[1],
              color = "white", fontsize = 14, horizontalalignment = "right")
     
     # Create TkInter canvas with Matplotlib figure
@@ -851,10 +851,10 @@ def refreshData():
     cData = list(getCurrentHoldings()["Currency"])
     for h in range(0, 7):
         d1, d2, d3, d4 = {}, {}, {}, {}
-        for i in range(0, 7):
+        for i in range(0, 8):
             pbUpdate()
             d1["key%s" %i] = getPriceSeries(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
-                                            ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"][i])
+                                            ["DOGE", "ADA", "DOT", "LINK", "UNI", "LTC", "ETH", "BTC"][i])
             d2["key%s" %i] = d1["key%s" %i]["mean"]/(d1["key%s" %i]["mean"][0])
         for i in range(0, len(cData)):
             pbUpdate()
@@ -865,7 +865,7 @@ def refreshData():
         hData1.append(d3)
         hData2.append(d4)
         mData.append(getPriceSummary(["1hr", "1d", "1wk", "1m", "3m", "6m", "1yr"][h],
-                                     ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]))
+                                     ["DOGE", "ADA", "DOT", "LINK", "UNI", "LTC", "ETH", "BTC"]))
     
     # Retrieve info on top and bottom movers
     pbUpdate()
@@ -929,7 +929,7 @@ def loginDisable():
 # Function to update progress bars
 def pbUpdate():
     try:
-        w2_p1.step(0.459)
+        w2_p1.step(0.440)
         w2.update_idletasks()
     except NameError:
         try:
@@ -1178,8 +1178,8 @@ w3_tC.add(w3_t3, text = "Trade")
 w3_tC.pack(expand = 1, fill = "both")
 
 # Set up main window graphics, each plotted on their own canvas
-w3_figX = [pyplot.figure(figsize = [(11.40, 6.00), (11.40, 3.50), (8.20, 4.90), (8.20, 4.90),
-                                    (12.00, 6.00), (6.50, 5.45), (10.00, 0.30), (19.14, 3.50),
+w3_figX = [pyplot.figure(figsize = [(12.00, 6.00), (11.89, 3.50), (7.58, 4.90), (7.58, 4.90),
+                                    (12.00, 6.00), (6.97, 5.43), (10.00, 0.30), (19.14, 3.50),
                                     (7.50, 6.00), (6.80, 3.60), (10.80, 9.50), (5.00, 0.25)][x],
                          edgecolor = ["white" if w in [6, 11] else "#33393b" for w in range(1, 14)][x],
                          facecolor = "#33393b", linewidth = 2) for x in range(0, 12)]
@@ -1188,8 +1188,8 @@ w3_cvsX = [FigureCanvasTkAgg(w3_figX[x], master = w3_figL[x]) for x in range(0, 
 
 # Place all graphics
 for i in range(0, len(w3_figX)):
-    w3_cvsX[i].get_tk_widget().place(x = [23, 24, 830, 830, 19, 923, 748, 26, 51, 90, 614, 980][i], 
-                                     y = [50, 500, 35, 400, 50, 65, 43, 500, 50, 500, 67, 7][i])
+    w3_cvsX[i].get_tk_widget().place(x = [19, 26, 875, 875, 19, 890, 749, 26, 51, 90, 614, 980][i], 
+                                     y = [50, 500, 35, 400, 50, 67, 44, 500, 50, 500, 67, 7][i])
     
 # Set up pop-up window trade confirmation graphic
 w4_fig = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")

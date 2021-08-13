@@ -172,7 +172,7 @@ def getCurrentMovers():
         currencyList1.append(cInfo[i]["id"])
         currencyList2.append(cInfo[i]["id"])
         try:
-            if currencyList1[i] in ["XLM", "ADA", "DOT", "UNI", "LTC", "ETH", "BTC"]:
+            if currencyList1[i] in ["DOGE", "ADA", "DOT", "LINK", "UNI", "LTC", "ETH", "BTC"]:
                 cVals = mData[1].loc[mData[1]["Currency"] == currencyList1[i]]
                 cChange.append(float(cVals["Return"]))
                 cOpen.append(float(cVals["Open"]))

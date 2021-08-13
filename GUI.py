@@ -1,6 +1,8 @@
 ##### GUI To-do list --------------------------------------------------------------------------------------
 
 # Fully implement trade functionality
+# Cap trade amount
+# 
 
 
 
@@ -305,11 +307,11 @@ def plotSeries(dType = "overview", currencies = None, *args):
         for i in range(0, 8):
             ax2.axhline(xmin = 0.79, xmax = 0.962, y = 0.913/8*i + 0.06, color = "white", linewidth = 0.8)
             for j in range(0, 4):
-                ax2.text([0.352, 0.532, 0.709, 0.963][j], 0.95, ["Open", "Close", "Change", fText][j],
+                ax2.text([0.354, 0.532, 0.709, 0.963][j], 0.95, ["Open", "Close", "Change", fText][j],
                          horizontalalignment = "right", color = "white", fontsize = 20)
             ax2.text(0.082, 0.913/8*i, currencyList[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "left")
-            ax2.text(0.352, 0.913/8*i, cOpen[i], color = colourList[i],
+            ax2.text(0.354, 0.913/8*i, cOpen[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "right")
             ax2.text(0.532, 0.913/8*i, cClose[i], color = colourList[i],
                      fontsize = 20, horizontalalignment = "right")
@@ -343,7 +345,7 @@ def plotMovers():
             iStart, iEnd = 0, 10
             prefix = "Top"
         else:
-            iStart, iEnd = 10, 21
+            iStart, iEnd = 10, 20
             prefix = "Bottom"
         
         # Convert movement data to lists, then format
@@ -373,20 +375,20 @@ def plotMovers():
         ax = pyplot.gca()
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
-        ax.text(0.004, 12/14, prefix + " 24-Hour Movers", color = "white", fontsize = 35,
+        ax.text(0.029, 0.877, prefix + " 24-Hour Movers", color = "white", fontsize = 35,
                 horizontalalignment = "left")
         for j in range(0, 10):
             for k in range(0, 3):
-                ax.text([0.397, 0.677, 0.968][k], 10/14, ["Open", "Close", "Change"][k],
+                ax.text([0.433, 0.711, 0.968][k], 0.714, ["Open", "Close", "Change"][k],
                         horizontalalignment = "right", color = "white", fontsize = 20)
-            ax.text(0.004, 1/14*j, currencyList[j], color = colourList[j],
-                    fontsize = 20, horizontalalignment = "left")
-            ax.text(0.397, 1/14*j, cOpen[j], color = colourList[j],
-                    fontsize = 20, horizontalalignment = "right")
-            ax.text(0.677, 1/14*j, cClose[j], color = colourList[j],
-                    fontsize = 20, horizontalalignment = "right")
-            ax.text(0.968, 1/14*j, cChange[j], color = colourList[j],
-                    fontsize = 20, horizontalalignment = "right")
+            ax.text(0.029, 0.652/10*j + 0.03, currencyList[j], color = colourList[j],
+                    fontsize = 18, horizontalalignment = "left")
+            ax.text(0.433, 0.652/10*j + 0.03, cOpen[j], color = colourList[j],
+                    fontsize = 18, horizontalalignment = "right")
+            ax.text(0.711, 0.652/10*j + 0.03, cClose[j], color = colourList[j],
+                    fontsize = 18, horizontalalignment = "right")
+            ax.text(0.968, 0.652/10*j + 0.03, cChange[j], color = colourList[j],
+                    fontsize = 18, horizontalalignment = "right")
         
         # Create Tkinter canvas with Matplotlib figure
         pyplot.gcf().canvas.draw()
@@ -1178,18 +1180,18 @@ w3_tC.add(w3_t3, text = "Trade")
 w3_tC.pack(expand = 1, fill = "both")
 
 # Set up main window graphics, each plotted on their own canvas
-w3_figX = [pyplot.figure(figsize = [(12.00, 6.00), (11.89, 3.50), (7.58, 4.90), (7.58, 4.90),
-                                    (12.00, 6.00), (6.97, 5.43), (10.00, 0.30), (19.14, 3.50),
+w3_figX = [pyplot.figure(figsize = [(12.00, 6.00), (11.89, 3.65), (6.97, 4.50), (6.97, 4.50),
+                                    (12.00, 6.00), (6.97, 5.43), (10.00, 0.30), (19.14, 3.65),
                                     (7.50, 6.00), (6.80, 3.60), (10.80, 9.50), (5.00, 0.25)][x],
-                         edgecolor = ["white" if w in [6, 11] else "#33393b" for w in range(1, 14)][x],
+                         edgecolor = ["white" if w in [3, 4, 6, 11] else "#33393b" for w in range(1, 14)][x],
                          facecolor = "#33393b", linewidth = 2) for x in range(0, 12)]
 w3_figL = [w3_t1]*4 + [w3_t2]*4 + [w3_t3]*3 + [w3]
 w3_cvsX = [FigureCanvasTkAgg(w3_figX[x], master = w3_figL[x]) for x in range(0, len(w3_figX))]
 
 # Place all graphics
 for i in range(0, len(w3_figX)):
-    w3_cvsX[i].get_tk_widget().place(x = [19, 26, 875, 875, 19, 890, 749, 26, 51, 90, 614, 980][i], 
-                                     y = [50, 500, 35, 400, 50, 67, 44, 500, 50, 500, 67, 7][i])
+    w3_cvsX[i].get_tk_widget().place(x = [19, 26, 890, 890, 19, 890, 749, 26, 51, 90, 614, 980][i], 
+                                     y = [50, 500, 67, 427, 50, 67, 44, 500, 50, 500, 67, 7][i])
     
 # Set up pop-up window trade confirmation graphic
 w4_fig = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")

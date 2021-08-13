@@ -543,7 +543,7 @@ def plotHoldings():
     ax3 = pyplot.gca()
     ax3.set_xlim(0, 1)
     ax3.set_ylim(0, 1)
-    ax3.text(0.99, 0.47, bChange1 + " (" + bChange2 + ") since last update on " + dPrevious[1],
+    ax3.text(0.99, 0.47, bChange1 + " (" + bChange2 + ") change in portfolio value since last update",
              color = "white", fontsize = 14, horizontalalignment = "right")
     
     # Create TkInter canvas with Matplotlib figure
@@ -783,13 +783,13 @@ def plotRefresh(rActive = False):
     pbUpdate()
     
     # Get current time
-    tCurrent = datetime.datetime.now().strftime("%H:%M")
+    tCurrent = datetime.datetime.now().strftime("%m/%d/%Y %H:%M")
     
     # Get text
     if rActive == True:
         rText = "Refreshing... Please Wait."
     else:
-        rText = "Last updated at " + tCurrent
+        rText = "Last updated " + tCurrent
         
     # Plot text
     fig = pyplot.figure(12)
@@ -931,7 +931,7 @@ def loginDisable():
 # Function to update progress bars
 def pbUpdate():
     try:
-        w2_p1.step(0.440)
+        w2_p1.step(0.432)
         w2.update_idletasks()
     except NameError:
         try:

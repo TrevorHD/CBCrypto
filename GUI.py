@@ -640,9 +640,11 @@ def plotTrade(push = False):
     if w3_eState1.get() == "":
         cText1, cText2 = currency2, currency1
         aText = w3_eState2.get()
+        cIndex = 2
     elif w3_eState2.get() == "":
         cText1, cText2 = currency1, currency2
         aText = w3_eState1.get()
+        cIndex = 0
     if w3_tState1.get() == 1:
         tType1 = "buy"
     elif w3_tState1.get() == 2:
@@ -667,6 +669,10 @@ def plotTrade(push = False):
         
         # Get currency owned information
         cInfo = getSpecificCurrency(currency1, currency2)
+        if cText1 in cData:
+            cCapDollar = float(cInfo[cIndex + 1])
+        else:
+            cCapDollar = -1
     
         # Get currency owned text
         oText1 = currency1 + " owned: " + ftNum(float(cInfo[0]), "amount", 4) + " ($" + cInfo[1] + ")"
@@ -675,39 +681,61 @@ def plotTrade(push = False):
         else:
             oText2 = ""
     
-        # Get trade text
+        # Get trade text for given specifications
+        # Reject trade if amount exceeds holdings or $10000
+        failureState = 0
         colour = "white"
         eText = ""
         if blank == False:
             try:
-                if tType1 != "convert":
+                if tType1 == "buy":
                     if tInfo[0] < 10000 and tInfo[2] < 10000:
                         tText1 = "$" + ftNum(tInfo[0], "amount")
-                        tText2 = ("-" if tType1 == "sell" else "") + "$" + ftNum(tInfo[1], "amount")
+                        tText2 = "$" + ftNum(tInfo[1], "amount")
                         tText3 = "$" + ftNum(tInfo[2], "amount")
                         w3_tState3.set(0)
                     else:
-                        colour = "red"
-                        eText = "Transactions of $10000 or more not supported!"
-                        tText1, tText2, tText3 = "$---", "$---", "$---"
-                        w3_tState3.set(1)
-                else:
-                    if tInfo[0] < 10000 and tInfo[4] < 10000:
-                        tText1 = "$" + ftNum(tInfo[0], "amount")
-                        tText2 = "-$" + ftNum(tInfo[1] + tInfo[5], "amount")
-                        tText3 = "$" + ftNum(tInfo[4], "amount")
-                        w3_tState3.set(0)
+                        failureState = 1
+                elif tType1 == "sell":
+                    if tInfo[0] <= cCapDollar:
+                        if tInfo[0] < 10000 and tInfo[2] < 10000:
+                            tText1 = "$" + ftNum(tInfo[0], "amount")
+                            tText2 = "-$" + ftNum(tInfo[1], "amount")
+                            tText3 = "$" + ftNum(tInfo[2], "amount")
+                            w3_tState3.set(0)
+                        else:
+                            failureState = 1
                     else:
-                        colour = "red"
-                        eText = "Transactions of $10000 or more not supported."
-                        tText1, tText2, tText3 = "$---", "$---", "$---"
-                        w3_tState3.set(1)
+                        if tInfo[0] >= 10000 or tInfo[2] >= 10000:
+                            failureState = 1
+                        else:
+                            failureState = 2
+                elif tType1 == "convert":
+                    if tInfo[0] <= cCapDollar:
+                        if tInfo[0] < 10000 and tInfo[4] < 10000:
+                            tText1 = "$" + ftNum(tInfo[0], "amount")
+                            tText2 = "-$" + ftNum(tInfo[1] + tInfo[5], "amount")
+                            tText3 = "$" + ftNum(tInfo[4], "amount")
+                            w3_tState3.set(0)
+                        else:
+                            failureState = 1
+                    else:
+                        if tInfo[0] >= 10000 or tInfo[4] >= 10000:
+                            failureState = 1
+                        else:
+                            failureState = 2  
             except coinbase.wallet.error.InvalidRequestError:
-                colour = "red"
-                eText = "Transactions of $10000 or more not supported."
-                tText1, tText2, tText3 = "$---", "$---", "$---"
+                failureState = 1
         elif blank == True:
             tText1, tText2, tText3 = "$---", "$---", "$---"  
+        if failureState in [1, 2]:
+            colour = "red"
+            w3_tState3.set(1)
+            tText1, tText2, tText3 = "$---", "$---", "$---"
+            if failureState == 1:
+                eText = "Transactions of $10000 or more not supported!"
+            elif failureState == 2:
+                eText = "Transaction exceeds current account holdings!"
         
         # List disclaimer text
         dText1 = "Rates may differ at the time of transaction completion due to changes in market conditions."

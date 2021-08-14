@@ -1,7 +1,6 @@
 ##### GUI To-do list --------------------------------------------------------------------------------------
 
 # Fully implement trade functionality
-# Cap trade amount
 # Fix trade amounts when selling/converting
 # Fix trade button lag
 
@@ -677,17 +676,39 @@ def plotTrade(push = False):
             oText2 = ""
     
         # Get trade text
+        colour = "white"
+        eText = ""
         if blank == False:
-            tText1 = "$" + ftNum(tInfo[0], "amount")
-            if tType1 != "convert":
-                tText2 = ("-" if tType1 == "sell" else "") + "$" + ftNum(tInfo[1], "amount")
-                tText3 = "$" + ftNum(tInfo[2], "amount")
-            else:
-                tText2 = "-$" + ftNum(tInfo[1] + tInfo[5], "amount")
-                tText3 = "$" + ftNum(tInfo[4], "amount")
-        else:
-            tText1, tText2, tText3 = "$---", "$---", "$---"
-    
+            try:
+                if tType1 != "convert":
+                    if tInfo[0] < 10000 and tInfo[2] < 10000:
+                        tText1 = "$" + ftNum(tInfo[0], "amount")
+                        tText2 = ("-" if tType1 == "sell" else "") + "$" + ftNum(tInfo[1], "amount")
+                        tText3 = "$" + ftNum(tInfo[2], "amount")
+                        w3_tState3.set(0)
+                    else:
+                        colour = "red"
+                        eText = "Transactions of $10000 or more not supported!"
+                        tText1, tText2, tText3 = "$---", "$---", "$---"
+                        w3_tState3.set(1)
+                else:
+                    if tInfo[0] < 10000 and tInfo[4] < 10000:
+                        tText1 = "$" + ftNum(tInfo[0], "amount")
+                        tText2 = "-$" + ftNum(tInfo[1] + tInfo[5], "amount")
+                        tText3 = "$" + ftNum(tInfo[4], "amount")
+                        w3_tState3.set(0)
+                    else:
+                        colour = "red"
+                        eText = "Transactions of $10000 or more not supported."
+                        tText1, tText2, tText3 = "$---", "$---", "$---"
+                        w3_tState3.set(1)
+            except coinbase.wallet.error.InvalidRequestError:
+                colour = "red"
+                eText = "Transactions of $10000 or more not supported."
+                tText1, tText2, tText3 = "$---", "$---", "$---"
+        elif blank == True:
+            tText1, tText2, tText3 = "$---", "$---", "$---"  
+        
         # List disclaimer text
         dText1 = "Rates may differ at the time of transaction completion due to changes in market conditions."
         dText2 = "A detailed schedule of transaction fees can be found on Coinbase (www.coinbase.com)."
@@ -707,11 +728,12 @@ def plotTrade(push = False):
         ax.text(0.430, 0.53, "Subtotal:", color = "white", fontsize = 20, horizontalalignment = "left")
         ax.text(0.430, 0.37, "Fees:", color = "white", fontsize = 20, horizontalalignment = "left")
         ax.text(0.430, 0.21, "Total:", color = "white", fontsize = 20, horizontalalignment = "left")
+        ax.text(0.430, 0.67, eText, color = colour, fontsize = 11, horizontalalignment = "left")
         ax.text(0.000, 0.05, dText1, color = "white", fontsize = 10, horizontalalignment = "left")
         ax.text(0.000, 0.00, dText2, color = "white", fontsize = 10, horizontalalignment = "left")
-        ax.text(0.986, 0.53, tText1, color = "white", fontsize = 20, horizontalalignment = "right")
-        ax.text(0.986, 0.37, tText2, color = "white", fontsize = 20, horizontalalignment = "right")
-        ax.text(0.986, 0.21, tText3, color = "white", fontsize = 20, horizontalalignment = "right")
+        ax.text(0.986, 0.53, tText1, color = colour, fontsize = 20, horizontalalignment = "right")
+        ax.text(0.986, 0.37, tText2, color = colour, fontsize = 20, horizontalalignment = "right")
+        ax.text(0.986, 0.21, tText3, color = colour, fontsize = 20, horizontalalignment = "right")
     
         # Create TkInter canvas with Matplotlib figure
         pyplot.gcf().canvas.draw()
@@ -971,7 +993,7 @@ afterNum = None
 def entryWait(*args, aN = afterNum):
     if aN is not None:
         w3_e1.after_cancel(aN)
-    global afterNum; afterNum = w3_e1.after(2000, plotTrade)
+    global afterNum; afterNum = w3_e1.after(2000, lambda:[plotTrade(), disableTrades()])
     
 # Function to place or remove second dropdown menu for currency conversion
 def placeMenu():
@@ -999,6 +1021,8 @@ def changeList(*args):
 # Function to disable trade confirmation button when no input is provided
 def disableTrades():
     if w3_eState1.get() == "" and w3_eState2.get() == "":
+        w3_tState3.set(1)
+    if w3_tState3.get() == 1:
         w3_b2.state(["disabled"])
         w3.update()
     else:
@@ -1200,7 +1224,8 @@ w4_fig = pyplot.figure(figsize = (4.9, 2), facecolor = "#33393b")
 
 # Set state variables for buttons, text, and menus
 w3_bState1, w3_bState2, w3_bState3 = IntVar(), IntVar(), IntVar()
-w3_tState1, w3_tState2 = IntVar(), IntVar()
+w3_tState1, w3_tState2, w3_tState3 = IntVar(), IntVar(), IntVar()
+w3_tState1.set(1)
 w3_eState1, w3_eState2 = StringVar(), StringVar()
 w3_cState1, w3_cState2 = StringVar(), StringVar()
 w3_cState1.set("BTC")
@@ -1251,14 +1276,14 @@ for i in range(0, len(w3_r3)):
 
 # Add radiobuttons for controlling trade type
 w3_r4 = [ttk.Radiobutton(w3_t3, command = lambda:[placeMenu(), changeList(), plotTrade(),
-                                               plotSeries(dType = "trade")],
+                                                  plotSeries(dType = "trade")],
                          text = ["Buy", "Sell", "Convert"][x], 
                          variable = w3_tState1, value = x + 1) for x in range(0, 3)]
 for i in range(0, len(w3_r4)):
     w3_r4[i].place(x = 100, y = [526, 546, 566][i])
     
 # Add radiobuttons for controlling trade dollar/crypto input
-w3_r5 = [ttk.Radiobutton(w3_t3, command = lambda:[clearBox(), plotTrade()],
+w3_r5 = [ttk.Radiobutton(w3_t3, command = lambda:[clearBox(), plotTrade(), disableTrades()],
                          text = ["Dollars", "Crypto"][x], 
                          variable = w3_tState2, value = x + 1) for x in range(0, 2)]
 for i in range(0, len(w3_r5)):
@@ -1292,8 +1317,8 @@ w3_e2 = ttk.Entry(w3_t3, textvariable = w3_eState2, width = 9, validate = "key",
 w3_e2.place(x = 181, y = 628)
 
 # Add entry bindings for updating trade information when typing stops
-w3_e1.bind("<Key>", lambda e:[entryWait(), clearBox(2), disableTrades()])
-w3_e2.bind("<Key>", lambda e:[entryWait(), clearBox(1), disableTrades()])
+w3_e1.bind("<Key>", lambda e:[entryWait(), clearBox(2)])
+w3_e2.bind("<Key>", lambda e:[entryWait(), clearBox(1)])
 
 # Add spinbox to select transaction history page
 w3_s1 = ttk.Spinbox(w3_t3, from_ = 1, to = thMaxPage, textvariable = w3_sState, width = 2,

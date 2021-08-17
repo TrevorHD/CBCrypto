@@ -935,6 +935,11 @@ def refreshData():
     tHist = getTransactionHistory()
     thMaxPage = 99 if math.ceil(len(tHist)/25) > 99 else math.ceil(len(tHist)/25)
     w3_sState.set(thMaxPage)
+    
+    # Filter data to ensure that currencies without price data are not available
+    initIDs = initIDs[initIDs.Currency.isin(oData["Currency"].values)]
+    cbList = list(set(cbList) & set(oData["Currency"].values))
+    cbList.sort()
 
 # Function to mask information when login boxes are activated
 def loginFocus(eBox, *args):

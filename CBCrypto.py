@@ -354,86 +354,91 @@ def getPmt():
     # Return data frame of payment methods  
     return(data)
 
-# Function to get buy/sell prices for a given crypto
-def getQuote(tType1, tType2, amount, currency1, currency2 = None, push = False): 
+# Function to get buy/sell prices for a given crypto, or perform trades            
+def getQuote(tType1, tType2, amount, currency1, currency2 = None, push = False):
     
-    # Get wallet IDs for each currency
-    id1 = initIDs.loc[initIDs["Currency"] == currency1]["ID"].values[0]
+    # Get prices for each currency
+    cPrice1 = oData.loc[oData["Currency"] == currency1]["Close"].values[0]
     if currency2 not in [None, ""]:
-        id2 = initIDs.loc[initIDs["Currency"] == currency2]["ID"].values[0]
-        
-    # Get payment method IDs
-    pBank = initPmt.loc[initPmt["Type"] == "ach_bank_account"]["ID"].values[0]
-    pFiat = initPmt.loc[initPmt["Type"] == "fiat_account"]["ID"].values[0]
+        cPrice2 = oData.loc[oData["Currency"] == currency2]["Close"].values[0]
     
-    # Get quotes and store data if push is false
-    if push == False:
+    # Internal function to calculate fees
+    def getFee(amount, cPrice):
+        if tType2 == "crypto":
+            nAmount = amount*cPrice
+        elif tType2 == "dollar":
+            nAmount = amount
+        if nAmount <= 10.00:
+            nFee = 0.99
+        elif 10.00 < nAmount <= 25.00:
+            nFee = 1.49
+        elif 25.00 < nAmount <= 50.00:
+            nFee = 1.99
+        elif 50.00 < nAmount <= 200.00:
+            nFee = 2.99
+        elif nAmount > 200.00:
+            nFee = nAmount*0.0149
+        return(round(nFee, 2))
     
-        # Get price quote for buy
-        if tType1 == "buy":
-           if tType2 == "crypto":
-               conf = client.buy(id1, amount = amount, quote = True,
-                                 currency = currency1, payment_method = pBank)
-           elif tType2 == "dollar":
-               conf = client.buy(id1, total = amount, quote = True,
-                                 currency = "USD", payment_method = pBank)    
+    # Execute buy order
+    if tType1 == "buy":
+        pFee = getFee(amount, cPrice1)
+        if tType2 == "crypto":
+            pList = [round(amount*cPrice1, 2), pFee, round(amount*cPrice1 + pFee, 2), cPrice1]
+        elif tType2 == "dollar":
+            pList = [round(amount, 2), pFee, round(amount + pFee, 2), cPrice1]
     
-        # Get price quote for sell
-        if tType1 == "sell":
-            if tType2 == "crypto":
-                conf = client.sell(id1, amount = amount, quote = True,
-                                   currency = currency1, payment_method = pFiat)
-            elif tType2 == "dollar":
-                conf = client.sell(id1, total = amount, quote = True,
-                                   currency = "USD", payment_method = pFiat)
-            
-        # Get price quote for conversion (sell then buy)
-        if tType1 == "convert":
-            if tType2 == "crypto":
-                conf1 = client.sell(id1, amount = amount, quote = True,
-                                    currency = currency1, payment_method = pFiat)
-            elif tType2 == "dollar":
-                conf1 = client.sell(id1, total = amount, quote = True,
-                                    currency = "USD", payment_method = pFiat)
-            conf2 = client.buy(id2, total = float(conf1["total"]["amount"]),
-                               quote = True, currency = "USD", payment_method = pBank)
+    # Execute sell order
+    elif tType1 == "sell":
+        pFee = getFee(amount, cPrice1)
+        if tType2 == "crypto":
+            pList = [round(amount*cPrice1, 2), pFee, round(amount*cPrice1 - pFee, 2), cPrice1]
+        elif tType2 == "dollar":
+            pList = [round(amount, 2), pFee, round(amount - pFee, 2), cPrice1]
     
-        # Compile quote data
-        if tType1 != "convert":
-            qData = [float(conf["subtotal"]["amount"]), float(conf["fee"]["amount"]),
-                     float(conf["total"]["amount"]), float(conf["unit_price"]["amount"])]
-        else:
-            qData = [float(conf1["subtotal"]["amount"]), float(conf1["fee"]["amount"]),
-                     float(conf1["total"]["amount"]), float(conf1["unit_price"]["amount"]),
-                     float(conf2["subtotal"]["amount"]), float(conf2["fee"]["amount"]),
-                     float(conf2["total"]["amount"]), float(conf2["unit_price"]["amount"])]
-    
-        # Return quote data
-        return qData
+    # Execute currency conversion
+    elif tType1 == "convert":
+        pFee1 = getFee(amount, cPrice1)
+        if tType2 == "crypto":
+            pList1 = [round(amount*cPrice1, 2), pFee1, round(amount*cPrice1 - pFee1, 2), cPrice1]
+        elif tType2 == "dollar":
+            pList1 = [round(amount, 2), pFee1, round(amount - pFee1, 2), cPrice1]
+        pFee2 = getFee(pList1[2], cPrice2)
+        pList2 = [pList1[2], pFee2, pList1[2] - pFee2, cPrice2]
     
     # Perform trade if push is true
-    elif push == True:
+    if push == True:   
         
+        # Get wallet IDs for each currency
+        id1 = initIDs.loc[initIDs["Currency"] == currency1]["ID"].values[0]
+        if currency2 not in [None, ""]:
+            id2 = initIDs.loc[initIDs["Currency"] == currency2]["ID"].values[0]
+    
+        # Get payment method IDs
+        pBank = initPmt.loc[initPmt["Type"] == "ach_bank_account"]["ID"].values[0]
+        pFiat = initPmt.loc[initPmt["Type"] == "fiat_account"]["ID"].values[0]
+    
         # Execute buy order
-        if tType1 == "buy":
-           if tType2 == "crypto":
-               client.buy(id1, amount = amount, currency = currency1, payment_method = pBank)
-           elif tType2 == "dollar":
-               client.buy(id1, total = amount, currency = "USD", payment_method = pBank)    
+        #if tType1 == "buy":
+        #    client.buy(id1, total = pList1[2], currency = currency1, payment_method = pBank) 
     
         # Execute sell order
-        if tType1 == "sell":
-            if tType2 == "crypto":
-                client.sell(id1, amount = amount, currency = currency1, payment_method = pFiat)
-            elif tType2 == "dollar":
-                client.sell(id1, total = amount, currency = "USD", payment_method = pFiat)
+        #elif tType1 == "sell":
+        #    client.sell(id1, total = pList1[2], currency = currency1, payment_method = pFiat)
             
-        # Execute currency conversion
+        ## Execute currency conversion
+        #elif tType1 == "convert":
+        #    if tType2 == "crypto":
+        #         client.sell(id1, amount = amount, currency = currency1, payment_method = pFiat)
+        #    elif tType2 == "dollar":
+        #        client.sell(id1, total = amount, currency = "USD", payment_method = pFiat)
+        #    client.buy(id2, total = float(conf1["total"]["amount"]),
+        #               currency = "USD", payment_method = pBank)
+    
+    # Otherwise return just a quote
+    elif push == False:
         if tType1 == "convert":
-            if tType2 == "crypto":
-                 client.sell(id1, amount = amount, currency = currency1, payment_method = pFiat)
-            elif tType2 == "dollar":
-                client.sell(id1, total = amount, currency = "USD", payment_method = pFiat)
-            client.buy(id2, total = float(conf1["total"]["amount"]),
-                       currency = "USD", payment_method = pBank)
-
+            return(pList1 + pList2)
+        else:
+            return(pList)
+    

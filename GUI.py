@@ -655,7 +655,7 @@ def plotTrade(push = False):
         tType2 = "dollar"
     elif w3_tState2.get() == 2:
         tType2 = "crypto"
-    if aText == "":
+    if aText == "" or float(aText) == 0:
         blank = True
     else:
         blank = False
@@ -689,7 +689,7 @@ def plotTrade(push = False):
         if blank == False:
             try:
                 if tType1 == "buy":
-                    if tInfo[0] < 10000 and tInfo[2] < 10000:
+                    if 1 <= tInfo[2] < 10000:
                         tText1 = "$" + ftNum(tInfo[0], "amount")
                         tText2 = "$" + ftNum(tInfo[1], "amount")
                         tText3 = "$" + ftNum(tInfo[2], "amount")
@@ -698,43 +698,53 @@ def plotTrade(push = False):
                         failureState = 1
                 elif tType1 == "sell":
                     if tInfo[0] <= cCapDollar:
-                        if tInfo[0] < 10000 and tInfo[2] < 10000:
+                        if 1 <= tInfo[0] < 10000:
                             tText1 = "$" + ftNum(tInfo[0], "amount")
                             tText2 = "-$" + ftNum(tInfo[1], "amount")
                             tText3 = "$" + ftNum(tInfo[2], "amount")
                             w3_tState3.set(0)
+                        elif tInfo[0] < 1:
+                            failureState = 2
                         else:
                             failureState = 1
                     else:
-                        if tInfo[0] >= 10000 or tInfo[2] >= 10000:
+                        if tInfo[0] >= 10000:
                             failureState = 1
-                        else:
+                        elif tInfo[0] < 1:
                             failureState = 2
+                        else:
+                            failureState = 3
                 elif tType1 == "convert":
                     if tInfo[0] <= cCapDollar:
-                        if tInfo[0] < 10000 and tInfo[4] < 10000:
+                        if 1.99 <= tInfo[0] < 10000:
                             tText1 = "$" + ftNum(tInfo[0], "amount")
                             tText2 = "-$" + ftNum(tInfo[1] + tInfo[5], "amount")
-                            tText3 = "$" + ftNum(tInfo[4], "amount")
+                            tText3 = "$" + ftNum(tInfo[6], "amount")
                             w3_tState3.set(0)
+                        elif tInfo[0] < 1.99:
+                            failureState = 2
                         else:
                             failureState = 1
                     else:
-                        if tInfo[0] >= 10000 or tInfo[4] >= 10000:
+                        if tInfo[0] >= 10000:
                             failureState = 1
+                        elif tInfo[0] < 1:
+                            failureState = 2
                         else:
-                            failureState = 2  
+                            failureState = 3  
             except coinbase.wallet.error.InvalidRequestError:
                 failureState = 1
         elif blank == True:
             tText1, tText2, tText3 = "$---", "$---", "$---"  
-        if failureState in [1, 2]:
+        if failureState in [1, 2, 3]:
             colour = "red"
             w3_tState3.set(1)
             tText1, tText2, tText3 = "$---", "$---", "$---"
             if failureState == 1:
                 eText = "Transactions of $10000 or more not supported!"
             elif failureState == 2:
+                eText = "Transaction amount below supported threshold!"
+            elif failureState == 3:
                 eText = "Transaction exceeds current account holdings!"
         
         # List disclaimer text
@@ -1021,7 +1031,7 @@ afterNum = None
 def entryWait(*args, aN = afterNum):
     if aN is not None:
         w3_e1.after_cancel(aN)
-    global afterNum; afterNum = w3_e1.after(2000, lambda:[plotTrade(), disableTrades()])
+    global afterNum; afterNum = w3_e1.after(300, lambda:[plotTrade(), disableTrades()])
     
 # Function to place or remove second dropdown menu for currency conversion
 def placeMenu():

@@ -1168,13 +1168,18 @@ w1_b1.state(["disabled"])
 w1_b2 = ttk.Button(w1, text = "Reset", command = lambda:[loginReset(), loginDisable()], width = 9)
 w1_b2.place(x = 740, y = 700)
 
-# Add blank label; will activate when authentication fails
+# Add blank label; will display message when authentication fails
 w1_l2 = Label(w1, text = "", justify = CENTER, bg = "#33393b", bd = 0,
               font = ("Arial", 14), fg = "red")
 w1_l2.place(x = 642, y = 750)
 
 # Run TkInter window over loop
 w1.mainloop()
+
+# Prevent rest of program from running if user quits before authentication
+if "client" not in globals():
+    sys.exit()
+
 
 
 

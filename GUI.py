@@ -684,7 +684,6 @@ def plotTrade(push = False):
         # Get trade text for given specifications
         # Reject trade if amount exceeds holdings or $10000
         failureState = 0
-        colour = "white"
         eText = ""
         if blank == False:
             try:
@@ -735,17 +734,19 @@ def plotTrade(push = False):
             except coinbase.wallet.error.InvalidRequestError:
                 failureState = 1
         elif blank == True:
-            tText1, tText2, tText3 = "$---", "$---", "$---"  
-        if failureState in [1, 2, 3]:
-            colour = "red"
+            tText1, tText2, tText3 = "$---", "$---", "$---"
+            failureState = 4
+        if failureState in [1, 2, 3, 4]:
             w3_tState3.set(1)
             tText1, tText2, tText3 = "$---", "$---", "$---"
             if failureState == 1:
                 eText = "Transactions of $10000 or more not supported!"
             elif failureState == 2:
-                eText = "Transaction amount below supported threshold!"
+                eText = "Transaction amount lower than minimum limit!"
             elif failureState == 3:
-                eText = "Transaction exceeds current account holdings!"
+                eText = "Transaction amount exceeds current holdings!"
+            elif failureState == 4:
+                eText = "Transaction amount must be greater than zero!"
         
         # List disclaimer text
         dText1 = "Rates may differ at the time of transaction completion due to changes in market conditions."
@@ -766,12 +767,12 @@ def plotTrade(push = False):
         ax.text(0.430, 0.53, "Subtotal:", color = "white", fontsize = 20, horizontalalignment = "left")
         ax.text(0.430, 0.37, "Fees:", color = "white", fontsize = 20, horizontalalignment = "left")
         ax.text(0.430, 0.21, "Total:", color = "white", fontsize = 20, horizontalalignment = "left")
-        ax.text(0.430, 0.67, eText, color = colour, fontsize = 11, horizontalalignment = "left")
+        ax.text(0.430, 0.67, eText, color = "red", fontsize = 11, horizontalalignment = "left")
         ax.text(0.000, 0.05, dText1, color = "white", fontsize = 10, horizontalalignment = "left")
         ax.text(0.000, 0.00, dText2, color = "white", fontsize = 10, horizontalalignment = "left")
-        ax.text(0.986, 0.53, tText1, color = colour, fontsize = 20, horizontalalignment = "right")
-        ax.text(0.986, 0.37, tText2, color = colour, fontsize = 20, horizontalalignment = "right")
-        ax.text(0.986, 0.21, tText3, color = colour, fontsize = 20, horizontalalignment = "right")
+        ax.text(0.986, 0.53, tText1, color = "white", fontsize = 20, horizontalalignment = "right")
+        ax.text(0.986, 0.37, tText2, color = "white", fontsize = 20, horizontalalignment = "right")
+        ax.text(0.986, 0.21, tText3, color = "white", fontsize = 20, horizontalalignment = "right")
     
         # Create TkInter canvas with Matplotlib figure
         pyplot.gcf().canvas.draw()
@@ -1182,7 +1183,6 @@ w1.mainloop()
 # Prevent rest of program from running if user quits before authentication
 if "client" not in globals():
     sys.exit()
-
 
 
 

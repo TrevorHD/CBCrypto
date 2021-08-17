@@ -989,7 +989,10 @@ def loginDisable():
 def pbUpdate():
     try:
         w2_p1.step(0.432)
+        w2_pState.set(w2_p1.cget("value"))
+        w2_l2.configure(text = "Loading... (" + str(round(w2_pState.get(), 2)) + "%)")
         w2.update_idletasks()
+        w2.update()
     except TclError:
         if w3_rState.get() == 1:
             try:
@@ -1219,14 +1222,16 @@ icon2 = ImageTk.PhotoImage(Image.open("Logo.png").resize((500, 500), Image.ANTIA
 w2_cvs = Canvas(w2, width = 460, height = 460, bg = "#33393b", highlightthickness = 1)
 w2_cvs.place(x = 500, y = 75)
 w2_cvs.create_image((230, 230), anchor = CENTER, image = icon2)
-w2_l1 = Label(w2, text = "CBCrypto: Cryptocurrency Dashboard", justify = CENTER,
-              bg = "#33393b", bd = 0, font = ("Arial", 17), fg = "white")
-w2_l1.place(x = 537, y = 550)
-w2_l2 = Label(w2, text = "Loading...", justify = CENTER,
-              bg = "#33393b", bd = 0, font = ("Arial", 10), fg = "white")
-w2_l2.place(x = 700, y = 726)
 w2_p1 = ttk.Progressbar(w2, orient = HORIZONTAL, length = 300, mode = "determinate")
 w2_p1.place(x = 580, y = 700)
+w2_pState = IntVar()
+w2_pState.set(0)
+w2_l1 = Label(w2, text = "CBCrypto: Cryptocurrency Dashboard", justify = "center",
+              bg = "#33393b", bd = 0, font = ("Arial", 17), fg = "white")
+w2_l1.place(x = 537, y = 550)
+w2_l2 = Label(w2, text = "Loading... (0%)", justify = "center",
+              bg = "#33393b", bd = 0, font = ("Arial", 10), fg = "white")
+w2_l2.place(x = 682, y = 726)
 w2.update()
 
 # Set application screen tabs

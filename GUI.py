@@ -1,8 +1,6 @@
 ##### GUI To-do list --------------------------------------------------------------------------------------
 
-# Fully implement trade functionality
-# Fix trade amounts when selling/converting
-# Fix trade button lag
+# Add support for fiat balance in holdings
 
 
 
@@ -842,7 +840,10 @@ def plotRefresh(rActive = False):
     if rActive == True:
         rText = "Refreshing... Please Wait."
     else:
-        rText = "Last updated " + tCurrent
+        if w3_fState.get() == 1:
+            rText = "Previous trade failed; Last updated " + tCurrent
+        else:
+            rText = "Last updated " + tCurrent
         
     # Plot text
     fig = pyplot.figure(11)
@@ -1097,17 +1098,20 @@ def tradeWindow():
     w4_cvs = FigureCanvasTkAgg(w4_fig, master = w4)
     w4_cvs.get_tk_widget().place(x = 0, y = 0)
     
+    # Internal function to complete trande and handle exceptions
+    def finishTrade():
+        try:
+            plotTrade(push = True)
+            w3_fState.set(0)
+        except:
+            w3_fState.set(1)
+
     # Create buttons to confirm or cancel trade
     w4_b1 = ttk.Button(w4, command = lambda:[w4.destroy(), fullRefresh(rType = "trade")],
                        text = "Yes",  width = 9)
     w4_b1.place(x = 20, y = 45)
     w4_b2 = ttk.Button(w4, text = "No", command = w4.destroy, width = 9)
     w4_b2.place(x = 20, y = 80)
-
-    # Confirmation button with actual trade functionality
-    # Temporarily disabled to avoid accidental purchases while testing
-    # Fix this to ensure that pop-up is destroyed before refreshing
-    #w4_b1 = ttk.Button(w4, text = "Yes", command = lambda:[plotTrade(push = True), refreshData(), w4.destroy()], width = 9)    
 
 # Function to refresh the entire application
 def fullRefresh(rType = "startup"):
@@ -1307,6 +1311,8 @@ w3_cState1.set("BTC")
 w3_sState = IntVar()
 w3_rState = IntVar()
 w3_rState.set(0)
+w3_fState = IntVar()
+w3_fState.set(0)
 
 # Add master refresh button in top-right corner
 # Run once on startup and again any time button is pressed

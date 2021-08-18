@@ -1098,7 +1098,8 @@ def tradeWindow():
     w4_cvs.get_tk_widget().place(x = 0, y = 0)
     
     # Create buttons to confirm or cancel trade
-    w4_b1 = ttk.Button(w4, text = "Yes", command = lambda:[plotTransactions(tHist = tHist, ref = True), w4.destroy()], width = 9)
+    w4_b1 = ttk.Button(w4, command = lambda:[w4.destroy(), fullRefresh(rType = "trade")],
+                       text = "Yes",  width = 9)
     w4_b1.place(x = 20, y = 45)
     w4_b2 = ttk.Button(w4, text = "No", command = w4.destroy, width = 9)
     w4_b2.place(x = 20, y = 80)
@@ -1108,8 +1109,29 @@ def tradeWindow():
     # Fix this to ensure that pop-up is destroyed before refreshing
     #w4_b1 = ttk.Button(w4, text = "Yes", command = lambda:[plotTrade(push = True), refreshData(), w4.destroy()], width = 9)    
 
-
-
+# Function to refresh the entire application
+def fullRefresh(rType = "startup"):
+    toggleReset("disable")
+    plotRefresh(rActive = True)
+    if rType in ["manual", "trade"]:
+        resetTrades()
+        clearBox()
+        placeMenu()
+        changeList()
+        disableTrades()
+        plotTrade()
+    refreshData()
+    plotSeries()
+    plotSeries(dType = "portfolio", currencies = cData)
+    plotSeries(dType = "trade")
+    plotMovers()
+    plotHoldings()
+    plotTransactions(tHist = tHist)
+    plotRefresh()
+    toggleReset("enable")
+    
+    
+    
 
 
 ##### Run login screen ------------------------------------------------------------------------------------
@@ -1287,14 +1309,12 @@ w3_rState = IntVar()
 w3_rState.set(0)
 
 # Add master refresh button in top-right corner
+# Run once on startup and again any time button is pressed
 w3_b1 = ttk.Button(w3, text = "Refresh", style = "small.TButton",
-                   command = lambda:[toggleReset("disable"), plotRefresh(rActive = True), refreshData(),
-                                     plotSeries(), plotSeries(dType = "portfolio", currencies = cData),
-                                     plotMovers(), plotHoldings(), plotTransactions(tHist = tHist),
-                                     plotRefresh(), toggleReset("enable")])
+                   command = lambda:[fullRefresh(rType = "manual")])
 #w3_b1.place(x = 1390, y = 1, width = 30, height = 20)
 w3_b1.place(x = 1420, y = 6)
-w3_b1.invoke()
+fullRefresh()
 
 # Add trade button to buy/sell/convert currency
 w3_b2 = ttk.Button(w3_t3, text = "Confirm", command = tradeWindow, width = 9)

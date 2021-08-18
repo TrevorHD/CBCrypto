@@ -364,10 +364,10 @@ def getQuote(tType1, tType2, amount, currency1, currency2 = None, push = False):
         cPrice2 = oData.loc[oData["Currency"] == currency2]["Close"].values[0]
     
     # Internal function to calculate fees
-    def getFee(amount, cPrice):
-        if tType2 == "crypto":
+    def getFee(amount, cPrice = None):
+        if cPrice not in [None]:
             nAmount = amount*cPrice
-        elif tType2 == "dollar":
+        else:
             nAmount = amount
         if nAmount <= 10.00:
             nFee = 0.99
@@ -383,29 +383,32 @@ def getQuote(tType1, tType2, amount, currency1, currency2 = None, push = False):
     
     # Execute buy order
     if tType1 == "buy":
-        pFee = getFee(amount, cPrice1)
         if tType2 == "crypto":
+            pFee = getFee(amount, cPrice1)
             pList = [round(amount*cPrice1, 2), pFee, round(amount*cPrice1 + pFee, 2), cPrice1]
         elif tType2 == "dollar":
+            pFee = getFee(amount)
             pList = [round(amount, 2), pFee, round(amount + pFee, 2), cPrice1]
     
     # Execute sell order
     elif tType1 == "sell":
-        pFee = getFee(amount, cPrice1)
         if tType2 == "crypto":
+            pFee = getFee(amount, cPrice1)
             pList = [round(amount*cPrice1, 2), pFee, round(amount*cPrice1 - pFee, 2), cPrice1]
         elif tType2 == "dollar":
+            pFee = getFee(amount)
             pList = [round(amount, 2), pFee, round(amount - pFee, 2), cPrice1]
     
     # Execute currency conversion
     elif tType1 == "convert":
-        pFee1 = getFee(amount, cPrice1)
         if tType2 == "crypto":
+            pFee1 = getFee(amount, cPrice1)
             pList1 = [round(amount*cPrice1, 2), pFee1, round(amount*cPrice1 - pFee1, 2), cPrice1]
         elif tType2 == "dollar":
+            pFee1 = getFee(amount)
             pList1 = [round(amount, 2), pFee1, round(amount - pFee1, 2), cPrice1]
-        pFee2 = getFee(pList1[2], cPrice2)
-        pList2 = [pList1[2], pFee2, pList1[2] - pFee2, cPrice2]
+        pFee2 = getFee(pList1[2])
+        pList2 = [round(pList1[2], 2), pFee2, round(pList1[2] - pFee2, 2), cPrice2]
     
     # Perform trade if push is true
     if push == True:   
@@ -420,21 +423,17 @@ def getQuote(tType1, tType2, amount, currency1, currency2 = None, push = False):
         pFiat = initPmt.loc[initPmt["Type"] == "fiat_account"]["ID"].values[0]
     
         # Execute buy order
-        #if tType1 == "buy":
-        #    client.buy(id1, total = pList1[2], currency = currency1, payment_method = pBank) 
+        if tType1 == "buy":
+            client.buy(id1, total = pList1[2], currency = "USD", payment_method = pBank) 
     
         # Execute sell order
-        #elif tType1 == "sell":
-        #    client.sell(id1, total = pList1[2], currency = currency1, payment_method = pFiat)
+        elif tType1 == "sell":
+            client.sell(id1, total = pList1[2], currency = "USD", payment_method = pFiat)
             
         ## Execute currency conversion
-        #elif tType1 == "convert":
-        #    if tType2 == "crypto":
-        #         client.sell(id1, amount = amount, currency = currency1, payment_method = pFiat)
-        #    elif tType2 == "dollar":
-        #        client.sell(id1, total = amount, currency = "USD", payment_method = pFiat)
-        #    client.buy(id2, total = float(conf1["total"]["amount"]),
-        #               currency = "USD", payment_method = pBank)
+        elif tType1 == "convert":
+            client.sell(id1, total = pList1[2], currency = "USD", payment_method = pFiat)
+            client.buy(id2, total = pList1[0], currency = "USD", payment_method = pBank)
     
     # Otherwise return just a quote
     elif push == False:

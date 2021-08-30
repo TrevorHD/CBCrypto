@@ -77,9 +77,9 @@ if "client" not in globals():
 
 
 
-##### Run splash screen and main window -------------------------------------------------------------------
+##### Run splash screen  ----------------------------------------------------------------------------------
 
-# Create main TkInter window
+# Create main TkInter window from which splash screen will deploy
 w3 = Tk()
 
 # Set application ID so icon shows up on Windows taskbar
@@ -125,6 +125,12 @@ w2_l2 = Label(w2, text = "Loading... (0%)", justify = "center",
               bg = "#33393b", bd = 0, font = ("Arial", 10), fg = "white")
 w2_l2.place(x = 682, y = 726)
 w2.update()
+
+
+
+
+
+##### Run main window  ------------------------------------------------------------------------------------
 
 # Set application screen tabs
 w3_tC = ttk.Notebook(w3)

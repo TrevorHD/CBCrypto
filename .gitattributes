@@ -1,6 +1,6 @@
-TclTheme/awthemes.tcl linguist-vendored
-TclTheme/colorutils.tcl linguist-vendored
-TclTheme/demoscaled.tcl linguist-vendored
-TclTheme/demoscaledb.tcl linguist-vendored
-TclTheme/demottk.tcl linguist-vendored
-TclTheme/pkgIndex.tcl linguist-vendored
+TclTheme/awthemes.tcl -linguist-detectable
+TclTheme/colorutils.tcl -linguist-detectable
+TclTheme/demoscaled.tcl -linguist-detectable
+TclTheme/demoscaledb.tcl -linguist-detectable
+TclTheme/demottk.tcl -linguist-detectable
+TclTheme/pkgIndex.tcl -linguist-detectable

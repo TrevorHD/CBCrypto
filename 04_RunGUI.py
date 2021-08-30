@@ -7,7 +7,7 @@ w1 = Tk()
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u'process.cbcrypto')
 
 # Set window theme
-w1.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes-10.4.0")
+w1.tk.call("lappend", "auto_path", "TclTheme")
 w1.tk.call("package", "require", "awdark") 
 ttk.Style().theme_use("awdark") 
 
@@ -86,9 +86,9 @@ w3 = Tk()
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u'process.cbcrypto')
 
 # Set main window theme
-w3.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes-10.4.0")
+w3.tk.call("lappend", "auto_path", "TclTheme")
 w3.tk.call("package", "require", "awdark") 
-ttk.Style().theme_use("awdark") 
+ttk.Style().theme_use("awdark")
 ttk.Style().configure("My.TSpinbox", arrowsize = 11)
 ttk.Style().configure("small.TButton", font = (None, 5))
  

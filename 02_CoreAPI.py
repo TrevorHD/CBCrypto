@@ -1,36 +1,3 @@
-##### Load packages ---------------------------------------------------------------------------------------
-
-# Import Coinbase-related packages
-import cbpro
-import coinbase
-from coinbase.wallet.client import Client
-from coinbase.wallet.model import APIObject
-
-# Import other packages
-#import matplotlib
-#matplotlib.use("TKAgg")
-import matplotlib.dates
-from matplotlib.ticker import StrMethodFormatter
-from matplotlib import pyplot
-import dateutil.parser as dp
-from numpy import linspace
-from numpy import argmax
-from numpy import argmin
-from pandas import *
-import datetime
-from datetime import timedelta
-import seaborn
-import math
-import time
-import json
-import requests
-import re
-import sys
-
-
-
-
-
 ##### Get price data --------------------------------------------------------------------------------------
 
 # Create function to pull price data for a given timeframe

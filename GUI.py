@@ -16,6 +16,7 @@ from PIL import Image
 from PIL import ImageTk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import ctypes
 
 
 
@@ -1143,6 +1144,9 @@ def fullRefresh(rType = "startup"):
 # Create TkInter window
 w1 = Tk()
 
+# Set application ID so icon shows up on Windows taskbar
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u'process.cbcrypto')
+
 # Set window theme
 w1.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes-10.4.0")
 w1.tk.call("package", "require", "awdark") 
@@ -1218,6 +1222,9 @@ if "client" not in globals():
 
 # Create main TkInter window
 w3 = Tk()
+
+# Set application ID so icon shows up on Windows taskbar
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(u'process.cbcrypto')
 
 # Set main window theme
 w3.tk.call("lappend", "auto_path", "C:/Users/Trevor Drees/Downloads/awthemes-10.4.0")

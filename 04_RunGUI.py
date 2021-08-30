@@ -1,5 +1,8 @@
 ##### Run login screen ------------------------------------------------------------------------------------
 
+# Auth info; do not show when pushing commits
+#client = Client("xWKkQvYPJQotMKo3", "QgeDZSZ9J7vqPKhygjQTXaGnA5USCYyA")
+
 # Create TkInter window
 w1 = Tk()
 

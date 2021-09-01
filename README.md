@@ -38,7 +38,7 @@ A cryptocurrency desktop application built using Python, Tk/Tcl, and the API fro
 
 # Notes
 
-Before running CBCrypto, ensure that all required packages are present in your Python environment; these packages can be found in `01_Imports.py`, and the program will not run if they are not present. Since CBCrypto is not yet packaged as a standalone executable, to launch the program without issues, the user should run the entirety of `00_RunAll` in their Python IDE of choice. At the moment, there are several known bugs, including:
+Before running CBCrypto, ensure that all dependencies are present in your Python environment; these packages and modules required for the program to function can be found in `01_Imports.py`, and CBCrypto will not run if they are not present. Since CBCrypto is not yet packaged as a standalone executable, to launch the program without issues, the user should run the entirety of `00_RunAll.py` in their Python IDE of choice. At the moment, there are several known bugs, including:
 
 * Fiat currency owned is not displayed in the portfolio overview
 * Owned cryptocurrencies for which price data cannot be found are not displayed in the portfolio overview
@@ -49,13 +49,13 @@ These issues are quite minor and will be fixed at a later date. If any other iss
 
 # Privacy Notice
 
-When using CBCrypto, the user is required to enter their Coinbase API key and API secret; these are necessary in order to compile information on the user's portfolio and allow them to buy, sell, or convert cryptocurrency. User authentication with the API is handled by `coinbase.wallet.client`, and the user's credentials are **not** handled by any other programs other than CBCrypto and the packages required for user authentication with Coinbase. Login information is **not** stored locally after the program is closed and is required to be entered every time the program is started.
+When using CBCrypto, the user is required to enter their Coinbase API key and API secret; these two credentials are necessary in order to compile information on the user's portfolio and allow them to buy, sell, or convert cryptocurrency. User authentication with the API is handled by `coinbase.wallet.client`, and the user's credentials are **not** handled by any other programs other than CBCrypto and the packages required for user authentication with Coinbase. Login information is **not** stored locally after the program is closed and is required to be entered every time the program is started.
 
 <br/>
 
 # Featured Images
 
-The "Overview" screen displays, for several cryptocurrencies with the highest market cap, a time series of cryptocurrency value relative to its opening price for a variety of time periods; it also displays some of the top and bottom movers over the past 24 hours. 
+The "Overview" screen displays, for several cryptocurrencies with the highest market cap, a time series of currency value relative to its opening price for a variety of time periods; it also displays some of the top and bottom movers over the past 24 hours. 
 
 <kbd>![](https://github.com/TrevorHD/CBCrypto/blob/main/Screenshots/MS1.png)</kbd>
 

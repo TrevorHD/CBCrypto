@@ -1,6 +1,6 @@
 # Overview
 
-A cryptocurrency desktop application built using Python, Tk, and the API from Coinbase (a popular cryptocurrency trading platform). Includes visualisation and statistics on market trends, user portfolio summary and transaction history, and trading support for buying/selling/converting various cryptocurrencies such as Bitcoin, Litecoin, Etherium, etc.
+A cryptocurrency desktop application built using Python, Tk/Tcl, and the API from Coinbase (a popular cryptocurrency trading platform). Includes visualisation and statistics on market trends, user portfolio summary and transaction history, and trading support for buying/selling/converting various cryptocurrencies such as Bitcoin, Litecoin, Etherium, etc.
 
 <br/>
 
@@ -8,12 +8,20 @@ A cryptocurrency desktop application built using Python, Tk, and the API from Co
 
 ## Scripts
 
-**CBCrypto** *(.py)* - Main script containing essential functions for pulling data from the Coinbase API.
+**00_RunAll** *(.py)* - Script that runs CBCrypto in its entirety.
 
-**GUI** *(.py)* - Script responsible for creating and running the application and GUI.
+**01_Imports** *(.py)* - Script responsible for managing imports of packages/modules necessary to run the program.
+
+**02_CoreAPI** *(.py)* - Script defining all functions that are used in pulling information from the Coinbase API.
+
+**03_CoreGUI** *(.py)* - Script defining all functions used in setting up and running the GUI
+
+**04_RunGui** *(.py)* - Script that runs the GUI.
 
 ## Other
 
-**OldCode** *(.py)* - Older code that is currently unused but kept just in case it is needed again.
+**S1_OldCode** *(.py)* - Code from older versions of the program that, while currently unused, is kept here just in case it is needed again.
 
 **UserData** *(.txt)* - File responsible for storing user data between application launches.
+
+**TclTheme** *(folder)* - Folder containing files responsible for managing the Tcl theme used by the application; these files are created by Brad Lanam and can be found [here](https://sourceforge.net/projects/tcl-awthemes/).
